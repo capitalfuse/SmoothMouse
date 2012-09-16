@@ -24,6 +24,8 @@
 /* -------------------------------------------------------------------------- */
 
 static CGPoint pos0;
+static BOOL mouse_enabled;
+static BOOL trackpad_enabled;
 static double velocity;
 static BOOL invert;
 
@@ -178,9 +180,15 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 
 -(void) saveDefaultSettings
 {
-	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithDouble:1.0], @"velocity", 
-						  [NSNumber numberWithBool:NO], @"invert", nil];
+	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
+                          [NSNumber numberWithDouble:1.0], @"velocity",
+						  [NSNumber numberWithBool:NO], @"invert",
+                          [NSNumber numberWithBool:YES], @"Mouse enabled",
+                          [NSNumber numberWithBool:YES], @"Trackpad enabled",
+                          nil];
+
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+
 	[dict writeToFile:file atomically:YES];
 }
 
@@ -193,8 +201,26 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 		NSLog(@"cannot open file %@", file);
 		[self saveDefaultSettings];
 	}
-	
-	NSNumber *value = [dict valueForKey:@"velocity"];
+
+    NSNumber *value;
+
+    value = [dict valueForKey:@"Mouse enabled"];
+	if (value) {
+		mouse_enabled = [value boolValue];
+		NSLog(@"Mouse enabled set to %@", value);
+	} else {
+		mouse_enabled = TRUE;
+	}
+
+    value = [dict valueForKey:@"Trackpad enabled"];
+	if (value) {
+		trackpad_enabled = [value boolValue];
+		NSLog(@"Trackpad enabled set to %@", value);
+	} else {
+		trackpad_enabled = TRUE;
+	}
+
+	value = [dict valueForKey:@"velocity"];
 	if (value) {
 		velocity = [value doubleValue];
 		NSLog(@"velocity set to %@", value);
@@ -267,7 +293,47 @@ static void mouse_event_handler(void *buf, unsigned int size) {
     queueMappedMemory = (IODataQueueMemory *) address;
     dataSize = size;  
 	
+    configure_driver(connect);
+    
 	return YES;
+}
+
+BOOL configure_driver(io_connect_t connect)
+{
+    kern_return_t	kernResult;
+	
+    uint64_t scalarI_64[1];
+    uint64_t scalarO_64;
+    uint32_t outputCount = 1;
+    
+    uint32_t configuration = 0;
+    
+    if (mouse_enabled) {
+        configuration |= 1 << 0;
+    }
+    
+    if (trackpad_enabled) {
+        configuration |= 1 << 1;
+    }
+    
+    scalarI_64[0] = configuration;
+    
+    kernResult = IOConnectCallScalarMethod(connect,					// an io_connect_t returned from IOServiceOpen().
+                                           kConfigureMethod,        // selector of the function to be called via the user client.
+                                           scalarI_64,				// array of scalar (64-bit) input values.
+                                           1,						// the number of scalar input values.
+                                           &scalarO_64,				// array of scalar (64-bit) output values.
+                                           &outputCount				// pointer to the number of scalar output values.
+                                           );
+        
+    if (kernResult == KERN_SUCCESS) {
+        NSLog(@"Driver configured successfully (%u)", (uint32_t) scalarO_64);
+        return YES;
+    }
+	else {
+		NSLog(@"Failed to configure driver");
+        return NO;
+    }
 }
 
 -(oneway void) release 
@@ -295,8 +361,8 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 		NSLog(@"malloc error");
 		return;
 	}
-    
-    while (IODataQueueWaitForAvailableData(queueMappedMemory, recvPort) == kIOReturnSuccess) {            
+
+    while (IODataQueueWaitForAvailableData(queueMappedMemory, recvPort) == kIOReturnSuccess) {
         while (IODataQueueDataAvailable(queueMappedMemory)) {   
             error = IODataQueueDequeue(queueMappedMemory, buf, &dataSize);
             if (!error) {

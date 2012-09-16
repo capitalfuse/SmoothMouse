@@ -147,11 +147,11 @@
 												<reference key="NSControlView" ref="327561604"/>
 												<int key="NSButtonFlags">1211912448</int>
 												<int key="NSButtonFlags2">2</int>
-												<object class="NSCustomResource" key="NSNormalImage">
+												<object class="NSCustomResource" key="NSNormalImage" id="815301290">
 													<string key="NSClassName">NSImage</string>
 													<string key="NSResourceName">NSSwitch</string>
 												</object>
-												<object class="NSButtonImageSource" key="NSAlternateImage">
+												<object class="NSButtonImageSource" key="NSAlternateImage" id="946893027">
 													<string key="NSImageName">NSSwitch</string>
 												</object>
 												<string key="NSAlternateContents"/>
@@ -218,7 +218,7 @@
 											<string key="NSFrame">{{54, 132}, {206, 25}}</string>
 											<reference key="NSSuperview" ref="367831285"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView"/>
+											<reference key="NSNextKeyView" ref="807195951"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSSliderCell" key="NSCell" id="286983311">
 												<int key="NSCellFlags">-2080374784</int>
@@ -269,6 +269,7 @@
 											<string key="NSFrame">{{53, 114}, {38, 17}}</string>
 											<reference key="NSSuperview" ref="367831285"/>
 											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView" ref="495626324"/>
 											<string key="NSReuseIdentifierKey">_NS:1535</string>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="251294742">
@@ -309,6 +310,7 @@
 											<string key="NSFrame">{{110, 114}, {13, 17}}</string>
 											<reference key="NSSuperview" ref="367831285"/>
 											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView" ref="896324835"/>
 											<string key="NSReuseIdentifierKey">_NS:1535</string>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="98554468">
@@ -323,11 +325,65 @@
 											</object>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 										</object>
+										<object class="NSButton" id="1063972375">
+											<reference key="NSNextResponder" ref="367831285"/>
+											<int key="NSvFlags">268</int>
+											<string key="NSFrame">{{54, 258}, {206, 18}}</string>
+											<reference key="NSSuperview" ref="367831285"/>
+											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView" ref="896672117"/>
+											<string key="NSReuseIdentifierKey">_NS:9</string>
+											<bool key="NSEnabled">YES</bool>
+											<object class="NSButtonCell" key="NSCell" id="143358879">
+												<int key="NSCellFlags">-2080374784</int>
+												<int key="NSCellFlags2">268435456</int>
+												<string key="NSContents">Enable for Mouse</string>
+												<reference key="NSSupport" ref="415778044"/>
+												<string key="NSCellIdentifier">_NS:9</string>
+												<reference key="NSControlView" ref="1063972375"/>
+												<int key="NSButtonFlags">1211912448</int>
+												<int key="NSButtonFlags2">2</int>
+												<reference key="NSNormalImage" ref="815301290"/>
+												<reference key="NSAlternateImage" ref="946893027"/>
+												<string key="NSAlternateContents"/>
+												<string key="NSKeyEquivalent"/>
+												<int key="NSPeriodicDelay">200</int>
+												<int key="NSPeriodicInterval">25</int>
+											</object>
+											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
+										</object>
+										<object class="NSButton" id="896672117">
+											<reference key="NSNextResponder" ref="367831285"/>
+											<int key="NSvFlags">268</int>
+											<string key="NSFrame">{{54, 238}, {206, 18}}</string>
+											<reference key="NSSuperview" ref="367831285"/>
+											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView" ref="230303278"/>
+											<string key="NSReuseIdentifierKey">_NS:9</string>
+											<bool key="NSEnabled">YES</bool>
+											<object class="NSButtonCell" key="NSCell" id="614060507">
+												<int key="NSCellFlags">-2080374784</int>
+												<int key="NSCellFlags2">268435456</int>
+												<string key="NSContents">Enable for Trackpad</string>
+												<reference key="NSSupport" ref="415778044"/>
+												<string key="NSCellIdentifier">_NS:9</string>
+												<reference key="NSControlView" ref="896672117"/>
+												<int key="NSButtonFlags">1211912448</int>
+												<int key="NSButtonFlags2">2</int>
+												<reference key="NSNormalImage" ref="815301290"/>
+												<reference key="NSAlternateImage" ref="946893027"/>
+												<string key="NSAlternateContents"/>
+												<string key="NSKeyEquivalent"/>
+												<int key="NSPeriodicDelay">200</int>
+												<int key="NSPeriodicInterval">25</int>
+											</object>
+											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
+										</object>
 									</object>
 									<string key="NSFrame">{{1, 1}, {314, 316}}</string>
 									<reference key="NSSuperview" ref="324446662"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView" ref="230303278"/>
+									<reference key="NSNextKeyView" ref="1063972375"/>
 								</object>
 							</object>
 							<string key="NSFrame">{{335, 16}, {316, 332}}</string>
@@ -358,7 +414,7 @@
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="234554274"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {2560, 1578}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{224.66399999999999, 32}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
@@ -430,6 +486,38 @@
 						<reference key="destination" ref="801990403"/>
 					</object>
 					<int key="connectionID">132</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">pressEnableDisableMouse:</string>
+						<reference key="source" ref="294453543"/>
+						<reference key="destination" ref="1063972375"/>
+					</object>
+					<int key="connectionID">143</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">enableForMouse</string>
+						<reference key="source" ref="294453543"/>
+						<reference key="destination" ref="1063972375"/>
+					</object>
+					<int key="connectionID">144</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">pressEnableDisableTrackpad:</string>
+						<reference key="source" ref="294453543"/>
+						<reference key="destination" ref="896672117"/>
+					</object>
+					<int key="connectionID">147</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">enableForTrackpad</string>
+						<reference key="source" ref="294453543"/>
+						<reference key="destination" ref="896672117"/>
+					</object>
+					<int key="connectionID">149</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -530,6 +618,8 @@
 							<reference ref="807195951"/>
 							<reference ref="896324835"/>
 							<reference ref="495626324"/>
+							<reference ref="896672117"/>
+							<reference ref="1063972375"/>
 						</object>
 						<reference key="parent" ref="1037298196"/>
 					</object>
@@ -617,6 +707,34 @@
 						<reference key="object" ref="98554468"/>
 						<reference key="parent" ref="495626324"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">139</int>
+						<reference key="object" ref="1063972375"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="143358879"/>
+						</object>
+						<reference key="parent" ref="324446662"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">140</int>
+						<reference key="object" ref="143358879"/>
+						<reference key="parent" ref="1063972375"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">141</int>
+						<reference key="object" ref="896672117"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="614060507"/>
+						</object>
+						<reference key="parent" ref="324446662"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">142</int>
+						<reference key="object" ref="614060507"/>
+						<reference key="parent" ref="896672117"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -645,6 +763,10 @@
 					<string>136.IBPluginDependency</string>
 					<string>137.IBPluginDependency</string>
 					<string>138.IBPluginDependency</string>
+					<string>139.IBPluginDependency</string>
+					<string>140.IBPluginDependency</string>
+					<string>141.IBPluginDependency</string>
+					<string>142.IBPluginDependency</string>
 					<string>6.IBPluginDependency</string>
 					<string>99.IBPluginDependency</string>
 				</object>
@@ -674,6 +796,10 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -688,7 +814,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">138</int>
+			<int key="maxID">149</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -755,11 +881,15 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>changeVelocity:</string>
+							<string>pressEnableDisableMouse:</string>
+							<string>pressEnableDisableTrackpad:</string>
 							<string>pressStartAtLogin:</string>
 							<string>pressSwitchOnOff:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -770,6 +900,8 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>changeVelocity:</string>
+							<string>pressEnableDisableMouse:</string>
+							<string>pressEnableDisableTrackpad:</string>
 							<string>pressStartAtLogin:</string>
 							<string>pressSwitchOnOff:</string>
 						</object>
@@ -777,6 +909,14 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
 								<string key="name">changeVelocity:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">pressEnableDisableMouse:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">pressEnableDisableTrackpad:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -793,6 +933,8 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>enableForMouse</string>
+							<string>enableForTrackpad</string>
 							<string>startAtLogin</string>
 							<string>status</string>
 							<string>switchOnOff</string>
@@ -800,6 +942,8 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>NSButton</string>
+							<string>NSButton</string>
 							<string>NSButton</string>
 							<string>NSTextField</string>
 							<string>NSButton</string>
@@ -810,6 +954,8 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>enableForMouse</string>
+							<string>enableForTrackpad</string>
 							<string>startAtLogin</string>
 							<string>status</string>
 							<string>switchOnOff</string>
@@ -817,6 +963,14 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBToOneOutletInfo">
+								<string key="name">enableForMouse</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">enableForTrackpad</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">startAtLogin</string>
 								<string key="candidateClassName">NSButton</string>
@@ -847,10 +1001,6 @@
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDependencies">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.macosx</string>
 			<integer value="1050" key="NS.object.0"/>
-		</object>
-		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDependencyDefaults">
-			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.macosx</string>
-			<real value="1070" key="NS.object.0"/>
 		</object>
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDevelopmentDependencies">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.InterfaceBuilder3</string>

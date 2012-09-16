@@ -8,3 +8,8 @@ typedef struct mouse_event_s {
 	int dx;
 	int dy;
 } mouse_event_t;
+
+enum {
+    kConfigureMethod,
+    kNumberOfMethods
+};

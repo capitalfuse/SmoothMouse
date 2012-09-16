@@ -24,6 +24,20 @@
 		[startAtLogin setState:0];
 	}
 	
+    /* Mouse enabled state */
+    if ([self isMouseEnabled]) {
+        [enableForMouse setState:1];
+    } else {
+        [enableForMouse setState:0];
+    }
+    
+    /* Trackpad enabled state */
+    if ([self isTrackpadEnabled]) {
+        [enableForTrackpad setState:1];
+    } else {
+        [enableForTrackpad setState:0];
+    }
+    
 	/* velocity value */
 	[velocity setDoubleValue:[self velocity]];
 }
@@ -70,6 +84,24 @@
 	}
 }
 
+- (IBAction)pressEnableDisableMouse:(id) sender
+{
+	[self saveMouseEnabled:[enableForMouse state]];
+	
+	if ([self daemonRunning]) {
+		[self stopDaemon];
+		[self startDaemon];
+	}
+}
+
+- (IBAction)pressEnableDisableTrackpad:(id) sender {
+	[self saveTrackpadEnabled:[enableForTrackpad state]];
+	
+	if ([self daemonRunning]) {
+		[self stopDaemon];
+		[self startDaemon];
+	}   
+}
 
 - (BOOL)daemonRunning
 {
@@ -138,7 +170,23 @@
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
 	NSNumber *value = [settings valueForKey:@"velocity"];
-	return [value doubleValue] ? [value doubleValue] : 1.0;
+	return value ? [value doubleValue] : 0.5;
+}
+
+- (BOOL)isMouseEnabled
+{
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
+	NSNumber *value = [settings valueForKey:@"Mouse enabled"];
+	return value ? [value boolValue] : TRUE;
+}
+
+- (BOOL)isTrackpadEnabled
+{
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
+	NSNumber *value = [settings valueForKey:@"Trackpad enabled"];
+	return value ? [value boolValue] : TRUE;
 }
 
 - (BOOL)saveVelocity:(double) value
@@ -147,6 +195,24 @@
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
 	NSNumber *num = [NSNumber numberWithDouble:value];
 	[settings setValue:num forKey:@"velocity"];
+	return [settings writeToFile:file atomically:YES];
+}
+
+- (BOOL)saveMouseEnabled:(BOOL) value
+{
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
+	NSNumber *num = [NSNumber numberWithBool:value];
+	[settings setValue:num forKey:@"Mouse enabled"];
+	return [settings writeToFile:file atomically:YES];
+}
+
+- (BOOL)saveTrackpadEnabled:(BOOL) value
+{
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
+	NSNumber *num = [NSNumber numberWithBool:value];
+	[settings setValue:num forKey:@"Trackpad enabled"];
 	return [settings writeToFile:file atomically:YES];
 }
 
