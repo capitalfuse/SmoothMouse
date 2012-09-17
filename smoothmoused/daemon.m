@@ -26,7 +26,10 @@
 static CGPoint pos0;
 static BOOL mouse_enabled;
 static BOOL trackpad_enabled;
-static double velocity;
+static double velocity_mouse;
+static double velocity_trackpad;
+static int acceleration_curve_mouse;
+static int acceleration_curve_trackpad;
 static BOOL invert;
 
 /* -------------------------------------------------------------------------- *
@@ -41,7 +44,20 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 	CGPoint pos;
 	mouse_event_t *event = buf;
 	CGDisplayCount displayCount = 0;
-	
+	double velocity = 1;
+    
+    switch (event->device_type) {
+        case kDeviceTypeMouse:
+            velocity = velocity_mouse;
+            break;
+        case kDeviceTypeTrackpad:
+            velocity = velocity_trackpad;
+            break;
+        default:
+            velocity = 1;
+            NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
+    }
+    
 	/* Calculate new cursor position */
 	if (invert) {
 		pos.x = pos0.x - (velocity * event->dx);
@@ -220,14 +236,25 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 		trackpad_enabled = TRUE;
 	}
 
-	value = [dict valueForKey:@"velocity"];
+	value = [dict valueForKey:@"Mouse velocity"];
 	if (value) {
-		velocity = [value doubleValue];
-		NSLog(@"velocity set to %@", value);
+        velocity_mouse = [value doubleValue];
+		NSLog(@"mouse velocity set to %@", value);
 	} else {
-		velocity = 1.0;
+		velocity_mouse = 1.0;
 	}
-	
+
+    value = [dict valueForKey:@"Trackpad velocity"];
+	if (value) {
+		velocity_trackpad = [value doubleValue];
+		NSLog(@"trackpad velocity set to %@", value);
+	} else {
+		velocity_trackpad = 1.0;
+	}
+    
+    NSLog(@"Mouse velocity: %f", velocity_mouse);
+    NSLog(@"Trackpad velocity: %f", velocity_trackpad);
+
 	value = [dict valueForKey:@"invert"];
 	if (value) {
 		invert = [value boolValue];
@@ -366,9 +393,6 @@ BOOL configure_driver(io_connect_t connect)
         while (IODataQueueDataAvailable(queueMappedMemory)) {   
             error = IODataQueueDequeue(queueMappedMemory, buf, &dataSize);
             if (!error) {
-				if (velocity == 0.0) {
-					[self loadSettings];
-				}
 				mouse_event_handler(buf, dataSize);
 			} else {
 				NSLog(@"IODataQueueDequeue() failed");

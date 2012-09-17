@@ -8,102 +8,98 @@
 
 - (void)mainViewDidLoad
 {
-	/* Daemon state */
-	if ([self daemonRunning]) {
-		[switchOnOff setTitle:@"Stop"];
-		[status setStringValue:@"SmoothMouse is running"];
-	} else {
-		[switchOnOff setTitle:@"Start"];
-		[status setStringValue:@"SmoothMouse is stopped"];
-	}
-	
-	/* Start at login state */
-	if ([self startAtLoginEnabled]) {
-		[startAtLogin setState:1];
-	} else {
-		[startAtLogin setState:0];
-	}
+    NSMenu *menuCopy;
+    
+    menuCopy = [buttonMenu copy];
+    [accelerationCurveMouse setMenu: menuCopy];
+    [menuCopy release];
+    
+    menuCopy = [buttonMenu copy];
+    [accelerationCurveTrackpad setMenu: menuCopy];
+    [menuCopy release];
 	
     /* Mouse enabled state */
-    if ([self isMouseEnabled]) {
+    if ([self getMouseEnabled]) {
         [enableForMouse setState:1];
     } else {
         [enableForMouse setState:0];
     }
     
     /* Trackpad enabled state */
-    if ([self isTrackpadEnabled]) {
+    if ([self getTrackpadEnabled]) {
         [enableForTrackpad setState:1];
     } else {
         [enableForTrackpad setState:0];
     }
+
+    /* Mouse acceleration curve */
+    NSString *mouseAccelerationCurveString = [self getAccelerationCurveForMouse];
+    if (mouseAccelerationCurveString) {
+        [accelerationCurveMouse selectItemWithTitle:mouseAccelerationCurveString];
+    }
+         
+    /* Trackpad acceleration curve */
+    NSString *trackpadAccelerationCurveString = [self getAccelerationCurveForTrackpad];
+    if (trackpadAccelerationCurveString) {
+        [accelerationCurveTrackpad selectItemWithTitle:trackpadAccelerationCurveString];
+    }
+     
+	/* Velocity values */
+	[velocityForMouse setDoubleValue:[self getVelocityForMouse]];
+	[velocityForTrackpad setDoubleValue:[self getVelocityForTrackpad]];
     
-	/* velocity value */
-	[velocity setDoubleValue:[self velocity]];
-}
-
-- (IBAction)pressSwitchOnOff:(id) sender
-{
-	if ([self daemonRunning]) {
-		/* Stop */
-		if ([self stopDaemon]) {
-			[switchOnOff setTitle:@"Start"];
-			[status setStringValue:@"SmoothMouse is stopped"];
-		}
-	} else {
-		/* Start */
-		if ([self startDaemon]) {
-			[switchOnOff setTitle:@"Stop"];
-			[status setStringValue:@"SmoothMouse is running"];
-		}
-	}
-}
-
-- (IBAction)pressStartAtLogin:(id) sender
-{
-	if ([self startAtLoginEnabled]) {
-		/* Disable */
-		if ([self deleteLaunchdPlist]) {
-			[startAtLogin setState:0];
-		}
-	} else {
-		/* Enable */
-		if ([self putLaunchdPlist]) {
-			[startAtLogin setState:1];
-		}
-	}
+    /* Always enable start at login, and start daemon. */
+    if (![self putLaunchdPlist]) {
+        NSLog(@"Failed to enable start-at-login");
+    }
+    [self startDaemon];
 }
 
 - (IBAction)changeVelocity:(id) sender
 {
-	[self saveVelocity:[velocity doubleValue]];
-	
-	if ([self daemonRunning]) {
-		[self stopDaemon];
-		[self startDaemon];
-	}
+	[self saveVelocityForMouse:[velocityForMouse doubleValue] andTrackpad:[velocityForTrackpad doubleValue]];
+    [self restartDaemonIfRunning];
+}
+
+- (IBAction)changeAccelerationCurve:(id) sender {
+    NSPopUpButton *popupButton = sender;
+    NSMenuItem *item = [popupButton selectedItem];
+    NSString *title = [item title];
+    if (popupButton == accelerationCurveMouse) {
+        [self saveAccelerationCurveForMouse:title];
+    } else {
+        [self saveAccelerationCurveForTrackpad:title];
+    }
+
+    [self restartDaemonIfRunning];
 }
 
 - (IBAction)pressEnableDisableMouse:(id) sender
 {
 	[self saveMouseEnabled:[enableForMouse state]];
-	
-	if ([self daemonRunning]) {
-		[self stopDaemon];
-		[self startDaemon];
-	}
+    [self startOrStopDaemon];
 }
 
 - (IBAction)pressEnableDisableTrackpad:(id) sender {
 	[self saveTrackpadEnabled:[enableForTrackpad state]];
-	
-	if ([self daemonRunning]) {
-		[self stopDaemon];
-		[self startDaemon];
-	}   
+    [self startOrStopDaemon];
 }
 
-- (BOOL)daemonRunning
+- (void) startOrStopDaemon {
+    BOOL mouseOn = ([enableForMouse state] == 1);
+    BOOL trackpadOn = ([enableForTrackpad state] == 1);
+    if (mouseOn == YES || trackpadOn == YES) {
+        if (![self isDaemonRunning]) {
+            [self startDaemon];
+        }
+    } else {
+        if ([self isDaemonRunning]) {
+            [self stopDaemon];
+        }
+    }
+}
+
+- (BOOL)isDaemonRunning
 {
 	CFDictionaryRef job;
 	
@@ -164,16 +160,23 @@
 	return [fm removeItemAtPath:file error:&error];
 }
 
-
-- (double)velocity
+- (double)getVelocityForMouse
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSNumber *value = [settings valueForKey:@"velocity"];
+	NSNumber *value = [settings valueForKey:@"Mouse velocity"];
 	return value ? [value doubleValue] : 0.5;
 }
 
-- (BOOL)isMouseEnabled
+- (double)getVelocityForTrackpad
+{
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
+	NSNumber *value = [settings valueForKey:@"Trackpad velocity"];
+	return value ? [value doubleValue] : 0.5;
+}
+
+- (BOOL)getMouseEnabled
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
@@ -181,7 +184,7 @@
 	return value ? [value boolValue] : TRUE;
 }
 
-- (BOOL)isTrackpadEnabled
+- (BOOL)getTrackpadEnabled
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
@@ -189,12 +192,48 @@
 	return value ? [value boolValue] : TRUE;
 }
 
-- (BOOL)saveVelocity:(double) value
+- (NSString *)getAccelerationCurveForMouse {
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
+	NSString *value = [settings valueForKey:@"Mouse acceleration curve"];
+	return value;
+}
+
+- (NSString *)getAccelerationCurveForTrackpad {
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
+	NSString *value = [settings valueForKey:@"Trackpad acceleration curve"];
+	return value;
+}
+
+- (BOOL)saveVelocityForMouse:(double) valueMouse andTrackpad:(double) valueTrackpad;
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
-	NSNumber *num = [NSNumber numberWithDouble:value];
-	[settings setValue:num forKey:@"velocity"];
+	
+    NSNumber *num;
+
+    num = [NSNumber numberWithDouble:valueMouse];
+	[settings setValue:num forKey:@"Mouse velocity"];
+
+    num = [NSNumber numberWithDouble:valueTrackpad];
+	[settings setValue:num forKey:@"Trackpad velocity"];
+
+	// TODO: does num need releasing here?
+    return [settings writeToFile:file atomically:YES];
+}
+
+- (BOOL)saveAccelerationCurveForMouse:(NSString *) value {
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
+	[settings setValue:value forKey:@"Mouse acceleration curve"];
+	return [settings writeToFile:file atomically:YES];
+}
+
+- (BOOL)saveAccelerationCurveForTrackpad:(NSString *) value {
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
+	[settings setValue:value forKey:@"Trackpad acceleration curve"];
 	return [settings writeToFile:file atomically:YES];
 }
 
@@ -214,6 +253,13 @@
 	NSNumber *num = [NSNumber numberWithBool:value];
 	[settings setValue:num forKey:@"Trackpad enabled"];
 	return [settings writeToFile:file atomically:YES];
+}
+
+- (void)restartDaemonIfRunning {
+	if ([self isDaemonRunning]) {
+		[self stopDaemon];
+		[self startDaemon];
+	}
 }
 
 @end
