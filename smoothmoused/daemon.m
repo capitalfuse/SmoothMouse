@@ -30,7 +30,6 @@ static double velocity_mouse;
 static double velocity_trackpad;
 static int acceleration_curve_mouse;
 static int acceleration_curve_trackpad;
-static BOOL invert;
 
 /* -------------------------------------------------------------------------- *
  The following code is responsive for handling events received from kernel
@@ -59,13 +58,8 @@ static void mouse_event_handler(void *buf, unsigned int size) {
     }
     
 	/* Calculate new cursor position */
-	if (invert) {
-		pos.x = pos0.x - (velocity * event->dx);
-		pos.y = pos0.y - (velocity * event->dy);
-	} else {
-		pos.x = pos0.x + (velocity * event->dx);
-		pos.y = pos0.y + (velocity * event->dy);
-	}
+    pos.x = pos0.x + (velocity * event->dx);
+    pos.y = pos0.y + (velocity * event->dy);
 	
 	/* 
 	 The following code checks if cursor is in screen borders. It was ported 
@@ -194,11 +188,13 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 	}
 }
 
+// TODO: I'm not sure this is needed. We have default values...
 -(void) saveDefaultSettings
 {
 	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
-                          [NSNumber numberWithDouble:1.0], @"velocity",
-						  [NSNumber numberWithBool:NO], @"invert",
+                          [NSNumber numberWithDouble:1.0], @"Mouse velocity",
+                          [NSNumber numberWithDouble:1.0], @"Trackpad velocity",
+                          /* TODO: acceleeration curve */
                           [NSNumber numberWithBool:YES], @"Mouse enabled",
                           [NSNumber numberWithBool:YES], @"Trackpad enabled",
                           nil];
@@ -254,14 +250,6 @@ static void mouse_event_handler(void *buf, unsigned int size) {
     
     NSLog(@"Mouse velocity: %f", velocity_mouse);
     NSLog(@"Trackpad velocity: %f", velocity_trackpad);
-
-	value = [dict valueForKey:@"invert"];
-	if (value) {
-		invert = [value boolValue];
-		NSLog(@"invert set to %@", value);
-	} else {
-		invert = NO;
-	}
 }
 
 -(BOOL) loadDriver
