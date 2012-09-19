@@ -1,5 +1,5 @@
 #import "SmoothMousePrefPane.h"
-#import "strings.h"
+#import "constants.h"
 
 #import <ServiceManagement/ServiceManagement.h>
 
@@ -8,6 +8,11 @@
 
 - (void)mainViewDidLoad
 {
+    if (![self settingsFileExists]) {
+        [self saveDefaultSettingsFile];
+        NSLog(@"Default settings saved");
+    }
+    
     NSMenu *menuCopy;
     
     menuCopy = [buttonMenu copy];
@@ -49,6 +54,32 @@
 	[velocityForTrackpad setDoubleValue:[self getVelocityForTrackpad]];
     
     [self startDaemon];
+    
+    
+}
+
+-(BOOL) settingsFileExists
+{
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	
+	return [fm fileExistsAtPath:file];
+}
+
+-(void) saveDefaultSettingsFile
+{
+    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
+                          [NSNumber numberWithDouble:SETTINGS_MOUSE_VELOCITY_DEFAULT], SETTINGS_MOUSE_VELOCITY,
+                          [NSNumber numberWithDouble:SETTINGS_TRACKPAD_VELOCITY_DEFAULT], SETTINGS_TRACKPAD_VELOCITY,
+                          [NSNumber numberWithBool:SETTINGS_MOUSE_ENABLED_DEFAULT], SETTINGS_MOUSE_ENABLED,
+                          [NSNumber numberWithBool:SETTINGS_TRACKPAD_ENABLED_DEFAULT], SETTINGS_TRACKPAD_ENABLED,
+                          SETTINGS_MOUSE_ACCELERATION_CURVE_DEFAULT, SETTINGS_MOUSE_ACCELERATION_CURVE,
+                          SETTINGS_TRACKPAD_ACCELERATION_CURVE_DEFAULT, SETTINGS_TRACKPAD_ACCELERATION_CURVE,
+                          nil];
+
+    NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+
+    [dict writeToFile:file atomically:YES];
 }
 
 - (IBAction)changeVelocity:(id) sender
@@ -164,45 +195,45 @@
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSNumber *value = [settings valueForKey:@"Mouse velocity"];
-	return value ? [value doubleValue] : 0.5;
+	NSNumber *value = [settings valueForKey:SETTINGS_MOUSE_VELOCITY];
+	return value ? [value doubleValue] : SETTINGS_MOUSE_VELOCITY_DEFAULT;
 }
 
 - (double)getVelocityForTrackpad
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSNumber *value = [settings valueForKey:@"Trackpad velocity"];
-	return value ? [value doubleValue] : 0.5;
+	NSNumber *value = [settings valueForKey:SETTINGS_TRACKPAD_VELOCITY];
+	return value ? [value doubleValue] : SETTINGS_TRACKPAD_VELOCITY_DEFAULT;
 }
 
 - (BOOL)getMouseEnabled
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSNumber *value = [settings valueForKey:@"Mouse enabled"];
-	return value ? [value boolValue] : TRUE;
+	NSNumber *value = [settings valueForKey:SETTINGS_MOUSE_ENABLED];
+	return value ? [value boolValue] : FALSE;
 }
 
 - (BOOL)getTrackpadEnabled
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSNumber *value = [settings valueForKey:@"Trackpad enabled"];
-	return value ? [value boolValue] : TRUE;
+	NSNumber *value = [settings valueForKey:SETTINGS_TRACKPAD_ENABLED];
+	return value ? [value boolValue] : FALSE;
 }
 
 - (NSString *)getAccelerationCurveForMouse {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSString *value = [settings valueForKey:@"Mouse acceleration curve"];
+	NSString *value = [settings valueForKey:SETTINGS_MOUSE_ACCELERATION_CURVE];
 	return value;
 }
 
 - (NSString *)getAccelerationCurveForTrackpad {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSString *value = [settings valueForKey:@"Trackpad acceleration curve"];
+	NSString *value = [settings valueForKey:SETTINGS_TRACKPAD_ACCELERATION_CURVE];
 	return value;
 }
 
@@ -214,10 +245,10 @@
     NSNumber *num;
 
     num = [NSNumber numberWithDouble:valueMouse];
-	[settings setValue:num forKey:@"Mouse velocity"];
+	[settings setValue:num forKey:SETTINGS_MOUSE_VELOCITY];
 
     num = [NSNumber numberWithDouble:valueTrackpad];
-	[settings setValue:num forKey:@"Trackpad velocity"];
+	[settings setValue:num forKey:SETTINGS_TRACKPAD_VELOCITY];
 
 	// TODO: does num need releasing here?
     return [settings writeToFile:file atomically:YES];
@@ -226,14 +257,14 @@
 - (BOOL)saveAccelerationCurveForMouse:(NSString *) value {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
-	[settings setValue:value forKey:@"Mouse acceleration curve"];
+	[settings setValue:value forKey:SETTINGS_MOUSE_ACCELERATION_CURVE];
 	return [settings writeToFile:file atomically:YES];
 }
 
 - (BOOL)saveAccelerationCurveForTrackpad:(NSString *) value {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
-	[settings setValue:value forKey:@"Trackpad acceleration curve"];
+	[settings setValue:value forKey:SETTINGS_TRACKPAD_ACCELERATION_CURVE];
 	return [settings writeToFile:file atomically:YES];
 }
 
@@ -242,7 +273,7 @@
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
 	NSNumber *num = [NSNumber numberWithBool:value];
-	[settings setValue:num forKey:@"Mouse enabled"];
+	[settings setValue:num forKey:SETTINGS_MOUSE_ENABLED];
 	return [settings writeToFile:file atomically:YES];
 }
 
@@ -251,7 +282,7 @@
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
 	NSNumber *num = [NSNumber numberWithBool:value];
-	[settings setValue:num forKey:@"Trackpad enabled"];
+	[settings setValue:num forKey:SETTINGS_TRACKPAD_ENABLED];
 	return [settings writeToFile:file atomically:YES];
 }
 

@@ -7,7 +7,7 @@
 #import <ApplicationServices/ApplicationServices.h>
 
 #import "kextdaemon.h"
-#import "strings.h"
+#import "constants.h"
 
 #include <IOKit/hidsystem/event_status_driver.h>
 
@@ -214,38 +214,36 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 
     NSNumber *value;
 
-    value = [dict valueForKey:@"Mouse enabled"];
+    value = [dict valueForKey:SETTINGS_MOUSE_ENABLED];
 	if (value) {
 		mouse_enabled = [value boolValue];
-		NSLog(@"Mouse enabled set to %@", value);
 	} else {
-		mouse_enabled = TRUE;
+		return NO;
 	}
 
-    value = [dict valueForKey:@"Trackpad enabled"];
+    value = [dict valueForKey:SETTINGS_TRACKPAD_ENABLED];
 	if (value) {
 		trackpad_enabled = [value boolValue];
-		NSLog(@"Trackpad enabled set to %@", value);
 	} else {
-		trackpad_enabled = TRUE;
+		return NO;
 	}
 
-	value = [dict valueForKey:@"Mouse velocity"];
+	value = [dict valueForKey:SETTINGS_MOUSE_VELOCITY];
 	if (value) {
         velocity_mouse = [value doubleValue];
-		NSLog(@"mouse velocity set to %@", value);
 	} else {
 		velocity_mouse = 1.0;
 	}
 
-    value = [dict valueForKey:@"Trackpad velocity"];
+    value = [dict valueForKey:SETTINGS_TRACKPAD_VELOCITY];
 	if (value) {
 		velocity_trackpad = [value doubleValue];
-		NSLog(@"trackpad velocity set to %@", value);
 	} else {
 		velocity_trackpad = 1.0;
 	}
     
+    NSLog(@"Mouse enabled: %d", mouse_enabled);
+    NSLog(@"Mouse enabled: %d", trackpad_enabled);
     NSLog(@"Mouse velocity: %f", velocity_mouse);
     NSLog(@"Trackpad velocity: %f", velocity_trackpad);
     

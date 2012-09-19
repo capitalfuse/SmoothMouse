@@ -17,6 +17,9 @@
 
 - (void)mainViewDidLoad;
 
+-(BOOL) settingsFileExists;
+-(void) saveDefaultSettingsFile;
+
 - (IBAction)changeVelocity:(id) sender;
 - (IBAction)changeAccelerationCurve:(id) sender;
 - (IBAction)pressEnableDisableMouse:(id) sender;

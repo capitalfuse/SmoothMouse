@@ -89,7 +89,7 @@
 		ED0E123C14D5496F008704EC /* daemon.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = daemon.m; sourceTree = "<group>"; };
 		ED0E123F14D5496F008704EC /* smoothmoused-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "smoothmoused-Prefix.pch"; sourceTree = "<group>"; };
 		ED0E124E14D54A96008704EC /* kextdaemon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kextdaemon.h; sourceTree = SOURCE_ROOT; };
-		ED0E124F14D54A96008704EC /* strings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = strings.h; sourceTree = "<group>"; };
+		ED0E124F14D54A96008704EC /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
 		ED13219914D6713200D07CC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = SmoothMousePrefPane/en.lproj/SmoothMousePrefPane.xib; sourceTree = SOURCE_ROOT; };
 		ED13219B14D6721800D07CC3 /* SmoothMousePrefPane.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = SmoothMousePrefPane.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -121,7 +121,7 @@
 		ED0E11F014D5493A008704EC = {
 			isa = PBXGroup;
 			children = (
-				ED0E124F14D54A96008704EC /* strings.h */,
+				ED0E124F14D54A96008704EC /* constants.h */,
 				ED0E124E14D54A96008704EC /* kextdaemon.h */,
 				ED0E122014D5495F008704EC /* SmoothMousePrefPane */,
 				ED0E123B14D5496F008704EC /* smoothmoused */,
