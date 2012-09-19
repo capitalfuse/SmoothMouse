@@ -9,6 +9,8 @@
 #import "kextdaemon.h"
 #import "strings.h"
 
+#include <IOKit/hidsystem/event_status_driver.h>
+
 /* -------------------------------------------------------------------------- */
 
 #define LEFT_BUTTON		4
@@ -101,6 +103,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 											BUTTON_DOWN(event->buttons, BUTTON4),
 											BUTTON_DOWN(event->buttons, BUTTON5),
 											BUTTON_DOWN(event->buttons, BUTTON6))) {
+        NSLog(@"Failed to post mouse event");
 		exit(0);
 	}
 }
@@ -124,7 +127,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 -(id)init;
 -(oneway void) release;
 
--(void) loadSettings;
+-(BOOL) loadSettings;
 -(BOOL) getCursorPosition;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;
@@ -141,8 +144,19 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 {
 	self = [super init];
 	
-	[self loadSettings];
-	
+	BOOL settingsOK = [self loadSettings];
+    if (!settingsOK) {
+        NSLog(@"settings doesn't exist (please open preference pane)");
+        [self dealloc];
+        return nil;
+    }
+    
+	if (!mouse_enabled && !trackpad_enabled) {
+        NSLog(@"neither mouse nor trackpad is enabled");
+        [self dealloc];
+        return nil;
+    }
+    
 	if (![self getCursorPosition]) {
 		NSLog(@"cannot get cursor position");
 		[self dealloc];
@@ -188,30 +202,14 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 	}
 }
 
-// TODO: I'm not sure this is needed. We have default values...
--(void) saveDefaultSettings
-{
-	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
-                          [NSNumber numberWithDouble:1.0], @"Mouse velocity",
-                          [NSNumber numberWithDouble:1.0], @"Trackpad velocity",
-                          /* TODO: acceleeration curve */
-                          [NSNumber numberWithBool:YES], @"Mouse enabled",
-                          [NSNumber numberWithBool:YES], @"Trackpad enabled",
-                          nil];
-
-	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
-
-	[dict writeToFile:file atomically:YES];
-}
-
--(void) loadSettings
+-(BOOL) loadSettings
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
 	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:file];
 	
 	if (!dict) {
 		NSLog(@"cannot open file %@", file);
-		[self saveDefaultSettings];
+        return NO;
 	}
 
     NSNumber *value;
@@ -250,6 +248,8 @@ static void mouse_event_handler(void *buf, unsigned int size) {
     
     NSLog(@"Mouse velocity: %f", velocity_mouse);
     NSLog(@"Trackpad velocity: %f", velocity_trackpad);
+    
+    return YES;
 }
 
 -(BOOL) loadDriver
@@ -397,14 +397,18 @@ BOOL configure_driver(io_connect_t connect)
 int main(int argc, char **argv)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
+    
 	SmoothMouseDaemon *daemon = [[SmoothMouseDaemon alloc] init];
-		
+    if (daemon == NULL) {
+        NSLog(@"Daemon failed to initialize. BYE.");
+        exit(1);
+    }
+
 	[daemon listenForMouseEvents];
 	
 	[daemon release];
 	
 	[pool release];
-	
+
 	return EXIT_SUCCESS;
 }
