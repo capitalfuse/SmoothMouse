@@ -48,10 +48,6 @@
 	[velocityForMouse setDoubleValue:[self getVelocityForMouse]];
 	[velocityForTrackpad setDoubleValue:[self getVelocityForTrackpad]];
     
-    /* Always enable start at login, and start daemon. */
-    if (![self putLaunchdPlist]) {
-        NSLog(@"Failed to enable start-at-login");
-    }
     [self startDaemon];
 }
 
@@ -92,9 +88,15 @@
         if (![self isDaemonRunning]) {
             [self startDaemon];
         }
+        if (![self enableStartAtLogin:YES]) {
+            NSLog(@"Failed to enable start-at-login");
+        }
     } else {
         if ([self isDaemonRunning]) {
             [self stopDaemon];
+        }
+        if (![self enableStartAtLogin:NO]) {
+            NSLog(@"Failed to enable start-at-login");
         }
     }
 }
@@ -139,25 +141,23 @@
 	return [fm fileExistsAtPath:file];
 }
 
-- (BOOL)putLaunchdPlist
+- (BOOL)enableStartAtLogin:(BOOL) enable
 {
-	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
+    if (enable) {
+        NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
 	
-	NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
-	[dict setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
-	[dict setObject:@"/usr/local/bin/smoothmoused" forKey:@"Program"];
-	[dict setObject:[NSNumber numberWithBool:(0 != [startAtLogin state])] forKey:@"KeepAlive"];
-	
-	return [dict writeToFile:file atomically:YES];
-}
-
-- (BOOL)deleteLaunchdPlist
-{
-	NSError *error;
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
-	
-	return [fm removeItemAtPath:file error:&error];
+        NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
+        [dict setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
+        [dict setObject:@"/usr/local/bin/smoothmoused" forKey:@"Program"];
+        [dict setObject:[NSNumber numberWithBool:enable] forKey:@"KeepAlive"];
+        return [dict writeToFile:file atomically:YES];
+    } else {
+        NSError *error;
+        NSFileManager *fm = [NSFileManager defaultManager];
+        NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
+        
+        return [fm removeItemAtPath:file error:&error];
+    }
 }
 
 - (double)getVelocityForMouse

@@ -13,11 +13,6 @@
     IBOutlet NSButton       *enableForTrackpad;
     IBOutlet NSPopUpButton  *accelerationCurveTrackpad;
 	IBOutlet NSSlider		*velocityForTrackpad;
-
-    /* deprecated */
-	IBOutlet NSButton		*switchOnOff;
-	IBOutlet NSButton		*startAtLogin;
-	IBOutlet NSTextField	*status;
 }
 
 - (void)mainViewDidLoad;
@@ -33,8 +28,7 @@
 - (BOOL)stopDaemon;
 
 - (BOOL)startAtLoginEnabled;
-- (BOOL)putLaunchdPlist;
-- (BOOL)deleteLaunchdPlist;
+- (BOOL)enableStartAtLogin:(BOOL) enable;
 
 - (double)getVelocityForMouse;
 - (double)getVelocityForTrackpad;

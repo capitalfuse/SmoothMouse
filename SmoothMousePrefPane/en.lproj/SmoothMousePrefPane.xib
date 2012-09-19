@@ -127,7 +127,7 @@
 													<int key="NSCellFlags2">0</int>
 													<string key="NSContents"/>
 													<reference key="NSControlView" ref="801990403"/>
-													<double key="NSMaxValue">3</double>
+													<double key="NSMaxValue">5</double>
 													<double key="NSMinValue">0.25</double>
 													<double key="NSValue">1</double>
 													<double key="NSAltIncValue">0.0</double>
@@ -201,7 +201,7 @@
 												<int key="NSvFlags">268</int>
 												<string key="NSFrame">{{441, 119}, {30, 17}}</string>
 												<reference key="NSSuperview" ref="586427292"/>
-												<reference key="NSNextKeyView" ref="800643468"/>
+												<reference key="NSNextKeyView"/>
 												<string key="NSReuseIdentifierKey">_NS:1535</string>
 												<bool key="NSEnabled">YES</bool>
 												<object class="NSTextFieldCell" key="NSCell" id="94306443">
