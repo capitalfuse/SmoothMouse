@@ -63,8 +63,8 @@ static void mouse_event_handler(void *buf, unsigned int size) {
     pos.x = pos0.x + (velocity * event->dx);
     pos.y = pos0.y + (velocity * event->dy);
 	
-	/* 
-	 The following code checks if cursor is in screen borders. It was ported 
+	/*
+	 The following code checks if cursor is in screen borders. It was ported
 	 from Synergy.
 	 */
 	CGGetDisplaysWithPoint(pos, 0, NULL, &displayCount);
@@ -96,7 +96,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 	pos0 = pos;
 	
 	/* Post event */
-	if (kCGErrorSuccess != CGPostMouseEvent(pos, true, 6, 
+	if (kCGErrorSuccess != CGPostMouseEvent(pos, true, 6,
 											BUTTON_DOWN(event->buttons, LEFT_BUTTON),
 											BUTTON_DOWN(event->buttons, RIGHT_BUTTON),
 											BUTTON_DOWN(event->buttons, MIDDLE_BUTTON),
@@ -196,7 +196,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 													kCGEventSuppressionStateRemoteMouseDrag)) {
 		NSLog(@"CGSetLocalEventsFilterDuringSupressionState returns with error");
 	}
-
+    
 	if (CGSetLocalEventsSuppressionInterval(0.0)) {
 		NSLog(@"CGSetLocalEventsSuppressionInterval() returns with error");
 	}
@@ -211,30 +211,30 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 		NSLog(@"cannot open file %@", file);
         return NO;
 	}
-
+    
     NSNumber *value;
-
+    
     value = [dict valueForKey:SETTINGS_MOUSE_ENABLED];
 	if (value) {
 		mouse_enabled = [value boolValue];
 	} else {
 		return NO;
 	}
-
+    
     value = [dict valueForKey:SETTINGS_TRACKPAD_ENABLED];
 	if (value) {
 		trackpad_enabled = [value boolValue];
 	} else {
 		return NO;
 	}
-
+    
 	value = [dict valueForKey:SETTINGS_MOUSE_VELOCITY];
 	if (value) {
         velocity_mouse = [value doubleValue];
 	} else {
 		velocity_mouse = 1.0;
 	}
-
+    
     value = [dict valueForKey:SETTINGS_TRACKPAD_VELOCITY];
 	if (value) {
 		velocity_trackpad = [value doubleValue];
@@ -258,7 +258,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 
 -(BOOL) connectToDriver
 {
-    kern_return_t error; 
+    kern_return_t error;
 	
 	service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
 	if (service == IO_OBJECT_NULL) {
@@ -285,7 +285,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 	
 	IOObjectRelease(service);
 	
-	recvPort = IODataQueueAllocateNotificationPort(); 
+	recvPort = IODataQueueAllocateNotificationPort();
     if (MACH_PORT_NULL == recvPort) {
         NSLog(@"IODataQueueAllocateNotificationPort returned a NULL mach_port_t\n");
         return NO;
@@ -304,7 +304,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
     }
     
     queueMappedMemory = (IODataQueueMemory *) address;
-    dataSize = size;  
+    dataSize = size;
 	
     configure_driver(connect);
     
@@ -338,7 +338,7 @@ BOOL configure_driver(io_connect_t connect)
                                            &scalarO_64,				// array of scalar (64-bit) output values.
                                            &outputCount				// pointer to the number of scalar output values.
                                            );
-        
+    
     if (kernResult == KERN_SUCCESS) {
         NSLog(@"Driver configured successfully (%u)", (uint32_t) scalarO_64);
         return YES;
@@ -349,7 +349,7 @@ BOOL configure_driver(io_connect_t connect)
     }
 }
 
--(oneway void) release 
+-(oneway void) release
 {
 	if (address) {
 		IOConnectUnmapMemory(connect, eMouseEvent, mach_task_self(), address);
@@ -375,7 +375,7 @@ BOOL configure_driver(io_connect_t connect)
     NXMouseScaling ms;
     
     IOHIDSetMouseAcceleration((io_connect_t)evs, 1.0);
-
+    
     ms.numScaleLevels = 0;
     IOHIDSetMouseAcceleration(evs, &ms);
     
@@ -384,15 +384,15 @@ BOOL configure_driver(io_connect_t connect)
 
 -(void) listenForMouseEvents
 {
-	kern_return_t error; 
+	kern_return_t error;
 	char *buf = malloc(dataSize);
 	if (!buf) {
 		NSLog(@"malloc error");
 		return;
 	}
-
+    
     while (IODataQueueWaitForAvailableData(queueMappedMemory, recvPort) == kIOReturnSuccess) {
-        while (IODataQueueDataAvailable(queueMappedMemory)) {   
+        while (IODataQueueDataAvailable(queueMappedMemory)) {
             error = IODataQueueDequeue(queueMappedMemory, buf, &dataSize);
             if (!error) {
 				mouse_event_handler(buf, dataSize);
@@ -417,7 +417,7 @@ int main(int argc, char **argv)
         NSLog(@"Daemon failed to initialize. BYE.");
         exit(1);
     }
-
+    
     [daemon initializeSystemMouseSettings];
     
 	[daemon listenForMouseEvents];
@@ -425,6 +425,6 @@ int main(int argc, char **argv)
 	[daemon release];
 	
 	[pool release];
-
+    
 	return EXIT_SUCCESS;
 }

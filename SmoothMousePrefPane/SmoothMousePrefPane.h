@@ -5,11 +5,11 @@
 @interface SmoothMousePrefPane : NSPreferencePane {
 @private
     IBOutlet NSMenu         *buttonMenu;
-
+    
     IBOutlet NSButton       *enableForMouse;
     IBOutlet NSPopUpButton  *accelerationCurveMouse;
 	IBOutlet NSSlider		*velocityForMouse;
-
+    
     IBOutlet NSButton       *enableForTrackpad;
     IBOutlet NSPopUpButton  *accelerationCurveTrackpad;
 	IBOutlet NSSlider		*velocityForTrackpad;

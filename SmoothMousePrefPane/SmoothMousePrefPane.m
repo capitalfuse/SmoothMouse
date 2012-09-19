@@ -36,19 +36,19 @@
     } else {
         [enableForTrackpad setState:0];
     }
-
+    
     /* Mouse acceleration curve */
     NSString *mouseAccelerationCurveString = [self getAccelerationCurveForMouse];
     if (mouseAccelerationCurveString) {
         [accelerationCurveMouse selectItemWithTitle:mouseAccelerationCurveString];
     }
-         
+    
     /* Trackpad acceleration curve */
     NSString *trackpadAccelerationCurveString = [self getAccelerationCurveForTrackpad];
     if (trackpadAccelerationCurveString) {
         [accelerationCurveTrackpad selectItemWithTitle:trackpadAccelerationCurveString];
     }
-     
+    
 	/* Velocity values */
 	[velocityForMouse setDoubleValue:[self getVelocityForMouse]];
 	[velocityForTrackpad setDoubleValue:[self getVelocityForTrackpad]];
@@ -76,9 +76,9 @@
                           SETTINGS_MOUSE_ACCELERATION_CURVE_DEFAULT, SETTINGS_MOUSE_ACCELERATION_CURVE,
                           SETTINGS_TRACKPAD_ACCELERATION_CURVE_DEFAULT, SETTINGS_TRACKPAD_ACCELERATION_CURVE,
                           nil];
-
+    
     NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
-
+    
     [dict writeToFile:file atomically:YES];
 }
 
@@ -97,7 +97,7 @@
     } else {
         [self saveAccelerationCurveForTrackpad:title];
     }
-
+    
     [self restartDaemonIfRunning];
 }
 
@@ -176,7 +176,7 @@
 {
     if (enable) {
         NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
-	
+        
         NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
         [dict setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
         [dict setObject:@"/usr/local/bin/smoothmoused" forKey:@"Program"];
@@ -243,13 +243,13 @@
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
 	
     NSNumber *num;
-
+    
     num = [NSNumber numberWithDouble:valueMouse];
 	[settings setValue:num forKey:SETTINGS_MOUSE_VELOCITY];
-
+    
     num = [NSNumber numberWithDouble:valueTrackpad];
 	[settings setValue:num forKey:SETTINGS_TRACKPAD_VELOCITY];
-
+    
 	// TODO: does num need releasing here?
     return [settings writeToFile:file atomically:YES];
 }
