@@ -66,19 +66,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
     /* Calculate new cursor position */
     pos.x = pos0.x + calcdx;
     pos.y = pos0.y + calcdy;
-    
-    if (is_debug) {
-        static long long lastTimestamp = 0;
-        float deltaTimestamp = event->timestamp - lastTimestamp; // timestamp is ns
-        NSLog(@"HW: %d x %d   SW: %.2f x %.2f   %d hz",
-              event->dx,
-              event->dy,
-              calcdx,
-              calcdy,
-              (int) (1000000000 / deltaTimestamp));
-        lastTimestamp = event->timestamp;
-    }
-    
+        
 	/*
 	 The following code checks if cursor is in screen borders. It was ported
 	 from Synergy.
@@ -122,6 +110,36 @@ static void mouse_event_handler(void *buf, unsigned int size) {
         NSLog(@"Failed to post mouse event");
 		exit(0);
 	}
+    
+    if (is_debug) {
+        static long long lastTimestamp = 0;
+        static CGPoint lastPoint = { 0, 0 };
+
+        CGEventRef evt = CGEventCreate(NULL);
+        CGPoint point = CGEventGetLocation(evt);
+        
+        if (lastTimestamp != 0) {
+            float deltaTimestamp = event->timestamp - lastTimestamp; // timestamp is ns
+            
+            float actualdx = point.x - lastPoint.x;
+            float actualdy = point.y - lastPoint.y;
+            
+            BOOL inconsistencyDetected = (actualdx != calcdx || actualdy != calcdy);
+            NSLog(@"Kext: %d x %d   Calculated: %.2f x %.2f   Moved: %.2f x %.2f     %d hz    %s",
+                  event->dx,
+                  event->dy,
+                  calcdx,
+                  calcdy,
+                  actualdx,
+                  actualdy,
+                  (int) (1000000000 / deltaTimestamp),
+                  inconsistencyDetected ? "INCONSISTENCY!" : "");
+        }
+        lastTimestamp = event->timestamp;
+        lastPoint = point;
+        
+        CFRelease(evt);
+    }
 }
 
 @interface SmoothMouseDaemon : NSObject {
