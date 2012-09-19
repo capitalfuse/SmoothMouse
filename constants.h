@@ -2,7 +2,6 @@
 #define PLIST_FILENAME @"/Library/Preferences/com.cyberic.smoothmouse.plist"
 #define HELPER_FILENAME @"/usr/local/bin/smoothmouseplisthelper"
 
-
 #define SETTINGS_MOUSE_ENABLED @"Mouse enabled"
 #define SETTINGS_TRACKPAD_ENABLED @"Trackpad enabled"
 #define SETTINGS_MOUSE_ACCELERATION_CURVE @"Mouse acceleration curve"

@@ -366,6 +366,22 @@ BOOL configure_driver(io_connect_t connect)
 	[super release];
 }
 
+-(void) initializeSystemMouseSettings
+{
+    NXEventHandle evs;
+    
+    evs = NXOpenEventStatus();
+    
+    NXMouseScaling ms;
+    
+    IOHIDSetMouseAcceleration((io_connect_t)evs, 1.0);
+
+    ms.numScaleLevels = 0;
+    IOHIDSetMouseAcceleration(evs, &ms);
+    
+    NXCloseEventStatus(evs);
+}
+
 -(void) listenForMouseEvents
 {
 	kern_return_t error; 
@@ -402,6 +418,8 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    [daemon initializeSystemMouseSettings];
+    
 	[daemon listenForMouseEvents];
 	
 	[daemon release];
