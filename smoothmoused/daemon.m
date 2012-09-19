@@ -10,6 +10,7 @@
 #import "constants.h"
 
 #include <IOKit/hidsystem/event_status_driver.h>
+#include <IOKit/hidsystem/IOHIDParameter.h>
 
 /* -------------------------------------------------------------------------- */
 
@@ -407,18 +408,25 @@ BOOL configure_driver(io_connect_t connect)
 
 -(void) initializeSystemMouseSettings
 {
-    NXEventHandle evs;
+    NXEventHandle handle;
+    CFStringRef key;
+    kern_return_t ret;
     
-    evs = NXOpenEventStatus();
+    handle = NXOpenEventStatus();
     
-    NXMouseScaling ms;
+    key = CFSTR(kIOHIDTrackpadAccelerationType);
+    ret = IOHIDSetAccelerationWithKey(handle, key, 0.0);
+    if (ret != KERN_SUCCESS) {
+        NSLog(@"Failed to disable acceleration for trackpad");
+    }
     
-    IOHIDSetMouseAcceleration((io_connect_t)evs, 1.0);
+    key = CFSTR(kIOHIDMouseAccelerationType);
+    ret = IOHIDSetAccelerationWithKey(handle, key, 0.0);
+    if (ret != KERN_SUCCESS) {
+        NSLog(@"Failed to disable acceleration for mouse");
+    }
     
-    ms.numScaleLevels = 0;
-    IOHIDSetMouseAcceleration(evs, &ms);
-    
-    NXCloseEventStatus(evs);
+    NXCloseEventStatus(handle);
 }
 
 -(void) listenForMouseEvents
