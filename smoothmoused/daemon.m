@@ -32,6 +32,7 @@ static double velocity_mouse;
 static double velocity_trackpad;
 static int acceleration_curve_mouse;
 static int acceleration_curve_trackpad;
+static BOOL is_debug;
 
 /* -------------------------------------------------------------------------- *
  The following code is responsive for handling events received from kernel
@@ -59,10 +60,25 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
     }
     
-	/* Calculate new cursor position */
-    pos.x = pos0.x + (velocity * event->dx);
-    pos.y = pos0.y + (velocity * event->dy);
-	
+    float calcdx = (velocity * event->dx);
+	float calcdy = (velocity * event->dy);
+    
+    /* Calculate new cursor position */
+    pos.x = pos0.x + calcdx;
+    pos.y = pos0.y + calcdy;
+    
+    if (is_debug) {
+        static long long lastTimestamp = 0;
+        float deltaTimestamp = event->timestamp - lastTimestamp; // timestamp is ns
+        NSLog(@"HW: %d x %d   SW: %.2f x %.2f   %d hz",
+              event->dx,
+              event->dy,
+              calcdx,
+              calcdy,
+              (int) (1000000000 / deltaTimestamp));
+        lastTimestamp = event->timestamp;
+    }
+    
 	/*
 	 The following code checks if cursor is in screen borders. It was ported
 	 from Synergy.
@@ -151,10 +167,15 @@ static void mouse_event_handler(void *buf, unsigned int size) {
         return nil;
     }
     
-	if (!mouse_enabled && !trackpad_enabled) {
-        NSLog(@"neither mouse nor trackpad is enabled");
-        [self dealloc];
-        return nil;
+    if (!is_debug) {
+        if (!mouse_enabled && !trackpad_enabled) {
+            NSLog(@"neither mouse nor trackpad is enabled");
+            [self dealloc];
+            return nil;
+        }
+    } else {
+        mouse_enabled = 1;
+        trackpad_enabled = 1;
     }
     
 	if (![self getCursorPosition]) {
@@ -411,6 +432,15 @@ BOOL configure_driver(io_connect_t connect)
 int main(int argc, char **argv)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    is_debug = 0;
+    
+    if (argc > 1) {
+        if (strcmp(argv[1], "--debug") == 0) {
+            is_debug = 1;
+            NSLog(@"Debug mode on");
+        }
+    }
     
 	SmoothMouseDaemon *daemon = [[SmoothMouseDaemon alloc] init];
     if (daemon == NULL) {

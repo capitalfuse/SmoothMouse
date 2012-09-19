@@ -16,6 +16,7 @@ typedef struct mouse_event_s {
 	int buttons;
 	int dx;
 	int dy;
+    unsigned long long timestamp;
 } mouse_event_t;
 
 enum {
