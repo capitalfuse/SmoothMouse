@@ -283,7 +283,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 	}
     
     NSLog(@"Mouse enabled: %d", mouse_enabled);
-    NSLog(@"Mouse enabled: %d", trackpad_enabled);
+    NSLog(@"Trackpad enabled: %d", trackpad_enabled);
     NSLog(@"Mouse velocity: %f", velocity_mouse);
     NSLog(@"Trackpad velocity: %f", velocity_trackpad);
     
