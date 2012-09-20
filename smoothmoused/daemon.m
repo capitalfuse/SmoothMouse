@@ -126,7 +126,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             float actualdy = point.y - lastPoint.y;
             
             BOOL inconsistencyDetected = (abs(actualdx - calcdx) > 0.1) || (abs(actualdy - calcdy) > 0.1);
-            NSLog(@"Kext: %d x %d   Calculated: %.2f x %.2f   Moved: %.2f x %.2f     %d hz    %s",
+            NSLog(@"Kext: %d ⨉ %d	Calc: %.2f ⨉ %.2f	Move: %.2f ⨉ %.2f	%d Hz	%s",
                   event->dx,
                   event->dy,
                   calcdx,
