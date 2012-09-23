@@ -22,6 +22,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		036C5434160F50C600110497 /* debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 036C5433160F50C600110497 /* debug.m */; };
 		ED03CFA115D7D96000763D81 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA015D7D96000763D81 /* ApplicationServices.framework */; };
 		ED03CFA315D7D97400763D81 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA215D7D97400763D81 /* IOKit.framework */; };
 		ED03CFA615D7D9B500763D81 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA515D7D9B500763D81 /* ServiceManagement.framework */; };
@@ -66,6 +67,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		036C5433160F50C600110497 /* debug.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = debug.m; sourceTree = "<group>"; };
+		036C5436160F50D300110497 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
 		ED03CF9E15D7D95200763D81 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		ED03CFA015D7D96000763D81 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		ED03CFA215D7D97400763D81 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
@@ -193,6 +196,8 @@
 			isa = PBXGroup;
 			children = (
 				ED0E123C14D5496F008704EC /* daemon.m */,
+				036C5433160F50C600110497 /* debug.m */,
+				036C5436160F50D300110497 /* debug.h */,
 				ED0E123E14D5496F008704EC /* Supporting Files */,
 			);
 			path = smoothmoused;
@@ -320,6 +325,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED0E123D14D5496F008704EC /* daemon.m in Sources */,
+				036C5434160F50C600110497 /* debug.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,6 +8,7 @@
 
 #import "kextdaemon.h"
 #import "constants.h"
+#include "debug.h"
 
 #include <IOKit/hidsystem/event_status_driver.h>
 #include <IOKit/hidsystem/IOHIDParameter.h>
@@ -46,7 +47,7 @@ static BOOL is_debug;
 static void mouse_event_handler(void *buf, unsigned int size) {
 	CGPoint pos;
 	mouse_event_t *event = buf;
-	CGDisplayCount displayCount = 0;
+    CGDisplayCount displayCount = 0;
 	double velocity = 1;
     
     switch (event->device_type) {
@@ -111,35 +112,9 @@ static void mouse_event_handler(void *buf, unsigned int size) {
         NSLog(@"Failed to post mouse event");
 		exit(0);
 	}
-    
-    if (is_debug) {
-        static long long lastTimestamp = 0;
-        static CGPoint lastPoint = { 0, 0 };
 
-        CGEventRef evt = CGEventCreate(NULL);
-        CGPoint point = CGEventGetLocation(evt);
-        
-        if (lastTimestamp != 0) {
-            float deltaTimestamp = event->timestamp - lastTimestamp; // timestamp is ns
-            
-            float actualdx = point.x - lastPoint.x;
-            float actualdy = point.y - lastPoint.y;
-            
-            BOOL inconsistencyDetected = (abs(actualdx - calcdx) > 0.1) || (abs(actualdy - calcdy) > 0.1);
-            NSLog(@"Kext: %d ⨉ %d	Calc: %.2f ⨉ %.2f	Move: %.2f ⨉ %.2f	%d Hz	%s",
-                  event->dx,
-                  event->dy,
-                  calcdx,
-                  calcdy,
-                  actualdx,
-                  actualdy,
-                  (int) (1000000000 / deltaTimestamp),
-                  inconsistencyDetected ? "INCONSISTENCY!" : "");
-        }
-        lastTimestamp = event->timestamp;
-        lastPoint = point;
-        
-        CFRelease(evt);
+    if (is_debug) {
+        debug_log(event, calcdx, calcdy);
     }
 }
 
@@ -281,12 +256,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 	} else {
 		velocity_trackpad = 1.0;
 	}
-    
-    NSLog(@"Mouse enabled: %d", mouse_enabled);
-    NSLog(@"Trackpad enabled: %d", trackpad_enabled);
-    NSLog(@"Mouse velocity: %f", velocity_mouse);
-    NSLog(@"Trackpad velocity: %f", velocity_trackpad);
-    
+
     return YES;
 }
 
@@ -380,7 +350,7 @@ BOOL configure_driver(io_connect_t connect)
                                            );
     
     if (kernResult == KERN_SUCCESS) {
-        NSLog(@"Driver configured successfully (%u)", (uint32_t) scalarO_64);
+        //NSLog(@"Driver configured successfully (%u)", (uint32_t) scalarO_64);
         return YES;
     }
 	else {
@@ -454,6 +424,10 @@ BOOL configure_driver(io_connect_t connect)
 
 @end
 
+void trap_ctrl_c(int sig)
+{
+    exit(0);
+}
 
 int main(int argc, char **argv)
 {
@@ -474,8 +448,20 @@ int main(int argc, char **argv)
         exit(1);
     }
     
-    [daemon initializeSystemMouseSettings];
+    if (is_debug) {
+        atexit(debug_end);
+    }
+
+    signal(SIGINT, trap_ctrl_c);
     
+    [daemon initializeSystemMouseSettings];
+
+    NSLog(@"Mouse enabled: %d Mouse velocity: %f, Trackpad enabled: %d, Trackpad velocity: %f",
+          mouse_enabled,
+          velocity_mouse,
+          trackpad_enabled,
+          velocity_trackpad);
+
 	[daemon listenForMouseEvents];
 	
 	[daemon release];
