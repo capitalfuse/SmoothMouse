@@ -151,7 +151,7 @@
 	NSError *error;
 	NSMutableDictionary *job = [[[NSMutableDictionary alloc] init] autorelease];
 	[job setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
-	[job setObject:@"/usr/local/bin/smoothmoused" forKey:@"Program"];
+	[job setObject:DAEMON_FILENAME forKey:@"Program"];
 //	[job setObject:[NSNumber numberWithBool:YES] forKey:@"KeepAlive"];
     NSMutableDictionary *dict2 = [[[NSMutableDictionary alloc] init] autorelease];
     [dict2 setObject:[NSNumber numberWithBool:true] forKey:@"SuccessfulExit"];
@@ -182,7 +182,7 @@
         
         NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
         [dict setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
-        [dict setObject:@"/usr/local/bin/smoothmoused" forKey:@"Program"];
+        [dict setObject:DAEMON_FILENAME forKey:@"Program"];
 //        [dict setObject:[NSNumber numberWithBool:enable] forKey:@"KeepAlive"];
         NSMutableDictionary *dict2 = [[[NSMutableDictionary alloc] init] autorelease];
         [dict2 setObject:[NSNumber numberWithBool:true] forKey:@"SuccessfulExit"];
