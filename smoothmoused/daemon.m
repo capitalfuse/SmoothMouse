@@ -445,7 +445,7 @@ int main(int argc, char **argv)
 	SmoothMouseDaemon *daemon = [[SmoothMouseDaemon alloc] init];
     if (daemon == NULL) {
         NSLog(@"Daemon failed to initialize. BYE.");
-        exit(1);
+        exit(-1);
     }
     
     if (is_debug) {
