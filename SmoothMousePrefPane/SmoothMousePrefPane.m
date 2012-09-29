@@ -52,10 +52,6 @@
 	/* Velocity values */
 	[velocityForMouse setDoubleValue:[self getVelocityForMouse]];
 	[velocityForTrackpad setDoubleValue:[self getVelocityForTrackpad]];
-    
-    [self startDaemon];
-    
-    
 }
 
 -(BOOL) settingsFileExists
@@ -116,12 +112,14 @@
     BOOL mouseOn = ([enableForMouse state] == 1);
     BOOL trackpadOn = ([enableForTrackpad state] == 1);
     if (mouseOn == YES || trackpadOn == YES) {
-        if (![self isDaemonRunning]) {
-            [self startDaemon];
-        }
         if (![self enableStartAtLogin:YES]) {
             NSLog(@"Failed to enable start-at-login");
         }
+        if ([self isDaemonRunning]) {
+            [self stopDaemon];
+        }
+        [self startDaemon];
+        
     } else {
         if ([self isDaemonRunning]) {
             [self stopDaemon];
@@ -148,23 +146,66 @@
 
 - (BOOL)startDaemon
 {
-	NSError *error;
-	NSMutableDictionary *job = [[[NSMutableDictionary alloc] init] autorelease];
-	[job setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
-	[job setObject:DAEMON_FILENAME forKey:@"Program"];
-//	[job setObject:[NSNumber numberWithBool:YES] forKey:@"KeepAlive"];
-    NSMutableDictionary *dict2 = [[[NSMutableDictionary alloc] init] autorelease];
-    [dict2 setObject:[NSNumber numberWithBool:true] forKey:@"SuccessfulExit"];
-    [job setObject:dict2 forKey:@"KeepAlive"];
-
-	return SMJobSubmit(kSMDomainUserLaunchd, (CFDictionaryRef) job, NULL, (CFErrorRef*)&error);
+    NSTask *task;
+    task = [[NSTask alloc] init];
+    [task setLaunchPath: @"/bin/launchctl"];
+    
+    NSArray *arguments;
+    NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
+    arguments = [NSArray arrayWithObjects: @"load", plistFile, nil];
+    [task setArguments: arguments];
+    
+    NSPipe *pipe;
+    pipe = [NSPipe pipe];
+    [task setStandardOutput: pipe];
+    
+    NSFileHandle *file;
+    file = [pipe fileHandleForReading];
+    
+    [task launch];
+    
+    NSData *data;
+    data = [file readDataToEndOfFile];
+    
+    NSString *string;
+    string = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+    //NSLog (@"launchctl returned:\n%@", string);
+    
+    [string release];
+    [task release];
+    //[plistFile release];
 }
 
 - (BOOL)stopDaemon
 {
-	NSError *error;
-	
-	return SMJobRemove(kSMDomainUserLaunchd, (CFStringRef) @"com.cyberic.smoothmouse", NULL, TRUE, (CFErrorRef*)&error);
+    NSTask *task;
+    task = [[NSTask alloc] init];
+    [task setLaunchPath: @"/bin/launchctl"];
+    
+    NSArray *arguments;
+    NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
+    arguments = [NSArray arrayWithObjects: @"unload", plistFile, nil];
+    [task setArguments: arguments];
+    
+    NSPipe *pipe;
+    pipe = [NSPipe pipe];
+    [task setStandardOutput: pipe];
+    
+    NSFileHandle *file;
+    file = [pipe fileHandleForReading];
+    
+    [task launch];
+    
+    NSData *data;
+    data = [file readDataToEndOfFile];
+    
+    NSString *string;
+    string = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+    //NSLog (@"launchctl returned:\n%@", string);
+    
+    [string release];
+    [task release];
+    //[plistFile release];
 }
 
 - (BOOL)startAtLoginEnabled

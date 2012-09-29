@@ -6,6 +6,9 @@
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
 
+#include <assert.h>
+#include <pthread.h>
+
 #import "kextdaemon.h"
 #import "constants.h"
 #include "debug.h"
@@ -118,8 +121,12 @@ static void mouse_event_handler(void *buf, unsigned int size) {
     }
 }
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 @interface SmoothMouseDaemon : NSObject {
 @private
+    BOOL connected;
+    pthread_t mouseEventThreadID;
     io_service_t service;
 	io_connect_t connect;
 	IODataQueueMemory *queueMappedMemory;
@@ -141,8 +148,10 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 -(BOOL) getCursorPosition;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;
--(void) listenForMouseEvents;
+-(BOOL) configureDriver;
+-(BOOL) disconnectFromDriver;
 -(void) setupEventSuppression;
+-(BOOL) isActive;
 
 @end
 
@@ -154,6 +163,8 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 {
 	self = [super init];
 	
+    connected = NO;
+    
 	BOOL settingsOK = [self loadSettings];
     if (!settingsOK) {
         NSLog(@"settings doesn't exist (please open preference pane)");
@@ -268,60 +279,78 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 
 -(BOOL) connectToDriver
 {
-    kern_return_t error;
-	
-	service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
-	if (service == IO_OBJECT_NULL) {
-		NSLog(@"IOServiceGetMatchingService() failed");
-		if ([self loadDriver]) {
-			NSLog(@"driver is loaded manually, try again");
-			service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
-			if (service == IO_OBJECT_NULL) {
-				return NO;
-			}
-		} else {
-			NSLog(@"cannot load driver manually");
-		}
-		
-		return NO;
-	}
-    
-	error = IOServiceOpen(service, mach_task_self(), 0, &connect);
-	if (error) {
-		NSLog(@"IOServiceOpen() failed");
-		IOObjectRelease(service);
-        return NO;
-	}
-	
-	IOObjectRelease(service);
-	
-	recvPort = IODataQueueAllocateNotificationPort();
-    if (MACH_PORT_NULL == recvPort) {
-        NSLog(@"IODataQueueAllocateNotificationPort returned a NULL mach_port_t\n");
-        return NO;
+    if (!connected) {
+        kern_return_t error;
+        
+        pthread_mutex_lock(&mutex);
+        
+        service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
+        if (service == IO_OBJECT_NULL) {
+            NSLog(@"IOServiceGetMatchingService() failed");
+            if ([self loadDriver]) {
+                NSLog(@"driver is loaded manually, try again");
+                service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
+                if (service == IO_OBJECT_NULL) {
+                    goto error;
+                }
+            } else {
+                NSLog(@"cannot load driver manually");
+            }
+            
+            goto error;
+        }
+        
+        error = IOServiceOpen(service, mach_task_self(), 0, &connect);
+        if (error) {
+            NSLog(@"IOServiceOpen() failed");
+            IOObjectRelease(service);
+            goto error;
+        }
+        
+        IOObjectRelease(service);
+        
+        recvPort = IODataQueueAllocateNotificationPort();
+        if (MACH_PORT_NULL == recvPort) {
+            NSLog(@"IODataQueueAllocateNotificationPort returned a NULL mach_port_t\n");
+            goto error;
+        }
+        
+        error = IOConnectSetNotificationPort(connect, eMouseEvent, recvPort, 0);
+        if (kIOReturnSuccess != error) {
+            NSLog(@"IOConnectSetNotificationPort returned %d\n", error);
+            goto error;
+        }
+        
+        error = IOConnectMapMemory(connect, eMouseEvent, mach_task_self(), &address, &size, kIOMapAnywhere);
+        if (kIOReturnSuccess != error) {
+            NSLog(@"IOConnectMapMemory returned %d\n", error);
+            goto error;
+        }
+        
+        queueMappedMemory = (IODataQueueMemory *) address;
+        dataSize = size;
+        
+        [self configureDriver];
+
+        int threadError = pthread_create(&mouseEventThreadID, NULL, &HandleMouseEventThread, self);
+        if (threadError != 0)
+        {
+            NSLog(@"Failed to start mouse event thread");
+        }
+
+        connected = YES;
+
+        pthread_mutex_unlock(&mutex);
     }
-    
-    error = IOConnectSetNotificationPort(connect, eMouseEvent, recvPort, 0);
-    if (kIOReturnSuccess != error) {
-        NSLog(@"IOConnectSetNotificationPort returned %d\n", error);
-        return NO;
-    }
-    
-    error = IOConnectMapMemory(connect, eMouseEvent, mach_task_self(), &address, &size, kIOMapAnywhere);
-    if (kIOReturnSuccess != error) {
-        NSLog(@"IOConnectMapMemory returned %d\n", error);
-        return NO;
-    }
-    
-    queueMappedMemory = (IODataQueueMemory *) address;
-    dataSize = size;
-	
-    configure_driver(connect);
-    
+
 	return YES;
+
+error:
+    pthread_mutex_unlock(&mutex);
+    return NO;
 }
 
-BOOL configure_driver(io_connect_t connect)
+-(BOOL) configureDriver
 {
     kern_return_t	kernResult;
 	
@@ -350,7 +379,7 @@ BOOL configure_driver(io_connect_t connect)
                                            );
     
     if (kernResult == KERN_SUCCESS) {
-        //NSLog(@"Driver configured successfully (%u)", (uint32_t) scalarO_64);
+        NSLog(@"Driver configured successfully (%u)", (uint32_t) scalarO_64);
         return YES;
     }
 	else {
@@ -359,20 +388,40 @@ BOOL configure_driver(io_connect_t connect)
     }
 }
 
+-(BOOL) disconnectFromDriver
+{
+    if (connected) {
+        
+        pthread_mutex_lock(&mutex);
+
+        if (address) {
+            IOConnectUnmapMemory(connect, eMouseEvent, mach_task_self(), address);
+        }
+
+        if (recvPort) {
+            mach_port_destroy(mach_task_self(), recvPort);
+        }
+
+        if (connect) {
+            IOServiceClose(connect);
+        }
+
+        connected = NO;
+                
+        pthread_mutex_unlock(&mutex);
+
+        int rv = pthread_join(mouseEventThreadID, NULL);
+        if (rv != 0) {
+            NSLog(@"Failed to wait for mouse event thread");
+        }
+    }
+    
+    return YES;
+}
+
 -(oneway void) release
 {
-	if (address) {
-		IOConnectUnmapMemory(connect, eMouseEvent, mach_task_self(), address);
-	}
-    
-	if (recvPort) {
-		mach_port_destroy(mach_task_self(), recvPort);
-	}
-	
-	if (connect) {
-		IOServiceClose(connect);
-	}
-	
+    [self disconnectFromDriver];
 	[super release];
 }
 
@@ -399,27 +448,73 @@ BOOL configure_driver(io_connect_t connect)
     NXCloseEventStatus(handle);
 }
 
--(void) listenForMouseEvents
+void *HandleMouseEventThread(void *instance)
 {
-	kern_return_t error;
-	char *buf = malloc(dataSize);
+    SmoothMouseDaemon *self = (SmoothMouseDaemon *) instance;
+
+    kern_return_t error;
+    
+	char *buf = malloc(self->dataSize);
 	if (!buf) {
 		NSLog(@"malloc error");
-		return;
+		return NULL;
 	}
+
+    while (IODataQueueWaitForAvailableData(self->queueMappedMemory, self->recvPort) == kIOReturnSuccess) {
+        
+        pthread_mutex_lock(&mutex);
+
+        if (self->connected) {
+
+            while (IODataQueueDataAvailable(self->queueMappedMemory)) {
+                error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
+                if (!error) {
+                    mouse_event_handler(buf, self->dataSize);
+                } else {
+                    NSLog(@"IODataQueueDequeue() failed");
+                }
+            }
+        }
+        
+        pthread_mutex_unlock(&mutex);
+    }
     
-    while (IODataQueueWaitForAvailableData(queueMappedMemory, recvPort) == kIOReturnSuccess) {
-        while (IODataQueueDataAvailable(queueMappedMemory)) {
-            error = IODataQueueDequeue(queueMappedMemory, buf, &dataSize);
-            if (!error) {
-				mouse_event_handler(buf, dataSize);
-			} else {
-				NSLog(@"IODataQueueDequeue() failed");
-			}
+	free(buf);
+    
+    return NULL;
+}
+
+-(void) mainLoop
+{
+    while(1) {
+        usleep(1000000);
+        BOOL active = [self isActive];
+        if (active) {
+            [self connectToDriver];
+        } else {
+            [self disconnectFromDriver];
         }
     }
-	
-	free(buf);
+}
+
+-(BOOL) isActive {
+#if 1
+    CFDictionaryRef dict = CGSessionCopyCurrentDictionary();
+    const void* logged_in = CFDictionaryGetValue(dict, kCGSessionOnConsoleKey);
+    if (logged_in != kCFBooleanTrue) {
+        return NO;
+    } else {
+        return YES;
+    }
+#else
+    static int i = 0;
+    i++;
+    if (i % 2 == 0) {
+        return NO;
+    } else {
+        return YES;
+    }
+#endif
 }
 
 @end
@@ -448,6 +543,8 @@ int main(int argc, char **argv)
         exit(-1);
     }
     
+    //LaunchDetectUserSwitchThread();
+    
     if (is_debug) {
         atexit(debug_end);
     }
@@ -462,7 +559,7 @@ int main(int argc, char **argv)
           trackpad_enabled,
           velocity_trackpad);
 
-	[daemon listenForMouseEvents];
+	[daemon mainLoop];
 	
 	[daemon release];
 	
