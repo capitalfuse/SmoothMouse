@@ -151,6 +151,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 -(BOOL) configureDriver;
 -(BOOL) disconnectFromDriver;
 -(void) setupEventSuppression;
+-(void) initializeSystemMouseSettings;
 -(BOOL) isActive;
 
 @end
@@ -226,6 +227,29 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	if (CGSetLocalEventsSuppressionInterval(0.0)) {
 		NSLog(@"CGSetLocalEventsSuppressionInterval() returns with error");
 	}
+}
+
+-(void) initializeSystemMouseSettings
+{
+    NXEventHandle handle;
+    CFStringRef key;
+    kern_return_t ret;
+    
+    handle = NXOpenEventStatus();
+    
+    key = CFSTR(kIOHIDTrackpadAccelerationType);
+    ret = IOHIDSetAccelerationWithKey(handle, key, 0.0);
+    if (ret != KERN_SUCCESS) {
+        NSLog(@"Failed to disable acceleration for trackpad");
+    }
+    
+    key = CFSTR(kIOHIDMouseAccelerationType);
+    ret = IOHIDSetAccelerationWithKey(handle, key, 0.0);
+    if (ret != KERN_SUCCESS) {
+        NSLog(@"Failed to disable acceleration for mouse");
+    }
+    
+    NXCloseEventStatus(handle);
 }
 
 -(BOOL) loadSettings
@@ -338,8 +362,10 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
             NSLog(@"Failed to start mouse event thread");
         }
 
-        connected = YES;
+        [self initializeSystemMouseSettings];
 
+        connected = YES;
+        
         pthread_mutex_unlock(&mutex);
     }
 
@@ -423,29 +449,6 @@ error:
 {
     [self disconnectFromDriver];
 	[super release];
-}
-
--(void) initializeSystemMouseSettings
-{
-    NXEventHandle handle;
-    CFStringRef key;
-    kern_return_t ret;
-    
-    handle = NXOpenEventStatus();
-    
-    key = CFSTR(kIOHIDTrackpadAccelerationType);
-    ret = IOHIDSetAccelerationWithKey(handle, key, 0.0);
-    if (ret != KERN_SUCCESS) {
-        NSLog(@"Failed to disable acceleration for trackpad");
-    }
-    
-    key = CFSTR(kIOHIDMouseAccelerationType);
-    ret = IOHIDSetAccelerationWithKey(handle, key, 0.0);
-    if (ret != KERN_SUCCESS) {
-        NSLog(@"Failed to disable acceleration for mouse");
-    }
-    
-    NXCloseEventStatus(handle);
 }
 
 void *HandleMouseEventThread(void *instance)
@@ -543,16 +546,12 @@ int main(int argc, char **argv)
         exit(-1);
     }
     
-    //LaunchDetectUserSwitchThread();
-    
     if (is_debug) {
         atexit(debug_end);
     }
 
     signal(SIGINT, trap_ctrl_c);
     
-    [daemon initializeSystemMouseSettings];
-
     NSLog(@"Mouse enabled: %d Mouse velocity: %f, Trackpad enabled: %d, Trackpad velocity: %f",
           mouse_enabled,
           velocity_mouse,
