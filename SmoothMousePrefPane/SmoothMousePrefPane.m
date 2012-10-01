@@ -3,6 +3,9 @@
 
 #import <ServiceManagement/ServiceManagement.h>
 
+// umask
+#include <sys/types.h>
+#include <sys/stat.h>
 
 @implementation SmoothMousePrefPane
 
@@ -219,7 +222,16 @@
 - (BOOL)enableStartAtLogin:(BOOL) enable
 {
     if (enable) {
-        NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
+        // create LaunchAgents directory
+        
+        mode_t oldMask = umask(S_IRWXO | S_IRWXG);
+        
+        NSFileManager *filemgr = [NSFileManager defaultManager];
+        NSString *launchAgentsDirectory = [NSHomeDirectory() stringByAppendingPathComponent: @"/Library/LaunchAgents"];
+        NSURL *newDir = [NSURL fileURLWithPath:launchAgentsDirectory];
+        [filemgr createDirectoryAtURL: newDir withIntermediateDirectories:YES attributes: nil error:nil];
+
+        (void) umask(oldMask);
         
         NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
         [dict setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
@@ -228,6 +240,7 @@
         NSMutableDictionary *dict2 = [[[NSMutableDictionary alloc] init] autorelease];
         [dict2 setObject:[NSNumber numberWithBool:true] forKey:@"SuccessfulExit"];
         [dict setObject:dict2 forKey:@"KeepAlive"];
+        NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_PLIST_FILENAME];
         return [dict writeToFile:file atomically:YES];
     } else {
         NSError *error;
