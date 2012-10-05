@@ -105,13 +105,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
 	pos0 = pos;
 	
 	/* Post event */
-	if (kCGErrorSuccess != CGPostMouseEvent(pos, true, 6,
-											BUTTON_DOWN(event->buttons, LEFT_BUTTON),
-											BUTTON_DOWN(event->buttons, RIGHT_BUTTON),
-											BUTTON_DOWN(event->buttons, MIDDLE_BUTTON),
-											BUTTON_DOWN(event->buttons, BUTTON4),
-											BUTTON_DOWN(event->buttons, BUTTON5),
-											BUTTON_DOWN(event->buttons, BUTTON6))) {
+	if (kCGErrorSuccess != CGPostMouseEvent(pos, true, 1, BUTTON_DOWN(event->buttons, LEFT_BUTTON))) {
         NSLog(@"Failed to post mouse event");
 		exit(0);
 	}
