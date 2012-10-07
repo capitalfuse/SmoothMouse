@@ -13,9 +13,19 @@
     IBOutlet NSButton       *enableForTrackpad;
     IBOutlet NSPopUpButton  *accelerationCurveTrackpad;
 	IBOutlet NSSlider		*velocityForTrackpad;
+
+    IBOutlet NSButton       *checkForUpdates;
+    IBOutlet NSButton       *automaticallyCheckForUpdates;
+    IBOutlet NSTextField    *bundleVersion;
 }
 
 - (void)mainViewDidLoad;
+
+-(IBAction)pressCheckForUpdates:(id) sender;
+-(IBAction)pressEnableDisableAutomaticallyCheckForUpdates:(id) sender;
+
+-(void)createLaunchAgentsDirectory;
+-(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments;
 
 -(BOOL) settingsFileExists;
 -(void) saveDefaultSettingsFile;
@@ -30,8 +40,11 @@
 - (BOOL)startDaemon;
 - (BOOL)stopDaemon;
 
-- (BOOL)startAtLoginEnabled;
+- (BOOL)isStartAtLoginEnabled;
+- (BOOL)isAutomaticallyCheckForUpdatesEnabled;
+
 - (BOOL)enableStartAtLogin:(BOOL) enable;
+- (BOOL)enableAutomaticallyCheckForUpdates:(BOOL) enable;
 
 - (double)getVelocityForMouse;
 - (double)getVelocityForTrackpad;

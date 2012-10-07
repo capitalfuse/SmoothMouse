@@ -223,32 +223,81 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	}
 }
 
+// NOTE: You can only call this once, when the daemon starts up.
+//       if you call it again, for example in mainloop, it will result in null-deltas.
 -(void) initializeSystemMouseSettings
 {
-    NXEventHandle handle;
-    CFStringRef key;
-    kern_return_t ret;
+    NXEventHandle   handle;
+    CFStringRef     key;
+    kern_return_t   ret;
+    double          oldValueMouse,
+                    newValueMouse,
+                    oldValueTrackpad,
+                    newValueTrackpad;
+    double          resetValue = 0.0;
     
     handle = NXOpenEventStatus();
-    
-    key = CFSTR(kIOHIDTrackpadAccelerationType);
-    ret = IOHIDSetAccelerationWithKey(handle, key, 0.0);
-    if (ret != KERN_SUCCESS) {
-        NSLog(@"Failed to disable acceleration for trackpad");
+
+    if (mouse_enabled) {
+        key = CFSTR(kIOHIDMouseAccelerationType);
+        
+        ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueMouse);
+        if (ret != KERN_SUCCESS) {
+            NSLog(@"Failed to get '%@'", key);
+            return;
+        }
+        
+        if (oldValueMouse != resetValue) {
+            ret = IOHIDSetAccelerationWithKey(handle, key, resetValue);
+            if (ret != KERN_SUCCESS) {
+                NSLog(@"Failed to disable acceleration for '%@'", key);
+            }
+        } else if (is_debug) {
+            NSLog(@"Skipped settings '%@'", key);
+        }
+        
+        ret = IOHIDGetAccelerationWithKey(handle, key, &newValueMouse);
+        if (ret != KERN_SUCCESS) {
+            NSLog(@"Failed to get '%@' (2)", key);
+            return;
+        }
+
+        NSLog(@"System mouse settings initialized (%f/%f)", oldValueMouse, newValueMouse);
     }
     
-    key = CFSTR(kIOHIDMouseAccelerationType);
-    ret = IOHIDSetAccelerationWithKey(handle, key, 0.0);
-    if (ret != KERN_SUCCESS) {
-        NSLog(@"Failed to disable acceleration for mouse");
+    if (trackpad_enabled) {
+        key = CFSTR(kIOHIDTrackpadAccelerationType);
+        
+        ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueTrackpad);
+        if (ret != KERN_SUCCESS) {
+            NSLog(@"Failed to get '%@'", key);
+            return;
+        }
+        
+        if (oldValueTrackpad != resetValue) {
+            ret = IOHIDSetAccelerationWithKey(handle, key, resetValue);
+            if (ret != KERN_SUCCESS) {
+                NSLog(@"Failed to disable acceleration for '%@'", key);
+            }
+        } else if (is_debug) {
+            NSLog(@"Skipped settings '%@'", key);
+        }
+        
+        ret = IOHIDGetAccelerationWithKey(handle, key, &newValueTrackpad);
+        if (ret != KERN_SUCCESS) {
+            NSLog(@"Failed to get '%@' (2)", key);
+            return;
+        }
+
+        NSLog(@"System trackpad settings initialized (%f/%f)", oldValueTrackpad, newValueTrackpad);
     }
-    
+
     NXCloseEventStatus(handle);
 }
 
 -(BOOL) loadSettings
 {
-	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PLIST_FILENAME];
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
 	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:file];
 	
 	if (!dict) {
@@ -357,7 +406,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         }
 
         [self initializeSystemMouseSettings];
-
+        
         connected = YES;
         
         pthread_mutex_unlock(&mutex);
@@ -484,7 +533,7 @@ void *HandleMouseEventThread(void *instance)
 -(void) mainLoop
 {
     while(1) {
-        usleep(1000000);
+        sleep(3);
         BOOL active = [self isActive];
         if (active) {
             [self connectToDriver];
