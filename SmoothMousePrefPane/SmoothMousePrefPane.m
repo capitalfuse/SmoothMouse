@@ -137,7 +137,11 @@
 - (IBAction)changeVelocity:(id) sender
 {
 	[self saveVelocityForMouse:[velocityForMouse doubleValue] andTrackpad:[velocityForTrackpad doubleValue]];
-    [self restartDaemonIfRunning];
+
+    if ((sender == velocityForMouse && [self getMouseEnabled]) ||
+        (sender == velocityForTrackpad && [self getTrackpadEnabled])) {
+        [self restartDaemonIfRunning];        
+    }
 }
 
 - (IBAction)changeAccelerationCurve:(id) sender {
