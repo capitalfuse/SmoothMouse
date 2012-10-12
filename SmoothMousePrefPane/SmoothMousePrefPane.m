@@ -65,6 +65,10 @@
     [bundleVersion setStringValue:version];
 }
 
+-(void) labelWasClicked {
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://www.smoothmouse.com/"]];
+}
+
 -(IBAction)pressCheckForUpdates:(id) sender {
     NSArray *arguments;
     arguments = [NSArray arrayWithObjects:
@@ -140,7 +144,7 @@
 
     if ((sender == velocityForMouse && [self getMouseEnabled]) ||
         (sender == velocityForTrackpad && [self getTrackpadEnabled])) {
-        [self restartDaemonIfRunning];        
+        [self restartDaemonIfRunning];
     }
 }
 
@@ -209,7 +213,7 @@
     NSArray *arguments;
     NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_DAEMON_FILENAME];
     arguments = [NSArray arrayWithObjects: @"load", plistFile, nil];
-
+    
     return [self launchExecutable: @"/bin/launchctl" withArguments:arguments];
 }
 
@@ -256,7 +260,7 @@
         NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
         [dict setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
         [dict setObject:DAEMON_FILENAME forKey:@"Program"];
-//        [dict setObject:[NSNumber numberWithBool:enable] forKey:@"KeepAlive"];
+        //[dict setObject:[NSNumber numberWithBool:enable] forKey:@"KeepAlive"];
         NSMutableDictionary *dict2 = [[[NSMutableDictionary alloc] init] autorelease];
         [dict2 setObject:[NSNumber numberWithBool:true] forKey:@"SuccessfulExit"];
         [dict setObject:dict2 forKey:@"KeepAlive"];

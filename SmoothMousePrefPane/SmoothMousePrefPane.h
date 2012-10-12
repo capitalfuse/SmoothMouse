@@ -2,7 +2,7 @@
 #import <AppKit/NSTextView.h>
 #import <Cocoa/Cocoa.h>
 
-@interface SmoothMousePrefPane : NSPreferencePane {
+@interface SmoothMousePrefPane : NSPreferencePane <NSTextFieldDelegate> {
 @private
     IBOutlet NSMenu         *buttonMenu;
     
@@ -17,6 +17,7 @@
     IBOutlet NSButton       *checkForUpdates;
     IBOutlet NSButton       *automaticallyCheckForUpdates;
     IBOutlet NSTextField    *bundleVersion;
+    IBOutlet NSTextField    *urlLabel;
 }
 
 - (void)mainViewDidLoad;

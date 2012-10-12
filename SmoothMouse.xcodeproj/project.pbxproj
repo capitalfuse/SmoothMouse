@@ -24,6 +24,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		031386A91628B36000A04755 /* UrlLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 031386A71628B36000A04755 /* UrlLabel.h */; };
+		031386AA1628B36000A04755 /* UrlLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 031386A81628B36000A04755 /* UrlLabel.m */; };
 		036C5434160F50C600110497 /* debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 036C5433160F50C600110497 /* debug.m */; };
 		03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 03BA20FF161F757D0014A74E /* dsa_pub.pem */; };
 		03DB20C11620CB5900CF4299 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121914D5495F008704EC /* Cocoa.framework */; };
@@ -103,6 +105,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		031386A71628B36000A04755 /* UrlLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UrlLabel.h; sourceTree = "<group>"; };
+		031386A81628B36000A04755 /* UrlLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UrlLabel.m; sourceTree = "<group>"; };
 		036C5433160F50C600110497 /* debug.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = debug.m; sourceTree = "<group>"; };
 		036C5436160F50D300110497 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
 		03BA20FF161F757D0014A74E /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
@@ -255,10 +259,12 @@
 		ED0E122014D5495F008704EC /* SmoothMousePrefPane */ = {
 			isa = PBXGroup;
 			children = (
-				ED13219B14D6721800D07CC3 /* SmoothMousePrefPane.icns */,
 				ED0E122714D5495F008704EC /* SmoothMousePrefPane.h */,
+				ED13219B14D6721800D07CC3 /* SmoothMousePrefPane.icns */,
 				ED0E122914D5495F008704EC /* SmoothMousePrefPane.m */,
 				ED0E122114D5495F008704EC /* Supporting Files */,
+				031386A71628B36000A04755 /* UrlLabel.h */,
+				031386A81628B36000A04755 /* UrlLabel.m */,
 			);
 			path = SmoothMousePrefPane;
 			sourceTree = "<group>";
@@ -304,6 +310,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED0E122814D5495F008704EC /* SmoothMousePrefPane.h in Headers */,
+				031386A91628B36000A04755 /* UrlLabel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -457,6 +464,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED0E122A14D5495F008704EC /* SmoothMousePrefPane.m in Sources */,
+				031386AA1628B36000A04755 /* UrlLabel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -547,7 +555,6 @@
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/Sparkle 1-1.5b6\"",
 					"\"$(SRCROOT)/Dependencies\"",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -566,7 +573,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "SmoothMouseUpdater/SmoothMouseUpdater-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx10.7;
@@ -587,7 +594,6 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/Sparkle 1-1.5b6\"",
 					"\"$(SRCROOT)/Dependencies\"",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -599,7 +605,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "SmoothMouseUpdater/SmoothMouseUpdater-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx10.7;
 				WRAPPER_EXTENSION = app;
@@ -638,10 +644,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Sparkle 1-1.5b6\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -676,10 +679,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Sparkle 1-1.5b6\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_ENABLE_OBJC_GC = supported;
@@ -708,10 +708,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Sparkle 1-1.5b6\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -739,10 +736,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Sparkle 1-1.5b6\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

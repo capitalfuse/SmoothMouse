@@ -8,8 +8,6 @@
 }
 
 - (id)initWithArgc:(int)argc_ andArgv:(char **)argv_;
-- (void)updaterDidNotFindUpdate:(SUUpdater *)update;
-- (void)updater:(SUUpdater *)updater willInstallUpdate:(SUAppcastItem *)update;
 - (void)isDone;
 
 @end

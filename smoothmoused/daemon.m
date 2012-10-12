@@ -35,8 +35,6 @@ static BOOL mouse_enabled;
 static BOOL trackpad_enabled;
 static double velocity_mouse;
 static double velocity_trackpad;
-static int acceleration_curve_mouse;
-static int acceleration_curve_trackpad;
 static BOOL is_debug;
 
 /* -------------------------------------------------------------------------- *
