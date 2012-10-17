@@ -12,9 +12,7 @@
 #import "kextdaemon.h"
 #import "constants.h"
 #include "debug.h"
-
-#include <IOKit/hidsystem/event_status_driver.h>
-#include <IOKit/hidsystem/IOHIDParameter.h>
+#import "accel_util.h"
 
 /* -------------------------------------------------------------------------- */
 
@@ -30,12 +28,14 @@
 
 /* -------------------------------------------------------------------------- */
 
+BOOL is_debug;
+
 static CGPoint pos0;
 static BOOL mouse_enabled;
 static BOOL trackpad_enabled;
 static double velocity_mouse;
 static double velocity_trackpad;
-static BOOL is_debug;
+
 
 /* -------------------------------------------------------------------------- *
  The following code is responsive for handling events received from kernel
@@ -143,7 +143,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 -(BOOL) configureDriver;
 -(BOOL) disconnectFromDriver;
 -(void) setupEventSuppression;
--(void) initializeSystemMouseSettings;
 -(BOOL) isActive;
 
 @end
@@ -219,78 +218,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	if (CGSetLocalEventsSuppressionInterval(0.0)) {
 		NSLog(@"CGSetLocalEventsSuppressionInterval() returns with error");
 	}
-}
-
-// NOTE: You can only call this once, when the daemon starts up.
-//       if you call it again, for example in mainloop, it will result in null-deltas.
--(void) initializeSystemMouseSettings
-{
-    NXEventHandle   handle;
-    CFStringRef     key;
-    kern_return_t   ret;
-    double          oldValueMouse,
-                    newValueMouse,
-                    oldValueTrackpad,
-                    newValueTrackpad;
-    double          resetValue = 0.0;
-    
-    handle = NXOpenEventStatus();
-
-    if (mouse_enabled) {
-        key = CFSTR(kIOHIDMouseAccelerationType);
-        
-        ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueMouse);
-        if (ret != KERN_SUCCESS) {
-            NSLog(@"Failed to get '%@'", key);
-            return;
-        }
-        
-        if (oldValueMouse != resetValue) {
-            ret = IOHIDSetAccelerationWithKey(handle, key, resetValue);
-            if (ret != KERN_SUCCESS) {
-                NSLog(@"Failed to disable acceleration for '%@'", key);
-            }
-        } else if (is_debug) {
-            NSLog(@"Skipped settings '%@'", key);
-        }
-        
-        ret = IOHIDGetAccelerationWithKey(handle, key, &newValueMouse);
-        if (ret != KERN_SUCCESS) {
-            NSLog(@"Failed to get '%@' (2)", key);
-            return;
-        }
-
-        NSLog(@"System mouse settings initialized (%f/%f)", oldValueMouse, newValueMouse);
-    }
-    
-    if (trackpad_enabled) {
-        key = CFSTR(kIOHIDTrackpadAccelerationType);
-        
-        ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueTrackpad);
-        if (ret != KERN_SUCCESS) {
-            NSLog(@"Failed to get '%@'", key);
-            return;
-        }
-        
-        if (oldValueTrackpad != resetValue) {
-            ret = IOHIDSetAccelerationWithKey(handle, key, resetValue);
-            if (ret != KERN_SUCCESS) {
-                NSLog(@"Failed to disable acceleration for '%@'", key);
-            }
-        } else if (is_debug) {
-            NSLog(@"Skipped settings '%@'", key);
-        }
-        
-        ret = IOHIDGetAccelerationWithKey(handle, key, &newValueTrackpad);
-        if (ret != KERN_SUCCESS) {
-            NSLog(@"Failed to get '%@' (2)", key);
-            return;
-        }
-
-        NSLog(@"System trackpad settings initialized (%f/%f)", oldValueTrackpad, newValueTrackpad);
-    }
-
-    NXCloseEventStatus(handle);
 }
 
 -(BOOL) loadSettings
@@ -403,8 +330,8 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
             NSLog(@"Failed to start mouse event thread");
         }
 
-        [self initializeSystemMouseSettings];
-        
+        initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
+
         connected = YES;
         
         pthread_mutex_unlock(&mutex);
@@ -538,6 +465,7 @@ void *HandleMouseEventThread(void *instance)
         } else {
             [self disconnectFromDriver];
         }
+        initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
     }
 }
 
@@ -563,8 +491,13 @@ void *HandleMouseEventThread(void *instance)
 
 @end
 
-void trap_ctrl_c(int sig)
+void trap_signals(int sig)
 {
+    //NSLog(@"trapped signal: %d", sig);
+    if (is_debug) {
+        debug_end();
+    }
+    restoreSystemMouseSettings();
     exit(0);
 }
 
@@ -587,11 +520,15 @@ int main(int argc, char **argv)
         exit(-1);
     }
     
-    if (is_debug) {
-        atexit(debug_end);
+#if 0
+    for (int i = 0; i != 31; ++i) {
+        signal(i, trap_signals);
     }
-
-    signal(SIGINT, trap_ctrl_c);
+#endif
+    
+    signal(SIGINT, trap_signals);
+    signal(SIGKILL, trap_signals);
+    signal(SIGTERM, trap_signals);
     
     NSLog(@"Mouse enabled: %d Mouse velocity: %f, Trackpad enabled: %d, Trackpad velocity: %f",
           mouse_enabled,

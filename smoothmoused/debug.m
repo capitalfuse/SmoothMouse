@@ -16,6 +16,8 @@ void debug_log(mouse_event_t *event, float calcdx, float calcdy) {
     CGPoint point = CGEventGetLocation(evt);
     
     if (lastTimestamp != 0) {
+        NSLog(@"Actual system mouse position: %f x %f", point.x, point.y);
+        
         float deltaTimestamp = event->timestamp - lastTimestamp; // timestamp is ns
         
         float actualdx = point.x - lastPoint.x;
