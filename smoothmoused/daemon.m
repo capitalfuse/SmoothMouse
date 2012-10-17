@@ -380,13 +380,13 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
             goto error;
         }
         
-        error = IOConnectSetNotificationPort(connect, eMouseEvent, recvPort, 0);
+        error = IOConnectSetNotificationPort(connect, kIODefaultMemoryType, recvPort, 0);
         if (kIOReturnSuccess != error) {
             NSLog(@"IOConnectSetNotificationPort returned %d\n", error);
             goto error;
         }
         
-        error = IOConnectMapMemory(connect, eMouseEvent, mach_task_self(), &address, &size, kIOMapAnywhere);
+        error = IOConnectMapMemory(connect, kIODefaultMemoryType, mach_task_self(), &address, &size, kIOMapAnywhere);
         if (kIOReturnSuccess != error) {
             NSLog(@"IOConnectMapMemory returned %d\n", error);
             goto error;
@@ -462,7 +462,7 @@ error:
         pthread_mutex_lock(&mutex);
 
         if (address) {
-            IOConnectUnmapMemory(connect, eMouseEvent, mach_task_self(), address);
+            IOConnectUnmapMemory(connect, kIODefaultMemoryType, mach_task_self(), address);
         }
 
         if (recvPort) {
