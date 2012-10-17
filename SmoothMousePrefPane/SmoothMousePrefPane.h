@@ -16,6 +16,8 @@
 
     IBOutlet NSButton       *checkForUpdates;
     IBOutlet NSButton       *automaticallyCheckForUpdates;
+    IBOutlet NSButton       *reportBug;
+    
     IBOutlet NSTextField    *bundleVersion;
     IBOutlet NSTextField    *urlLabel;
 }
@@ -24,6 +26,7 @@
 
 -(IBAction)pressCheckForUpdates:(id) sender;
 -(IBAction)pressEnableDisableAutomaticallyCheckForUpdates:(id) sender;
+-(IBAction)pressReportBug:(id) sender;
 
 -(void)createLaunchAgentsDirectory;
 -(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments;

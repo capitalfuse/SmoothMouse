@@ -69,7 +69,6 @@
 							<string key="NSFrame">{{13, 10}, {642, 352}}</string>
 							<reference key="NSSuperview" ref="1037298196"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView" ref="2874142"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<array class="NSMutableArray" key="NSTabViewItems">
 								<object class="NSTabViewItem" id="1032424932">
@@ -568,10 +567,10 @@
 															<object class="NSTextView" id="95049643">
 																<reference key="NSNextResponder" ref="424583158"/>
 																<int key="NSvFlags">2322</int>
-																<string key="NSFrameSize">{571, 171}</string>
+																<string key="NSFrameSize">{586, 171}</string>
 																<reference key="NSSuperview" ref="424583158"/>
 																<reference key="NSWindow"/>
-																<reference key="NSNextKeyView" ref="781685215"/>
+																<reference key="NSNextKeyView" ref="1050883655"/>
 																<string key="NSReuseIdentifierKey">_NS:13</string>
 																<object class="NSTextContainer" key="NSTextContainer" id="1052430533">
 																	<object class="NSLayoutManager" key="NSLayoutManager">
@@ -588,7 +587,7 @@
 																		<nil key="NSDelegate"/>
 																	</object>
 																	<reference key="NSTextView" ref="95049643"/>
-																	<double key="NSWidth">571</double>
+																	<double key="NSWidth">586</double>
 																	<int key="NSTCFlags">1</int>
 																</object>
 																<object class="NSTextViewSharedData" key="NSSharedData">
@@ -634,7 +633,7 @@
 																<nil key="NSDelegate"/>
 															</object>
 														</array>
-														<string key="NSFrame">{{1, 1}, {571, 171}}</string>
+														<string key="NSFrame">{{1, 1}, {586, 171}}</string>
 														<reference key="NSSuperview" ref="434247293"/>
 														<reference key="NSWindow"/>
 														<reference key="NSNextKeyView" ref="95049643"/>
@@ -799,7 +798,7 @@ wGw</bytes>
 													<object class="NSScroller" id="781685215">
 														<reference key="NSNextResponder" ref="434247293"/>
 														<int key="NSvFlags">256</int>
-														<string key="NSFrame">{{572, 1}, {15, 171}}</string>
+														<string key="NSFrame">{{571, 1}, {16, 171}}</string>
 														<reference key="NSSuperview" ref="434247293"/>
 														<reference key="NSWindow"/>
 														<reference key="NSNextKeyView" ref="250338565"/>
@@ -829,7 +828,7 @@ wGw</bytes>
 												<string key="NSFrame">{{17, 39}, {588, 173}}</string>
 												<reference key="NSSuperview" ref="2874142"/>
 												<reference key="NSWindow"/>
-												<reference key="NSNextKeyView" ref="1050883655"/>
+												<reference key="NSNextKeyView" ref="424583158"/>
 												<string key="NSReuseIdentifierKey">_NS:9</string>
 												<int key="NSsFlags">133138</int>
 												<reference key="NSVScroller" ref="781685215"/>
@@ -937,7 +936,6 @@ wGw</bytes>
 												<string key="NSFrame">{{27, 15}, {293, 18}}</string>
 												<reference key="NSSuperview" ref="2874142"/>
 												<reference key="NSWindow"/>
-												<reference key="NSNextKeyView"/>
 												<string key="NSReuseIdentifierKey">_NS:9</string>
 												<bool key="NSEnabled">YES</bool>
 												<object class="NSButtonCell" key="NSCell" id="44900743">
@@ -1189,6 +1187,22 @@ wGw</bytes>
 						<reference key="destination" ref="638183353"/>
 					</object>
 					<int key="connectionID">255</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">reportBug</string>
+						<reference key="source" ref="294453543"/>
+						<reference key="destination" ref="1067274119"/>
+					</object>
+					<int key="connectionID">257</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">pressReportBug:</string>
+						<reference key="source" ref="294453543"/>
+						<reference key="destination" ref="1067274119"/>
+					</object>
+					<int key="connectionID">258</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -1762,7 +1776,7 @@ wGw</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">256</int>
+			<int key="maxID">258</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1808,6 +1822,7 @@ wGw</bytes>
 						<string key="pressEnableDisableAutomaticallyCheckForUpdates:">id</string>
 						<string key="pressEnableDisableMouse:">id</string>
 						<string key="pressEnableDisableTrackpad:">id</string>
+						<string key="pressReportBug:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
 						<object class="IBActionInfo" key="changeAccelerationCurve:">
@@ -1834,6 +1849,10 @@ wGw</bytes>
 							<string key="name">pressEnableDisableTrackpad:</string>
 							<string key="candidateClassName">id</string>
 						</object>
+						<object class="IBActionInfo" key="pressReportBug:">
+							<string key="name">pressReportBug:</string>
+							<string key="candidateClassName">id</string>
+						</object>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="accelerationCurveMouse">NSPopUpButton</string>
@@ -1844,6 +1863,7 @@ wGw</bytes>
 						<string key="checkForUpdates">NSButton</string>
 						<string key="enableForMouse">NSButton</string>
 						<string key="enableForTrackpad">NSButton</string>
+						<string key="reportBug">NSButton</string>
 						<string key="urlLabel">NSTextField</string>
 						<string key="velocityForMouse">NSSlider</string>
 						<string key="velocityForTrackpad">NSSlider</string>
@@ -1879,6 +1899,10 @@ wGw</bytes>
 						</object>
 						<object class="IBToOneOutletInfo" key="enableForTrackpad">
 							<string key="name">enableForTrackpad</string>
+							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="reportBug">
+							<string key="name">reportBug</string>
 							<string key="candidateClassName">NSButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="urlLabel">

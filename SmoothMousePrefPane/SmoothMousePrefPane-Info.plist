@@ -36,6 +36,10 @@
 	<string>http://127.0.0.1/~da/smcast.xml</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
+	<key>SMReportBugURL</key>
+	<string>http://www.smoothmouse.com</string>
+	<key>SMHomepageURL</key>
+	<string>http://www.smoothmouse.com</string>
 	<key>SUEnableAutomaticChecks</key>
 	<string>YES</string>
 </dict>

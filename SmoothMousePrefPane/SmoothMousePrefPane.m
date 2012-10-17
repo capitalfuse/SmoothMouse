@@ -60,13 +60,14 @@
 	[velocityForTrackpad setDoubleValue:[self getVelocityForTrackpad]];
 
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    
     NSString *version = [[bundle infoDictionary] objectForKey:@"CFBundleVersion"];
     [bundleVersion setStringValue:version];
 }
 
 -(void) labelWasClicked {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://www.smoothmouse.com/"]];
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *url = [[bundle infoDictionary] objectForKey:@"SMHomepageURL"];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
 }
 
 -(IBAction)pressCheckForUpdates:(id) sender {
@@ -82,6 +83,12 @@
 -(IBAction)pressEnableDisableAutomaticallyCheckForUpdates:(id) sender {
     BOOL checked = [automaticallyCheckForUpdates state];
     [self enableAutomaticallyCheckForUpdates:checked];
+}
+
+-(IBAction)pressReportBug:(id) sender {
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *url = [[bundle infoDictionary] objectForKey:@"SMReportBugURL"];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
 }
 
 -(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments {
