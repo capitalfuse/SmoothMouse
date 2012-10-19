@@ -20,6 +20,8 @@
     
     IBOutlet NSTextField    *bundleVersion;
     IBOutlet NSTextField    *urlLabel;
+    
+    IBOutlet NSTextView     *credits;
 }
 
 - (void)mainViewDidLoad;

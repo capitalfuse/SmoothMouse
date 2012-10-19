@@ -62,6 +62,17 @@
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *version = [[bundle infoDictionary] objectForKey:@"CFBundleVersion"];
     [bundleVersion setStringValue:version];
+    
+    NSString *filePath = [bundle pathForResource:@"Credits" ofType:@"rtf"];
+    NSData *data = [NSData dataWithContentsOfFile:filePath];
+    
+    if (data) {
+        NSDictionary *docAttributes;
+        NSAttributedString *rtfString =
+            [[NSAttributedString alloc] initWithRTF:data documentAttributes:&docAttributes];
+        
+        [[credits textStorage] setAttributedString: rtfString];
+    }
 }
 
 -(void) labelWasClicked {
