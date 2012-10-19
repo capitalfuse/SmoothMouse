@@ -175,12 +175,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         trackpad_enabled = 1;
     }
     
-	if (![self getCursorPosition]) {
-		NSLog(@"cannot get cursor position");
-		[self dealloc];
-		return nil;
-	}
-	
 	[self setupEventSuppression];
 	
 	if (![self connectToDriver]) {
@@ -323,6 +317,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         dataSize = size;
         
         [self configureDriver];
+        [self getCursorPosition];
 
         int threadError = pthread_create(&mouseEventThreadID, NULL, &HandleMouseEventThread, self);
         if (threadError != 0)
@@ -458,14 +453,14 @@ void *HandleMouseEventThread(void *instance)
 -(void) mainLoop
 {
     while(1) {
-        sleep(3);
+        sleep(2);
         BOOL active = [self isActive];
         if (active) {
+            initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
             [self connectToDriver];
         } else {
             [self disconnectFromDriver];
         }
-        initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
     }
 }
 
