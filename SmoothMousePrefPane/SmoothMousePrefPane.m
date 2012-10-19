@@ -102,6 +102,23 @@
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
 }
 
+-(IBAction)pressUninstall:(id) sender {
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"Uninstall"];
+    [alert setInformativeText:@"Are you sure you want to uninstall SmoothMouse"];
+    [alert addButtonWithTitle:@"OK"];
+    [alert addButtonWithTitle:@"Cancel"];
+    NSInteger button = [alert runModal];
+    [alert release];
+    if (button == NSAlertFirstButtonReturn) {
+        NSArray *arguments;
+        arguments = [NSArray arrayWithObjects:
+                     UNINSTALL_SCRIPT_FILENAME,
+                     nil];
+        [self launchExecutable:@"/bin/sh" withArguments:arguments];
+    }
+}
+
 -(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments {
     NSTask *task;
     
