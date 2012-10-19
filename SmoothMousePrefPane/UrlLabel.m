@@ -2,15 +2,12 @@
 
 @implementation UrlLabel
 
-@synthesize delegate;
-
 - (void)mouseUp:(NSEvent *)theEvent {
     
     [super mouseUp:theEvent];
-    
-    // call delegate
-    if (delegate != nil && [delegate respondsToSelector:@selector(labelWasClicked)]) {
-        [delegate performSelector:@selector(labelWasClicked) withObject:nil];
+
+    if (_delegate != nil && [_delegate respondsToSelector:@selector(labelWasClicked)]) {
+        [_delegate performSelector:@selector(labelWasClicked) withObject:nil];
     }
 }
 

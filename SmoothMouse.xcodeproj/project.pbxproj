@@ -30,7 +30,6 @@
 		036C5434160F50C600110497 /* debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 036C5433160F50C600110497 /* debug.m */; };
 		03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 03BA20FF161F757D0014A74E /* dsa_pub.pem */; };
 		03D020BD1631D0DA00CD04C1 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03D020BC1631D0DA00CD04C1 /* Credits.rtf */; };
-		03D020C01631D60D00CD04C1 /* Credits.rtf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03D020BC1631D0DA00CD04C1 /* Credits.rtf */; };
 		03DB20C11620CB5900CF4299 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121914D5495F008704EC /* Cocoa.framework */; };
 		03DB20C71620CB5900CF4299 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 03DB20C51620CB5900CF4299 /* InfoPlist.strings */; };
 		03DB20C91620CB5900CF4299 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20C81620CB5900CF4299 /* main.m */; };
@@ -77,16 +76,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		03D020BF1631D60400CD04C1 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-				03D020C01631D60D00CD04C1 /* Credits.rtf in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		03DB20161620BD2900CF4299 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -363,7 +352,6 @@
 				ED0E121414D5495F008704EC /* Headers */,
 				ED0E121514D5495F008704EC /* Resources */,
 				ED0E121614D5495F008704EC /* Rez */,
-				03D020BF1631D60400CD04C1 /* CopyFiles */,
 			);
 			buildRules = (
 			);
