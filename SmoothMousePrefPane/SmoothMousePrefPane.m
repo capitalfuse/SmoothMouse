@@ -9,7 +9,7 @@
 
 @implementation SmoothMousePrefPane
 
-- (void)mainViewDidLoad
+-(void)mainViewDidLoad
 {
     if (![self settingsFileExists]) {
         [self saveDefaultSettingsFile];
@@ -111,13 +111,53 @@
     NSInteger button = [alert runModal];
     [alert release];
     if (button == NSAlertFirstButtonReturn) {
-        NSArray *arguments;
-        arguments = [NSArray arrayWithObjects:
-                     UNINSTALL_SCRIPT_FILENAME,
-                     nil];
-        [self launchExecutable:@"/bin/sh" withArguments:arguments];
+        [self launchScriptWithSudoRights: UNINSTALL_SCRIPT_FILENAME];
     }
 }
+
+-(BOOL)launchScriptWithSudoRights:(NSString *) script
+{
+    BOOL                ret = NO;
+    OSStatus            status;
+    AuthorizationRef    authorizationRef;
+    
+    status = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment,
+                                 kAuthorizationFlagDefaults, &authorizationRef);
+    if (status != errAuthorizationSuccess) {
+        goto cleanup;
+    }
+    
+    AuthorizationItem right = {kAuthorizationRightExecute, 0, NULL, 0};
+    AuthorizationRights rights = {1, &right};
+    AuthorizationFlags flags =  kAuthorizationFlagDefaults |
+                                kAuthorizationFlagInteractionAllowed |
+                                kAuthorizationFlagPreAuthorize |
+                                kAuthorizationFlagExtendRights;
+    
+    status = AuthorizationCopyRights(authorizationRef, &rights, NULL, flags, NULL);
+    if (status != errAuthorizationSuccess) {
+        goto cleanup;
+    }
+    
+    const char *tool    = [script UTF8String];
+    char *args[]        = {NULL};
+    FILE *pipe          = NULL;
+    
+    status = AuthorizationExecuteWithPrivileges(authorizationRef, tool,
+                                                kAuthorizationFlagDefaults, args, &pipe);
+    if (status != errAuthorizationSuccess) {
+        goto cleanup;
+    }
+
+    ret = YES;
+
+cleanup:
+
+    status = AuthorizationFree(authorizationRef, kAuthorizationFlagDestroyRights);
+    
+    return ret;
+}
+
 
 -(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments {
     NSTask *task;

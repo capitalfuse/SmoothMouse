@@ -34,9 +34,10 @@
 
 -(void)createLaunchAgentsDirectory;
 -(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments;
+-(BOOL)launchScriptWithSudoRights:(NSString *) script;
 
--(BOOL) settingsFileExists;
--(void) saveDefaultSettingsFile;
+-(BOOL)settingsFileExists;
+-(void)saveDefaultSettingsFile;
 
 - (IBAction)changeVelocity:(id) sender;
 - (IBAction)changeAccelerationCurve:(id) sender;
