@@ -11,6 +11,7 @@
 #define SETTINGS_TRACKPAD_ACCELERATION_CURVE @"Trackpad acceleration curve"
 #define SETTINGS_MOUSE_VELOCITY @"Mouse velocity"
 #define SETTINGS_TRACKPAD_VELOCITY @"Trackpad velocity"
+#define SETTINGS_EVENT_ENABLED @"Event enabled"
 
 #define SETTINGS_MOUSE_ENABLED_DEFAULT NO
 #define SETTINGS_TRACKPAD_ENABLED_DEFAULT NO
