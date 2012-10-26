@@ -32,6 +32,8 @@
 -(IBAction)pressReportBug:(id) sender;
 -(IBAction)pressUninstall:(id) sender;  
 
+-(NSString *)findLocationOfPrefPane;
+-(NSString *)findLocationOfPrefPaneFile:(NSString *)file;
 -(void)createLaunchAgentsDirectory;
 -(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments;
 -(BOOL)launchScriptWithSudoRights:(NSString *) script;

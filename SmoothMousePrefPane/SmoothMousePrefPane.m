@@ -111,7 +111,7 @@
     NSInteger button = [alert runModal];
     [alert release];
     if (button == NSAlertFirstButtonReturn) {
-        [self launchScriptWithSudoRights: UNINSTALL_SCRIPT_FILENAME];
+        [self launchScriptWithSudoRights: [self findLocationOfPrefPaneFile:UNINSTALL_SCRIPT_FILENAME_BASE]];
     }
 }
 
@@ -286,7 +286,7 @@ cleanup:
 - (BOOL)startDaemon
 {
     NSArray *arguments;
-    NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_DAEMON_FILENAME];
+    NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
     arguments = [NSArray arrayWithObjects: @"load", plistFile, nil];
     
     return [self launchExecutable: @"/bin/launchctl" withArguments:arguments];
@@ -295,7 +295,7 @@ cleanup:
 - (BOOL)stopDaemon
 {
     NSArray *arguments;
-    NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_DAEMON_FILENAME];
+    NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
     arguments = [NSArray arrayWithObjects: @"unload", plistFile, nil];
     
     return [self launchExecutable: @"/bin/launchctl" withArguments:arguments];
@@ -304,7 +304,7 @@ cleanup:
 - (BOOL)isStartAtLoginEnabled
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_DAEMON_FILENAME];
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
 	
 	return [fm fileExistsAtPath:file];
 }
@@ -312,9 +312,33 @@ cleanup:
 - (BOOL)isAutomaticallyCheckForUpdatesEnabled
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_UPDATER_FILENAME];
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_UPDATER_FILENAME];
 	
 	return [fm fileExistsAtPath:file];
+}
+
+-(NSString *)findLocationOfPrefPane {
+	NSFileManager *fm = [NSFileManager defaultManager];
+	if ([fm fileExistsAtPath:PREFERENCE_PANE_LOCATION_BASE]) {
+        return PREFERENCE_PANE_LOCATION_BASE;
+    }
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCE_PANE_LOCATION_BASE];
+	if ([fm fileExistsAtPath:file]) {
+        return file;
+    }
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"Faulty installation"];
+    [alert setInformativeText:@"Location of SmoothMouse preference pane was not found"];
+    [alert addButtonWithTitle:@"OK"];
+    [alert runModal];
+    [alert release];
+    return NULL;
+}
+
+-(NSString *)findLocationOfPrefPaneFile:(NSString *)file {
+    NSString *prefPaneLocation = [self findLocationOfPrefPane];
+    NSString *completePath = [prefPaneLocation stringByAppendingString:file];
+    return completePath;
 }
 
 -(void)createLaunchAgentsDirectory {
@@ -330,21 +354,19 @@ cleanup:
 
 - (BOOL)enableStartAtLogin:(BOOL) enable
 {
+    NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
     if (enable) {
         [self createLaunchAgentsDirectory];
         NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
         [dict setObject:@"com.cyberic.smoothmouse" forKey:@"Label"];
-        [dict setObject:DAEMON_FILENAME forKey:@"Program"];
-        //[dict setObject:[NSNumber numberWithBool:enable] forKey:@"KeepAlive"];
+        [dict setObject:[self findLocationOfPrefPaneFile:DAEMON_FILENAME_BASE] forKey:@"Program"];
         NSMutableDictionary *dict2 = [[[NSMutableDictionary alloc] init] autorelease];
         [dict2 setObject:[NSNumber numberWithBool:true] forKey:@"SuccessfulExit"];
         [dict setObject:dict2 forKey:@"KeepAlive"];
-        NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_DAEMON_FILENAME];
         return [dict writeToFile:file atomically:YES];
     } else {
         NSError *error;
         NSFileManager *fm = [NSFileManager defaultManager];
-        NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_DAEMON_FILENAME];
         
         return [fm removeItemAtPath:file error:&error];
     }
@@ -352,18 +374,17 @@ cleanup:
 
 - (BOOL)enableAutomaticallyCheckForUpdates:(BOOL)enable
 {
+    NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_UPDATER_FILENAME];
     if (enable) {
         [self createLaunchAgentsDirectory];
         NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
         [dict setObject:@"com.cyberic.smoothmouseupdater" forKey:@"Label"];
-        [dict setObject:UPDATER_FILENAME forKey:@"Program"];
+        [dict setObject:[self findLocationOfPrefPaneFile:UPDATER_FILENAME_BASE] forKey:@"Program"];
         [dict setObject:[NSNumber numberWithBool:enable] forKey:@"RunAtLoad"];
-        NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_UPDATER_FILENAME];
         return [dict writeToFile:file atomically:YES];
     } else {
         NSError *error;
         NSFileManager *fm = [NSFileManager defaultManager];
-        NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCHD_UPDATER_FILENAME];
         
         return [fm removeItemAtPath:file error:&error];
     }

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# NOTE: Uninstaller currently ONLY supports system-wide installation.
+
 KEXT="/System/Library/Extensions/SmoothMouse.kext"
 PREFPANE="/Library/PreferencePanes/SmoothMouse.prefPane"
 DAEMON="smoothmoused"
