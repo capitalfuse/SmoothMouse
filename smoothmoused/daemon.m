@@ -33,7 +33,7 @@
 
 BOOL is_debug;
 BOOL is_event = 0;
-
+CGEventSourceRef eventSource = NULL;
 static CGPoint pos0;
 static int buttons0 = 0;
 static CGPoint lastSingleClickPos;
@@ -235,7 +235,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
                   is_tripple_click);
         }
 
-        CGEventRef evt = CGEventCreateMouseEvent(NULL, mouseType, pos, otherButton);
+        CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, pos, otherButton);
         if (is_tripple_click) {
             CGEventSetIntegerValueField(evt, kCGMouseEventClickState, 3);
             CGEventPost(kCGSessionEventTap, evt);
@@ -361,7 +361,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 -(void) setupEventSuppression
 {
     if (!is_event) {
-        if (CGSetLocalEventsFilterDuringSupressionState(kCGEventFilterMaskPermitAllEvents,
+        if (CGSetLocalEventsFilterDuringSuppressionState(kCGEventFilterMaskPermitAllEvents,
                                                         kCGEventSuppressionStateRemoteMouseDrag)) {
             NSLog(@"CGSetLocalEventsFilterDuringSupressionState returns with error");
         }
@@ -593,6 +593,14 @@ void *HandleMouseEventThread(void *instance)
 
     NXEventHandle handle = NXOpenEventStatus();
 	clickTime = NXClickTime(handle);
+    eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+    // TODO: cleanup eventSource and handle
+    if (eventSource == NULL) {
+        NSLog(@"call to CGEventSourceSetKeyboardType failed");
+    } else {
+        CGEventSourceSetLocalEventsSuppressionInterval(eventSource, 0.0);
+        CGEventSourceSetLocalEventsFilterDuringSuppressionState(eventSource, kCGEventFilterMaskPermitLocalMouseEvents, kCGEventSuppressionStateSuppressionInterval);
+    }
     
     while (IODataQueueWaitForAvailableData(self->queueMappedMemory, self->recvPort) == kIOReturnSuccess) {
         
