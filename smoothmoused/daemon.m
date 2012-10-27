@@ -247,6 +247,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             CGEventSetType(evt, kCGEventLeftMouseUp);
             CGEventPost(kCGSessionEventTap, evt);            
         } else {
+            CGEventSetIntegerValueField(evt, kCGMouseEventClickState, 1);
             CGEventPost(kCGSessionEventTap, evt);
         }
         CFRelease(evt);
@@ -254,9 +255,6 @@ static void mouse_event_handler(void *buf, unsigned int size) {
         if(buttonWasReleased) {
             mouseType = kCGEventMouseMoved;
         }
-
-        pos0 = pos;
-        buttons0 = event->buttons;
     } else {
         /* post event */
         if (kCGErrorSuccess != CGPostMouseEvent(pos, true, 1, BUTTON_DOWN(LEFT_BUTTON))) {
@@ -264,6 +262,8 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             exit(0);
         }
     }
+    pos0 = pos;
+    buttons0 = event->buttons;
     if (is_debug && !is_event) {
         debug_log(event, calcdx, calcdy);
     }
