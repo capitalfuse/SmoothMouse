@@ -39,7 +39,7 @@
 	<key>SUEnableAutomaticChecks</key>
 	<string>YES</string>
 	<key>SUFeedURL</key>
-	<string>http://update.smoothmouse.com/smcast.xml</string>
+	<string>http://update.smoothmouse.com/appcast.xml</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
 </dict>
