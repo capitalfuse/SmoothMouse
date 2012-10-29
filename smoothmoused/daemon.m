@@ -182,9 +182,9 @@ static void mouse_event_handler(void *buf, unsigned int size) {
                 case LEFT_BUTTON: otherButton = kCGMouseButtonLeft; break;
                 case RIGHT_BUTTON: otherButton = kCGMouseButtonRight; break;
                 case MIDDLE_BUTTON: otherButton = kCGMouseButtonCenter; break;
-                case BUTTON4: otherButton = 0; break;
-                case BUTTON5: otherButton   = 0; break;
-                case BUTTON6: otherButton = 0; break;
+                case BUTTON4: otherButton = 3; break;
+                case BUTTON5: otherButton = 4; break;
+                case BUTTON6: otherButton = 5; break;
             }
         }
 
@@ -218,7 +218,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
         }
         
         if (is_debug) {
-            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s, otherButton: %d, changedIndex: %d, 123: %d%d%d",
+            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, 123: %d%d%d",
                   event->dx,
                   event->dy,
                   BUTTON_DOWN(LEFT_BUTTON),
@@ -228,6 +228,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
                   BUTTON_DOWN(BUTTON5),
                   BUTTON_DOWN(BUTTON6),
                   event_type_to_string(mouseType),
+                  mouseType,
                   otherButton,
                   changedIndex,
                   click,
