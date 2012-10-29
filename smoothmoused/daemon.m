@@ -672,7 +672,7 @@ void trap_signals(int sig)
         // TODO: somehow this causes segmentation fault in debug mode
         restoreSystemMouseSettings();
     }
-    exit(0);
+    exit(-1);
 }
 
 int main(int argc, char **argv)
