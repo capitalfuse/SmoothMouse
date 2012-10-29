@@ -16,6 +16,7 @@ rm -f ~/Library/Preferences/com.cyberic.SmoothMouse.plist
 rm -f ~/Library/Preferences/com.cyberic.SmoothMouseUpdater.plist
 rm -f ~/Library/LaunchAgents/com.cyberic.smoothmouse.plist
 rm -f ~/Library/LaunchAgents/com.cyberic.smoothmouseupdater.plist
+rm /usr/bin/smoothmouse
 
 /usr/bin/killall $DAEMON
 
