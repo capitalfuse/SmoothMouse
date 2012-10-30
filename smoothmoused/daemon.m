@@ -417,7 +417,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	if (value) {
 		is_event = [value boolValue];
 	} else {
-		is_event = 0;
+		is_event = 1;
 	}
     
     return YES;
@@ -522,7 +522,11 @@ error:
     if (trackpad_enabled) {
         configuration |= 1 << 1;
     }
-    
+
+    if (!is_event) {
+        configuration |= 1 << 2;
+    }
+
     scalarI_64[0] = configuration;
     
     kernResult = IOConnectCallScalarMethod(connect,					// an io_connect_t returned from IOServiceOpen().
