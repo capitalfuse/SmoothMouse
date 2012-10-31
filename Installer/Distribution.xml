@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+	<title>SmoothMouse</title>
+	<welcome file="Welcome.rtf" />
+	<license file="License.rtf" />
+	
+	<options hostArchitectures="i386" />
+	<domains enable_localSystem="true" />
+	
+	<choice id="choice0" title="Kernel Extension" enabled="false">
+		<pkg-ref id="com.cyberic.pkg.SmoothMouseKext"/>
+	</choice>
+	
+	<choice id="choice1" title="Preference Pane" enabled="false">
+		<pkg-ref id="com.cyberic.pkg.SmoothMousePrefPane"/>
+	</choice>
+	
+	<choices-outline>
+		<line choice="choice0" />
+		<line choice="choice1" />
+	</choices-outline>
+	
+	<pkg-ref id="com.cyberic.pkg.SmoothMouseKext">#Kext.pkg</pkg-ref>
+	<pkg-ref id="com.cyberic.pkg.SmoothMousePrefPane">#PrefPane.pkg</pkg-ref>
+	
+    <installation-check script="installationCheck()" />
+	
+	<script><![CDATA[
+
+var minOSVersion = '10.7.4';
+var productName = 'SmoothMouse';
+var supportURL = 'smoothmouse.com/support';
+		
+var incompatibleSoftware = [
+	['/System/Library/Extensions/ControllerMate.kext', 'ControllerMate'],
+	['/System/Library/Extensions/SteerMouse.kext', 'SteerMouse'],
+	['/System/Library/Extensions/USBOverdrive.kext', 'USB Overdrive']
+]
+		
+function detectIncompatibleSoftware() {
+	var detected = new Array();
+
+	for (var i = 0, arrayLength = incompatibleSoftware.length; i < arrayLength; i++) {
+		if (system.files.fileExistsAtPath(incompatibleSoftware[i][0])) {
+			detected.push(incompatibleSoftware[i][1]);
+		}
+	}
+	
+	if (detected.length > 0) {
+		return {message: 'The following software is incompatible with the product and needs to be removed before proceeding with the installation: ' + detected.join(', ') + ".\n\nIf you don’t have such software installed, please contact support at " + supportURL};
+	}
+	
+	return false;
+}
+
+function installationCheck() {	
+	var checkIncompatibleSoftware = detectIncompatibleSoftware();
+	if (checkIncompatibleSoftware) {
+		my.result.type = 'Fatal';
+		my.result.title = 'Problem detected';
+		my.result.message = checkIncompatibleSoftware.message;
+		return false;
+	}
+	
+	if (system.compareVersions(system.version.ProductVersion, minOSVersion) == -1) {
+		my.result.type = 'Fatal';
+		my.result.title = 'Problem detected';
+		my.result.message = 'OS X version ' + minOSVersion + ' or higher is required.';
+	    return false;
+	}	
+	return true;
+}
+]]>
+	</script>
+</installer-gui-script>

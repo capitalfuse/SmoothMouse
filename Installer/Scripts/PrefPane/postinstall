@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "-----------------------------------------------------------------------"
+sudo -u $USER launchctl start "com.cyberic.smoothmouse"
+sudo -u $USER osascript "postinstall.scpt"
+sudo ln -sf "/Library/PreferencePanes/SmoothMouse.prefPane/Contents/MacOS/smoothmoused" "/usr/bin/smoothmouse"
+echo "-----------------------------------------------------------------------"
