@@ -36,6 +36,7 @@ BOOL is_event = 0;
 CGEventSourceRef eventSource = NULL;
 static CGPoint pos0;
 static int buttons0 = 0;
+static int nclicks0 = 0;
 static CGPoint lastSingleClickPos;
 static CGPoint lastDoubleClickPos;
 static CGPoint lastTrippleClickPos;
@@ -188,8 +189,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             }
         }
 
-        int is_double_click = 0;
-        int is_tripple_click = 0;
+        int nclicks = 0;
         if (click) {
             CGFloat maxDistanceAllowed = sqrt(2) + 0.0001;
             CGFloat distanceMovedSinceLastSingleClick = get_distance(lastSingleClickPos, pos);
@@ -203,22 +203,26 @@ static void mouse_event_handler(void *buf, unsigned int size) {
                 mouseType = kCGEventMouseMoved;
             } else if((now - lastDoubleClick <= clickTime) &&
                 distanceMovedSinceLastDoubleClick <= maxDistanceAllowed) {
-                is_tripple_click = 1;
+                nclicks = 3;
                 lastTrippleClick = timestamp();
                 lastTrippleClickPos = pos;
             } else if ((now - lastSingleClick <= clickTime) &&
                 distanceMovedSinceLastSingleClick <= maxDistanceAllowed) {
-                is_double_click = 1;
+                nclicks = 2;
                 lastDoubleClick = timestamp();
                 lastDoubleClickPos = pos;
             } else {
+                nclicks = 1;
                 lastSingleClick = timestamp();
                 lastSingleClickPos = pos;
             }
+        } else {
+            nclicks = nclicks0;
+            nclicks0 = 0;
         }
         
         if (is_debug) {
-            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, 123: %d%d%d",
+            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, nclicks: %d",
                   event->dx,
                   event->dy,
                   BUTTON_DOWN(LEFT_BUTTON),
@@ -231,31 +235,20 @@ static void mouse_event_handler(void *buf, unsigned int size) {
                   mouseType,
                   otherButton,
                   changedIndex,
-                  click,
-                  is_double_click,
-                  is_tripple_click);
+                  nclicks);
         }
 
         CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, pos, otherButton);
-        if (is_tripple_click) {
-            CGEventSetIntegerValueField(evt, kCGMouseEventClickState, 3);
-            CGEventPost(kCGSessionEventTap, evt);
-            CGEventSetType(evt, kCGEventLeftMouseUp);
-            CGEventPost(kCGSessionEventTap, evt);
-        } else if (is_double_click) {
-            CGEventSetIntegerValueField(evt, kCGMouseEventClickState, 2);
-            CGEventPost(kCGSessionEventTap, evt);
-            CGEventSetType(evt, kCGEventLeftMouseUp);
-            CGEventPost(kCGSessionEventTap, evt);            
-        } else {
-            CGEventSetIntegerValueField(evt, kCGMouseEventClickState, 1);
-            CGEventPost(kCGSessionEventTap, evt);
-        }
+        CGEventSetIntegerValueField(evt, kCGMouseEventClickState, nclicks);
+        CGEventPost(kCGSessionEventTap, evt);
         CFRelease(evt);
 
         if(buttonWasReleased) {
             mouseType = kCGEventMouseMoved;
+            nclicks = 0;
         }
+
+        nclicks0 = nclicks;
     } else {
         /* post event */
         if (kCGErrorSuccess != CGPostMouseEvent(pos, true, 1, BUTTON_DOWN(LEFT_BUTTON))) {
