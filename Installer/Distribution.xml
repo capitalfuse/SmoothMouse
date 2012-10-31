@@ -5,6 +5,7 @@
 	<license file="License.rtf" />
 	
 	<options hostArchitectures="i386" />
+	<options rootVolumeOnly="true" />
 	<domains enable_localSystem="true" />
 	
 	<choice id="choice0" title="Kernel Extension" enabled="false">
