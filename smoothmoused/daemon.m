@@ -220,9 +220,27 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             nclicks = nclicks0;
             nclicks0 = 0;
         }
-        
+
+        int clickStateValue;
+        switch(mouseType) {
+            case kCGEventLeftMouseDown:
+            case kCGEventLeftMouseUp:
+                clickStateValue = nclicks;
+                break;
+            case kCGEventRightMouseDown:
+            case kCGEventOtherMouseDown:
+                clickStateValue = 1;
+                break;
+            case kCGEventRightMouseUp:
+            case kCGEventOtherMouseUp:
+            case kCGEventMouseMoved:
+            default:
+                clickStateValue = 0;
+                break;
+        }
+
         if (is_debug) {
-            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, nclicks: %d",
+            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, nclicks: %d, csv: %d",
                   event->dx,
                   event->dy,
                   BUTTON_DOWN(LEFT_BUTTON),
@@ -235,11 +253,12 @@ static void mouse_event_handler(void *buf, unsigned int size) {
                   mouseType,
                   otherButton,
                   changedIndex,
-                  nclicks);
+                  nclicks,
+                  clickStateValue);
         }
 
         CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, pos, otherButton);
-        CGEventSetIntegerValueField(evt, kCGMouseEventClickState, nclicks);
+        CGEventSetIntegerValueField(evt, kCGMouseEventClickState, clickStateValue);
         CGEventPost(kCGSessionEventTap, evt);
         CFRelease(evt);
 
