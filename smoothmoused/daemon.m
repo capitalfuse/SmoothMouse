@@ -229,10 +229,10 @@ static void mouse_event_handler(void *buf, unsigned int size) {
                 break;
             case kCGEventRightMouseDown:
             case kCGEventOtherMouseDown:
-                clickStateValue = 1;
-                break;
             case kCGEventRightMouseUp:
             case kCGEventOtherMouseUp:
+                clickStateValue = 1;
+                break;
             case kCGEventMouseMoved:
             default:
                 clickStateValue = 0;
