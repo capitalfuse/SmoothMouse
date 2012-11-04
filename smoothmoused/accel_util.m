@@ -1,9 +1,10 @@
 
 #include <IOKit/hidsystem/event_status_driver.h>
 #include <IOKit/hidsystem/IOHIDParameter.h>
-#import <Foundation/Foundation.h>
-
+#include <IOKit/hidsystem/IOHIDLib.h>
 #include <stdio.h>
+
+#import <Foundation/Foundation.h>
 
 extern BOOL is_debug;
 static double savedMouseAcceleration = -1;
@@ -21,7 +22,7 @@ void initializeSystemMouseSettings(bool mouse_enabled, bool trackpad_enabled)
     double          resetValue = 0.0;
     
     handle = NXOpenEventStatus();
-    
+
     if (mouse_enabled) {
         key = CFSTR(kIOHIDMouseAccelerationType);
         
@@ -97,8 +98,8 @@ void restoreSystemMouseSettings()
 
     handle = NXOpenEventStatus();
     
+    key = CFSTR(kIOHIDMouseAccelerationType);
     if (savedMouseAcceleration != -1) {
-        key = CFSTR(kIOHIDMouseAccelerationType);
         ret = IOHIDSetAccelerationWithKey(handle, key, savedMouseAcceleration);
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to restore acceleration for '%@'", key);
@@ -108,9 +109,8 @@ void restoreSystemMouseSettings()
         NSLog(@"No need to restore acceleration for '%@'", key);
     }
     
-    if (savedTrackpadAcceleration != -1) {
-        key = CFSTR(kIOHIDTrackpadAccelerationType);
-        
+    key = CFSTR(kIOHIDTrackpadAccelerationType);
+    if (savedTrackpadAcceleration != -1) {        
         ret = IOHIDSetAccelerationWithKey(handle, key, savedTrackpadAcceleration);
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to restore acceleration for '%@'", key);

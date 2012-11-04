@@ -72,6 +72,7 @@
             [[NSAttributedString alloc] initWithRTF:data documentAttributes:&docAttributes];
         
         [[credits textStorage] setAttributedString: rtfString];
+        [rtfString release];
     }
 }
 
@@ -153,7 +154,7 @@
 
 cleanup:
 
-    status = AuthorizationFree(authorizationRef, kAuthorizationFlagDestroyRights);
+    (void) AuthorizationFree(authorizationRef, kAuthorizationFlagDestroyRights);
     
     return ret;
 }

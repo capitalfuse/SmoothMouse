@@ -199,7 +199,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             if (now - lastTrippleClick <= clickTime &&
                 distanceMovedSinceLastTrippleClick <= maxDistanceAllowed) {
                 lastTrippleClick = timestamp();
-                click = 0;
+                nclicks = 0;
                 mouseType = kCGEventMouseMoved;
             } else if((now - lastDoubleClick <= clickTime) &&
                 distanceMovedSinceLastDoubleClick <= maxDistanceAllowed) {
@@ -233,7 +233,6 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             case kCGEventOtherMouseUp:
                 clickStateValue = 1;
                 break;
-            case kCGEventMouseMoved:
             default:
                 clickStateValue = 0;
                 break;
@@ -610,8 +609,10 @@ void *HandleMouseEventThread(void *instance)
 
     NXEventHandle handle = NXOpenEventStatus();
 	clickTime = NXClickTime(handle);
+    NXCloseEventStatus(handle);
+    
     eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-    // TODO: cleanup eventSource and handle
+    
     if (eventSource == NULL) {
         NSLog(@"call to CGEventSourceSetKeyboardType failed");
     } else {
@@ -638,6 +639,7 @@ void *HandleMouseEventThread(void *instance)
         pthread_mutex_unlock(&mutex);
     }
     
+    CFRelease(eventSource);
 	free(buf);
     
     return NULL;
@@ -658,23 +660,18 @@ void *HandleMouseEventThread(void *instance)
 }
 
 -(BOOL) isActive {
-#if 1
-    CFDictionaryRef dict = CGSessionCopyCurrentDictionary();
-    const void* logged_in = CFDictionaryGetValue(dict, kCGSessionOnConsoleKey);
-    if (logged_in != kCFBooleanTrue) {
-        return NO;
-    } else {
-        return YES;
+    BOOL active = NO;
+    CFDictionaryRef sessionDict = CGSessionCopyCurrentDictionary();
+    if (sessionDict) {
+        const void *loggedIn = CFDictionaryGetValue(sessionDict, kCGSessionOnConsoleKey);
+        CFRelease(sessionDict);
+        if (loggedIn != kCFBooleanTrue) {
+            active = NO;
+        } else {
+            active = YES;
+        }
     }
-#else
-    static int i = 0;
-    i++;
-    if (i % 2 == 0) {
-        return NO;
-    } else {
-        return YES;
-    }
-#endif
+    return active;
 }
 
 @end
