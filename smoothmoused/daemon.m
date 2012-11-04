@@ -199,8 +199,7 @@ static void mouse_event_handler(void *buf, unsigned int size) {
             if (now - lastTrippleClick <= clickTime &&
                 distanceMovedSinceLastTrippleClick <= maxDistanceAllowed) {
                 lastTrippleClick = timestamp();
-                nclicks = 0;
-                mouseType = kCGEventMouseMoved;
+                nclicks = 4;
             } else if((now - lastDoubleClick <= clickTime) &&
                 distanceMovedSinceLastDoubleClick <= maxDistanceAllowed) {
                 nclicks = 3;
