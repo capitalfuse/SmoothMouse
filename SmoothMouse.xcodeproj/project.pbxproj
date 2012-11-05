@@ -27,7 +27,7 @@
 		031386A91628B36000A04755 /* UrlLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 031386A71628B36000A04755 /* UrlLabel.h */; };
 		031386AA1628B36000A04755 /* UrlLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 031386A81628B36000A04755 /* UrlLabel.m */; };
 		034215B41631F2BA0047E370 /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03D020D41631F22A00CD04C1 /* uninstall.sh */; };
-		0356EAE9162F436B001C371E /* accel_util.m in Sources */ = {isa = PBXBuildFile; fileRef = 0356EAE8162F436B001C371E /* accel_util.m */; };
+		0356EAE9162F436B001C371E /* accel.m in Sources */ = {isa = PBXBuildFile; fileRef = 0356EAE8162F436B001C371E /* accel.m */; };
 		036C5434160F50C600110497 /* debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 036C5433160F50C600110497 /* debug.m */; };
 		036E3EF11637066600887DCE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 036E3EF01637066600887DCE /* Security.framework */; };
 		03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 03BA20FF161F757D0014A74E /* dsa_pub.pem */; };
@@ -37,6 +37,7 @@
 		03DB20C91620CB5900CF4299 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20C81620CB5900CF4299 /* main.m */; };
 		03DB20CD1620CB5900CF4299 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03DB20CB1620CB5900CF4299 /* Credits.rtf */; };
 		03DB20D01620CB5900CF4299 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20CF1620CB5900CF4299 /* AppDelegate.m */; };
+		03F1B44A1647F19B00DB99E8 /* mouse.m in Sources */ = {isa = PBXBuildFile; fileRef = 03F1B4491647F19B00DB99E8 /* mouse.m */; };
 		03F3CBB416220E0700D9A857 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03F3CBB316220E0400D9A857 /* Sparkle.framework */; };
 		03F3CBB516220E0D00D9A857 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03F3CBB316220E0400D9A857 /* Sparkle.framework */; };
 		ED03CFA115D7D96000763D81 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA015D7D96000763D81 /* ApplicationServices.framework */; };
@@ -111,8 +112,8 @@
 /* Begin PBXFileReference section */
 		031386A71628B36000A04755 /* UrlLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UrlLabel.h; sourceTree = "<group>"; };
 		031386A81628B36000A04755 /* UrlLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UrlLabel.m; sourceTree = "<group>"; };
-		0356EAE8162F436B001C371E /* accel_util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = accel_util.m; sourceTree = "<group>"; };
-		0356EAEB162F4387001C371E /* accel_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = accel_util.h; sourceTree = "<group>"; };
+		0356EAE8162F436B001C371E /* accel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = accel.m; sourceTree = "<group>"; };
+		0356EAEB162F4387001C371E /* accel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = accel.h; sourceTree = "<group>"; };
 		036C5433160F50C600110497 /* debug.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = debug.m; sourceTree = "<group>"; };
 		036C5436160F50D300110497 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
 		036E3EF01637066600887DCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
@@ -129,6 +130,8 @@
 		03DB20CE1620CB5900CF4299 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		03DB20CF1620CB5900CF4299 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		03DB20DA1620CB5A00CF4299 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		03F1B4471647F17100DB99E8 /* mouse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mouse.h; sourceTree = "<group>"; };
+		03F1B4491647F19B00DB99E8 /* mouse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = mouse.m; sourceTree = "<group>"; };
 		03F3CBB316220E0400D9A857 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = Dependencies/Sparkle.framework; sourceTree = "<group>"; };
 		ED03CF9E15D7D95200763D81 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		ED03CFA015D7D96000763D81 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
@@ -299,11 +302,13 @@
 		ED0E123B14D5496F008704EC /* smoothmoused */ = {
 			isa = PBXGroup;
 			children = (
-				0356EAEB162F4387001C371E /* accel_util.h */,
-				0356EAE8162F436B001C371E /* accel_util.m */,
+				0356EAEB162F4387001C371E /* accel.h */,
+				0356EAE8162F436B001C371E /* accel.m */,
 				ED0E123C14D5496F008704EC /* daemon.m */,
 				036C5436160F50D300110497 /* debug.h */,
 				036C5433160F50C600110497 /* debug.m */,
+				03F1B4471647F17100DB99E8 /* mouse.h */,
+				03F1B4491647F19B00DB99E8 /* mouse.m */,
 				ED0E123E14D5496F008704EC /* Supporting Files */,
 			);
 			path = smoothmoused;
@@ -491,7 +496,8 @@
 			files = (
 				ED0E123D14D5496F008704EC /* daemon.m in Sources */,
 				036C5434160F50C600110497 /* debug.m in Sources */,
-				0356EAE9162F436B001C371E /* accel_util.m in Sources */,
+				0356EAE9162F436B001C371E /* accel.m in Sources */,
+				03F1B44A1647F19B00DB99E8 /* mouse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

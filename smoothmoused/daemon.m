@@ -1,284 +1,21 @@
-#import <mach/mach.h>
-#import <IOKit/IOKitLib.h>
-#import <IOKit/IODataQueueShared.h>
 #import <IOKit/IODataQueueClient.h>
 #import <IOKit/kext/KextManager.h>
-#import <Foundation/Foundation.h>
-#import <ApplicationServices/ApplicationServices.h>
-#include <sys/time.h>   
-#include <assert.h>
+#import <mach/mach.h>
 #include <pthread.h>
-#include <IOKit/hidsystem/event_status_driver.h>
 
 #import "kextdaemon.h"
 #import "constants.h"
-#include "debug.h"
-#import "accel_util.h"
-
-/* -------------------------------------------------------------------------- */
-
-#define LEFT_BUTTON     4
-#define RIGHT_BUTTON    1
-#define MIDDLE_BUTTON   2
-#define BUTTON4         8
-#define BUTTON5         16
-#define BUTTON6         32
-#define NUM_BUTTONS     6
-
-#define BUTTON_DOWN(button)             (((button) & buttons) == (button))
-#define BUTTON_UP(button)               (((button) & buttons) == 0)
-#define BUTTON_STATE_CHANGED(button)    ((buttons0 & (button)) != (buttons & (button)))
-
-/* -------------------------------------------------------------------------- */
+#import "debug.h"
+#import "mouse.h"
+#import "accel.h"
 
 BOOL is_debug;
 BOOL is_event = 0;
-CGEventSourceRef eventSource = NULL;
-static CGPoint pos0;
-static int buttons0 = 0;
-static int nclicks0 = 0;
-static CGPoint lastSingleClickPos;
-static CGPoint lastDoubleClickPos;
-static CGPoint lastTrippleClickPos;
-static double lastSingleClick;
-static double lastDoubleClick;
-static double lastTrippleClick;
-static double clickTime;
-CGEventType mouseType = kCGEventMouseMoved;
+
 static BOOL mouse_enabled;
 static BOOL trackpad_enabled;
 static double velocity_mouse;
 static double velocity_trackpad;
-
-double timestamp()
-{
-	struct timeval t;
-	gettimeofday(&t, NULL);
-	return (double)t.tv_sec + 1.0e-6 * (double)t.tv_usec;
-}
-
-/* -------------------------------------------------------------------------- *
- The following code is responsive for handling events received from kernel
- extension and for passing mouse events into CoreGraphics.
- * -------------------------------------------------------------------------- */
-
-static double get_distance(CGPoint pos0, CGPoint pos1) {
-    CGFloat deltaX = pos1.x - pos0.x;
-    CGFloat deltaY = pos1.y - pos0.y;
-    CGFloat distance = sqrt(deltaX * deltaX + deltaY * deltaY);
-    return distance;
-}
-
-static char *event_type_to_string(CGEventType type) {
-    switch(type) {
-        case kCGEventLeftMouseUp:       return "kCGEventLeftMouseUp";
-        case kCGEventLeftMouseDown:     return "kCGEventLeftMouseDown";
-        case kCGEventLeftMouseDragged:  return "kCGEventLeftMouseDragged";
-        case kCGEventRightMouseUp:      return "kCGEventRightMouseUp";
-        case kCGEventRightMouseDown:    return "kCGEventRightMouseDown";
-        case kCGEventRightMouseDragged: return "kCGEventRightMouseDragged";
-        case kCGEventOtherMouseUp:      return "kCGEventOtherMouseUp";
-        case kCGEventOtherMouseDown:    return "kCGEventOtherMouseDown";
-        case kCGEventOtherMouseDragged: return "kCGEventOtherMouseDragged";
-        case kCGEventMouseMoved:        return "kCGEventMouseMoved";
-        default:                        return "?";
-    }
-}
-
-/*
- This function handles events received from kernel module.
- */
-static void mouse_event_handler(void *buf, unsigned int size) {
-	CGPoint pos;
-	mouse_event_t *event = buf;
-    int buttons = event->buttons;
-    CGDisplayCount displayCount = 0;
-	double velocity = 1;
-        
-    switch (event->device_type) {
-        case kDeviceTypeMouse:
-            velocity = velocity_mouse;
-            break;
-        case kDeviceTypeTrackpad:
-            velocity = velocity_trackpad;
-            break;
-        default:
-            velocity = 1;
-            NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
-    }
-    
-    float calcdx = (velocity * event->dx);
-	float calcdy = (velocity * event->dy);
-    
-    /* Calculate new cursor position */
-    pos.x = pos0.x + calcdx;
-    pos.y = pos0.y + calcdy;
-        
-	/*
-	 The following code checks if cursor is in screen borders. It was ported
-	 from Synergy.
-	 */
-	CGGetDisplaysWithPoint(pos, 0, NULL, &displayCount);
-	if (displayCount == 0) {
-		displayCount = 0;
-		CGDirectDisplayID displayID;
-		CGGetDisplaysWithPoint(pos0, 1,
-							   &displayID, &displayCount);
-		if (displayCount != 0) {
-			CGRect displayRect = CGDisplayBounds(displayID);
-			if (pos.x < displayRect.origin.x) {
-				pos.x = displayRect.origin.x;
-			}
-			else if (pos.x > displayRect.origin.x +
-					 displayRect.size.width - 1) {
-				pos.x = displayRect.origin.x + displayRect.size.width - 1;
-			}
-			if (pos.y < displayRect.origin.y) {
-				pos.y = displayRect.origin.y;
-			}
-			else if (pos.y > displayRect.origin.y +
-					 displayRect.size.height - 1) {
-				pos.y = displayRect.origin.y + displayRect.size.height - 1;
-			}
-		}
-	}
-
-	if (is_event) {
-        CGMouseButton otherButton = 0;
-        int changedIndex = -1;
-        int buttonWasReleased = 0;
-        int click = 0;
-        for(int i = 0; i < NUM_BUTTONS; i++) {
-            int buttonIndex = (1 << i);
-            if (BUTTON_STATE_CHANGED(buttonIndex)) {
-                if (BUTTON_DOWN(buttonIndex)) {
-                    switch(buttonIndex) {
-                        case LEFT_BUTTON:   mouseType = kCGEventLeftMouseDown; click = 1; break;
-                        case RIGHT_BUTTON:  mouseType = kCGEventRightMouseDown; break;
-                        default:            mouseType = kCGEventOtherMouseDown; break;
-                    }
-                } else {
-                    switch(buttonIndex) {
-                        case LEFT_BUTTON:   mouseType = kCGEventLeftMouseUp; break;
-                        case RIGHT_BUTTON:  mouseType = kCGEventRightMouseUp; break;
-                        default:            mouseType = kCGEventOtherMouseUp; break;
-                    }
-                    buttonWasReleased = 1;
-                }
-                changedIndex = buttonIndex;
-            } else {
-                if (BUTTON_DOWN(buttonIndex)) {
-                    switch(buttonIndex) {
-                        case LEFT_BUTTON:   mouseType = kCGEventLeftMouseDragged; break;
-                        case RIGHT_BUTTON:  mouseType = kCGEventRightMouseDragged; break;
-                        default:            mouseType = kCGEventOtherMouseDragged; break;
-                    }
-                    changedIndex = buttonIndex;
-                }
-            }
-        }
-
-        if(changedIndex != -1) {
-            switch(changedIndex) {
-                case LEFT_BUTTON: otherButton = kCGMouseButtonLeft; break;
-                case RIGHT_BUTTON: otherButton = kCGMouseButtonRight; break;
-                case MIDDLE_BUTTON: otherButton = kCGMouseButtonCenter; break;
-                case BUTTON4: otherButton = 3; break;
-                case BUTTON5: otherButton = 4; break;
-                case BUTTON6: otherButton = 5; break;
-            }
-        }
-
-        int nclicks = 0;
-        if (click) {
-            CGFloat maxDistanceAllowed = sqrt(2) + 0.0001;
-            CGFloat distanceMovedSinceLastSingleClick = get_distance(lastSingleClickPos, pos);
-            CGFloat distanceMovedSinceLastDoubleClick = get_distance(lastDoubleClickPos, pos);
-            CGFloat distanceMovedSinceLastTrippleClick = get_distance(lastTrippleClickPos, pos);
-            double now = timestamp();
-            if (now - lastTrippleClick <= clickTime &&
-                distanceMovedSinceLastTrippleClick <= maxDistanceAllowed) {
-                lastTrippleClick = timestamp();
-                nclicks = 4;
-            } else if((now - lastDoubleClick <= clickTime) &&
-                distanceMovedSinceLastDoubleClick <= maxDistanceAllowed) {
-                nclicks = 3;
-                lastTrippleClick = timestamp();
-                lastTrippleClickPos = pos;
-            } else if ((now - lastSingleClick <= clickTime) &&
-                distanceMovedSinceLastSingleClick <= maxDistanceAllowed) {
-                nclicks = 2;
-                lastDoubleClick = timestamp();
-                lastDoubleClickPos = pos;
-            } else {
-                nclicks = 1;
-                lastSingleClick = timestamp();
-                lastSingleClickPos = pos;
-            }
-        } else {
-            nclicks = nclicks0;
-            nclicks0 = 0;
-        }
-
-        int clickStateValue;
-        switch(mouseType) {
-            case kCGEventLeftMouseDown:
-            case kCGEventLeftMouseUp:
-                clickStateValue = nclicks;
-                break;
-            case kCGEventRightMouseDown:
-            case kCGEventOtherMouseDown:
-            case kCGEventRightMouseUp:
-            case kCGEventOtherMouseUp:
-                clickStateValue = 1;
-                break;
-            default:
-                clickStateValue = 0;
-                break;
-        }
-
-        if (is_debug) {
-            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, nclicks: %d, csv: %d",
-                  event->dx,
-                  event->dy,
-                  BUTTON_DOWN(LEFT_BUTTON),
-                  BUTTON_DOWN(MIDDLE_BUTTON),
-                  BUTTON_DOWN(RIGHT_BUTTON),
-                  BUTTON_DOWN(BUTTON4),
-                  BUTTON_DOWN(BUTTON5),
-                  BUTTON_DOWN(BUTTON6),
-                  event_type_to_string(mouseType),
-                  mouseType,
-                  otherButton,
-                  changedIndex,
-                  nclicks,
-                  clickStateValue);
-        }
-
-        CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, pos, otherButton);
-        CGEventSetIntegerValueField(evt, kCGMouseEventClickState, clickStateValue);
-        CGEventPost(kCGSessionEventTap, evt);
-        CFRelease(evt);
-
-        if(buttonWasReleased) {
-            mouseType = kCGEventMouseMoved;
-            nclicks = 0;
-        }
-
-        nclicks0 = nclicks;
-    } else {
-        /* post event */
-        if (kCGErrorSuccess != CGPostMouseEvent(pos, true, 1, BUTTON_DOWN(LEFT_BUTTON))) {
-            NSLog(@"Failed to post mouse event");
-            exit(0);
-        }
-    }
-    pos0 = pos;
-    buttons0 = event->buttons;
-    if (is_debug && !is_event) {
-        debug_log(event, calcdx, calcdy);
-    }
-}
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -291,25 +28,18 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	IODataQueueMemory *queueMappedMemory;
 	mach_port_t	recvPort;
 	uint32_t dataSize;
-#if !__LP64__ || defined(IOCONNECT_MAPMEMORY_10_6)
-    vm_address_t address;
-    vm_size_t size;
-#else
 	mach_vm_address_t address;
     mach_vm_size_t size;
-#endif
 }
 
 -(id)init;
 -(oneway void) release;
 
 -(BOOL) loadSettings;
--(BOOL) getCursorPosition;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;
 -(BOOL) configureDriver;
 -(BOOL) disconnectFromDriver;
--(void) setupEventSuppression;
 -(BOOL) isActive;
 
 @end
@@ -342,8 +72,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         trackpad_enabled = 1;
     }
     
-	[self setupEventSuppression];
-	
 	if (![self connectToDriver]) {
 		NSLog(@"cannot connect to driver");
 		[self dealloc];
@@ -351,36 +79,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	}
 	
 	return self;
-}
-
--(BOOL) getCursorPosition
-{
-	CGEventRef event;
-	
-	event = CGEventCreate(NULL);
-	if (!event) {
-		return NO;
-	}
-	
-	pos0 = CGEventGetLocation(event);
-	
-	CFRelease(event);
-	
-	return YES;
-}
-
--(void) setupEventSuppression
-{
-    if (!is_event) {
-        if (CGSetLocalEventsFilterDuringSuppressionState(kCGEventFilterMaskPermitAllEvents,
-                                                        kCGEventSuppressionStateRemoteMouseDrag)) {
-            NSLog(@"CGSetLocalEventsFilterDuringSupressionState returns with error");
-        }
-        
-        if (CGSetLocalEventsSuppressionInterval(0.0)) {
-            NSLog(@"CGSetLocalEventsSuppressionInterval() returns with error");
-        }
-    }
 }
 
 -(BOOL) loadSettings
@@ -490,10 +188,9 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         }
         
         queueMappedMemory = (IODataQueueMemory *) address;
-        dataSize = size;
-        
+        dataSize = (uint32_t) size;
+
         [self configureDriver];
-        [self getCursorPosition];
 
         int threadError = pthread_create(&mouseEventThreadID, NULL, &HandleMouseEventThread, self);
         if (threadError != 0)
@@ -605,19 +302,8 @@ void *HandleMouseEventThread(void *instance)
 		NSLog(@"malloc error");
 		return NULL;
 	}
-
-    NXEventHandle handle = NXOpenEventStatus();
-	clickTime = NXClickTime(handle);
-    NXCloseEventStatus(handle);
     
-    eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-    
-    if (eventSource == NULL) {
-        NSLog(@"call to CGEventSourceSetKeyboardType failed");
-    } else {
-        CGEventSourceSetLocalEventsSuppressionInterval(eventSource, 0.0);
-        CGEventSourceSetLocalEventsFilterDuringSuppressionState(eventSource, kCGEventFilterMaskPermitLocalMouseEvents, kCGEventSuppressionStateSuppressionInterval);
-    }
+    (void) mouse_init(is_event);
     
     while (IODataQueueWaitForAvailableData(self->queueMappedMemory, self->recvPort) == kIOReturnSuccess) {
         
@@ -628,7 +314,20 @@ void *HandleMouseEventThread(void *instance)
             while (IODataQueueDataAvailable(self->queueMappedMemory)) {
                 error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
                 if (!error) {
-                    mouse_event_handler(buf, self->dataSize);
+                    mouse_event_t *mouse_event = (mouse_event_t *) buf;
+                    double velocity;
+                    switch (mouse_event->device_type) {
+                        case kDeviceTypeMouse:
+                            velocity = velocity_mouse;
+                            break;
+                        case kDeviceTypeTrackpad:
+                            velocity = velocity_trackpad;
+                            break;
+                        default:
+                            velocity = 1;
+                            NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
+                    }
+                    mouse_handle(mouse_event, velocity);
                 } else {
                     NSLog(@"IODataQueueDequeue() failed");
                 }
@@ -638,7 +337,6 @@ void *HandleMouseEventThread(void *instance)
         pthread_mutex_unlock(&mutex);
     }
     
-    CFRelease(eventSource);
 	free(buf);
     
     return NULL;
