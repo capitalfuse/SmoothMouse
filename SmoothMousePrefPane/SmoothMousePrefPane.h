@@ -36,7 +36,7 @@
 -(NSString *)findLocationOfPrefPaneFile:(NSString *)file;
 -(void)createLaunchAgentsDirectory;
 -(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments;
--(BOOL)launchScriptWithSudoRights:(NSString *) script;
+-(BOOL)launchScriptWithSudoRights:(NSString *) script withKeepPreferences:(BOOL)keepPreferences;
 
 -(BOOL)settingsFileExists;
 -(void)saveDefaultSettingsFile;

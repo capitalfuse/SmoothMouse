@@ -109,14 +109,20 @@
     [alert setInformativeText:@"Are you sure you want to uninstall SmoothMouse"];
     [alert addButtonWithTitle:@"OK"];
     [alert addButtonWithTitle:@"Cancel"];
+    [alert setShowsSuppressionButton:YES];
+    [[alert suppressionButton] setTitle:@"Keep preferences"];
     NSInteger button = [alert runModal];
+    BOOL keepPreferences = NO;
+    if ([[alert suppressionButton] state] == NSOnState) {
+        keepPreferences = YES;
+    }
     [alert release];
     if (button == NSAlertFirstButtonReturn) {
-        [self launchScriptWithSudoRights: [self findLocationOfPrefPaneFile:UNINSTALL_SCRIPT_FILENAME_BASE]];
+        [self launchScriptWithSudoRights: [self findLocationOfPrefPaneFile:UNINSTALL_SCRIPT_FILENAME_BASE] withKeepPreferences:keepPreferences];
     }
 }
 
--(BOOL)launchScriptWithSudoRights:(NSString *) script
+-(BOOL)launchScriptWithSudoRights:(NSString *) script withKeepPreferences:(BOOL)keepPreferences
 {
     BOOL                ret = NO;
     OSStatus            status;
@@ -141,9 +147,13 @@
     }
     
     const char *tool    = [script UTF8String];
-    char *args[]        = {NULL};
+    char *args[]        = { NULL, NULL };
     FILE *pipe          = NULL;
-    
+
+    if (keepPreferences) {
+        args[0] = "-k";
+    }
+
     status = AuthorizationExecuteWithPrivileges(authorizationRef, tool,
                                                 kAuthorizationFlagDefaults, args, &pipe);
     if (status != errAuthorizationSuccess) {

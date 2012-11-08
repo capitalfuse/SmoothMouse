@@ -2,9 +2,21 @@
 
 # NOTE: Uninstaller currently ONLY supports system-wide installation.
 
+# PARAMETERS:
+#  -k : keep preferences
+
 KEXT="/System/Library/Extensions/SmoothMouse.kext"
 PREFPANE="/Library/PreferencePanes/SmoothMouse.prefPane"
 DAEMON="smoothmoused"
+
+while getopts “k” OPTION
+do
+    case $OPTION in
+        k)
+            KEEP_PREFERENCES=1
+            ;;
+    esac
+done
 
 #env > /tmp/sm
 
@@ -12,8 +24,13 @@ DAEMON="smoothmoused"
 rm -rf $KEXT
 
 rm -rf $PREFPANE
-rm -f ~/Library/Preferences/com.cyberic.SmoothMouse.plist
-rm -f ~/Library/Preferences/com.cyberic.SmoothMouseUpdater.plist
+
+if [ -z "$KEEP_PREFERENCES" ]
+then
+    rm -f ~/Library/Preferences/com.cyberic.SmoothMouse.plist
+    rm -f ~/Library/Preferences/com.cyberic.SmoothMouseUpdater.plist
+fi
+
 rm -f ~/Library/LaunchAgents/com.cyberic.smoothmouse.plist
 rm -f ~/Library/LaunchAgents/com.cyberic.smoothmouseupdater.plist
 rm /usr/bin/smoothmouse
@@ -22,4 +39,3 @@ rm /usr/bin/smoothmouse
 
 /usr/bin/killall -u $USER "System Preferences"
 sudo -u $USER /usr/bin/open "/Applications/System Preferences.app"
-
