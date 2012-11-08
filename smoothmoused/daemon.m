@@ -72,12 +72,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         trackpad_enabled = 1;
     }
     
-	if (![self connectToDriver]) {
-		NSLog(@"cannot connect to driver");
-		[self dealloc];
-		return nil;
-	}
-	
 	return self;
 }
 
@@ -303,7 +297,7 @@ void *HandleMouseEventThread(void *instance)
 		return NULL;
 	}
     
-    (void) mouse_init(is_event);
+    (void) mouse_init();
     
     while (IODataQueueWaitForAvailableData(self->queueMappedMemory, self->recvPort) == kIOReturnSuccess) {
         
@@ -345,14 +339,18 @@ void *HandleMouseEventThread(void *instance)
 -(void) mainLoop
 {
     while(1) {
-        sleep(2);
         BOOL active = [self isActive];
         if (active) {
+            BOOL ok = [self connectToDriver];
+            if (!ok) {
+                NSLog(@"Failed to connect to kext");
+                exit(-1);
+            }
             initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
-            [self connectToDriver];
         } else {
             [self disconnectFromDriver];
         }
+        sleep(2);
     }
 }
 
