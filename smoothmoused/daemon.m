@@ -289,6 +289,8 @@ void *HandleMouseEventThread(void *instance)
 {
     SmoothMouseDaemon *self = (SmoothMouseDaemon *) instance;
 
+    static const int MOUSE_THREAD_PRIORITY = 96; // real-time
+    
     kern_return_t error;
     
 	char *buf = malloc(self->dataSize);
@@ -296,6 +298,13 @@ void *HandleMouseEventThread(void *instance)
 		NSLog(@"malloc error");
 		return NULL;
 	}
+    
+    struct sched_param sp;
+    memset(&sp, 0, sizeof(struct sched_param));
+    sp.sched_priority = MOUSE_THREAD_PRIORITY;
+    if (pthread_setschedparam(pthread_self(), SCHED_RR, &sp)  == -1) {
+        NSLog(@"call to pthread_setschedparam failed");
+    }
     
     (void) mouse_init();
     
@@ -320,6 +329,15 @@ void *HandleMouseEventThread(void *instance)
                         default:
                             velocity = 1;
                             NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
+                    }
+                    struct sched_param sp;
+                    int policy;
+                    if (pthread_getschedparam(pthread_self(), &policy, &sp)  == -1) {
+                        NSLog(@"call to pthread_getschedparam failed");
+                    }
+                    if (is_debug && sp.sched_priority != MOUSE_THREAD_PRIORITY) {
+                        NSLog(@"mouse thread priority has changed (should be %d, is %d)",
+                              MOUSE_THREAD_PRIORITY, sp.sched_priority);
                     }
                     mouse_handle(mouse_event, velocity);
                 } else {
