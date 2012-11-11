@@ -115,7 +115,7 @@ void restoreSystemMouseSettings()
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to restore acceleration for '%@'", key);
         }
-        NSLog(@"System trackpad settings restored to %f", savedMouseAcceleration);
+        NSLog(@"System trackpad settings restored to %f", savedTrackpadAcceleration);
     } else if (is_debug) {
         NSLog(@"No need to restore acceleration for '%@'", key);
     }
