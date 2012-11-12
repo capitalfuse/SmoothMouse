@@ -22,7 +22,8 @@ extern BOOL is_debug;
 extern BOOL is_event;
 
 static CGEventSourceRef eventSource = NULL;
-static CGPoint pos0;
+static CGPoint deltaPosInt;
+static CGPoint deltaPosFloat;
 static int buttons0 = 0;
 static int nclicks = 0;
 static CGPoint lastClickPos;
@@ -93,6 +94,13 @@ static CGPoint restrict_to_screen_boundaries(CGPoint lastPos, CGPoint newPos) {
     return pos;
 }
 
+static CGPoint get_current_mouse_pos() {
+    CGEventRef event = CGEventCreate(NULL);
+    CGPoint currentPos = CGEventGetLocation(event);
+    CFRelease(event);
+    return currentPos;
+}
+
 bool mouse_init() {
 
     NXEventHandle handle = NXOpenEventStatus();
@@ -107,17 +115,8 @@ bool mouse_init() {
         CGEventSourceSetLocalEventsFilterDuringSuppressionState(eventSource, kCGEventFilterMaskPermitLocalMouseEvents, kCGEventSuppressionStateSuppressionInterval);
     }
 
-    CGEventRef event;
+	deltaPosFloat = deltaPosInt = get_current_mouse_pos();
 
-	event = CGEventCreate(NULL);
-	if (!event) {
-		return NO;
-	}
-	
-	pos0 = CGEventGetLocation(event);
-	
-	CFRelease(event);
-	
     if (!is_event) {
         if (CGSetLocalEventsFilterDuringSuppressionState(kCGEventFilterMaskPermitAllEvents,
                                                          kCGEventSuppressionStateRemoteMouseDrag)) {
@@ -140,16 +139,16 @@ void mouse_cleanup() {
  This function handles events received from kernel module.
  */
 void mouse_handle(mouse_event_t *event, double velocity) {
-	CGPoint pos;
+    CGPoint newPos;
+    CGPoint currentPos = get_current_mouse_pos();
 
     float calcdx = (velocity * event->dx);
 	float calcdy = (velocity * event->dy);
 
-    /* Calculate new cursor position */
-    pos.x = pos0.x + calcdx;
-    pos.y = pos0.y + calcdy;
+    newPos.x = currentPos.x + calcdx;
+    newPos.y = currentPos.y + calcdy;
 
-    pos = restrict_to_screen_boundaries(pos0, pos);
+    newPos = restrict_to_screen_boundaries(currentPos, newPos);
 
 	if (is_event) {
         CGEventType mouseType = kCGEventMouseMoved;
@@ -197,7 +196,7 @@ void mouse_handle(mouse_event_t *event, double velocity) {
         
         if (mouseType == kCGEventLeftMouseDown) {
             CGFloat maxDistanceAllowed = sqrt(2) + 0.0001;
-            CGFloat distanceMovedSinceLastClick = get_distance(lastClickPos, pos);
+            CGFloat distanceMovedSinceLastClick = get_distance(lastClickPos, newPos);
             double now = timestamp();
             if (now - lastClickTime <= clickTime &&
                 distanceMovedSinceLastClick <= maxDistanceAllowed) {
@@ -206,7 +205,7 @@ void mouse_handle(mouse_event_t *event, double velocity) {
             } else {
                 nclicks = 1;
                 lastClickTime = timestamp();
-                lastClickPos = pos;
+                lastClickPos = newPos;
             }
         }
         
@@ -227,8 +226,15 @@ void mouse_handle(mouse_event_t *event, double velocity) {
                 break;
         }
 
+        deltaPosFloat.x += calcdx;
+        deltaPosFloat.y += calcdy;
+        int deltaX = (int) (deltaPosFloat.x - deltaPosInt.x);
+        int deltaY = (int) (deltaPosFloat.y - deltaPosInt.y);
+        deltaPosInt.x += deltaX;
+        deltaPosInt.y += deltaY;
+
         if (is_debug) {
-            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, nclicks: %d, csv: %d",
+            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, nclicks: %d, csv: %d, cur: %.2fx%.2f, delta: %.2fx%.2f",
                   event->dx,
                   event->dy,
                   BUTTON_DOWN(LEFT_BUTTON),
@@ -242,25 +248,30 @@ void mouse_handle(mouse_event_t *event, double velocity) {
                   otherButton,
                   changedIndex,
                   nclicks,
-                  clickStateValue);
+                  clickStateValue,
+                  currentPos.x,
+                  currentPos.y,
+                  deltaPosInt.x,
+                  deltaPosInt.y);
         }
 
-        CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, pos, otherButton);
+        CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, newPos, otherButton);
         CGEventSetIntegerValueField(evt, kCGMouseEventClickState, clickStateValue);
+        CGEventSetIntegerValueField(evt, kCGMouseEventDeltaX, deltaX);
+        CGEventSetIntegerValueField(evt, kCGMouseEventDeltaY, deltaY);
         CGEventPost(kCGSessionEventTap, evt);
         CFRelease(evt);
 
     } else {
         /* post event */
-        if (kCGErrorSuccess != CGPostMouseEvent(pos, true, 1, BUTTON_DOWN(LEFT_BUTTON))) {
+        if (kCGErrorSuccess != CGPostMouseEvent(newPos, true, 1, BUTTON_DOWN(LEFT_BUTTON))) {
             NSLog(@"Failed to post mouse event");
             exit(0);
         }
     }
 
-    pos0 = pos;
     buttons0 = event->buttons;
     if (is_debug && !is_event) {
-        debug_log(event, calcdx, calcdy);
+        debug_log(event, currentPos, calcdx, calcdy);
     }
 }

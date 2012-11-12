@@ -8,20 +8,17 @@ static int maxHz = -1;
 static int numHz = 0;
 static int sumHz = 0;
 
-void debug_log(mouse_event_t *event, float calcdx, float calcdy) {
+void debug_log(mouse_event_t *event, CGPoint currentPos, float calcdx, float calcdy) {
     static long long lastTimestamp = 0;
-    static CGPoint lastPoint = { 0, 0 };
-    
-    CGEventRef evt = CGEventCreate(NULL);
-    CGPoint point = CGEventGetLocation(evt);
+    static CGPoint lastPos = { 0, 0 };
     
     if (lastTimestamp != 0) {
-        //NSLog(@"Actual system mouse position: %f x %f", point.x, point.y);
+        //NSLog(@"Actual system mouse position: %f x %f", currentPos.x, currentPos.y);
         
         float deltaTimestamp = event->timestamp - lastTimestamp; // timestamp is ns
         
-        float actualdx = point.x - lastPoint.x;
-        float actualdy = point.y - lastPoint.y;
+        float actualdx = currentPos.x - lastPos.x;
+        float actualdy = currentPos.y - lastPos.y;
         
         int hz = (int) (1000000000 / deltaTimestamp);
 
@@ -46,9 +43,7 @@ void debug_log(mouse_event_t *event, float calcdx, float calcdy) {
     }
     
     lastTimestamp = event->timestamp;
-    lastPoint = point;
-    
-    CFRelease(evt);
+    lastPos = currentPos;
 }
 
 void debug_end() {

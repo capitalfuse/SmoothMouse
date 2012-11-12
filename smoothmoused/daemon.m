@@ -395,10 +395,7 @@ void trap_signals(int sig)
     if (is_debug) {
         debug_end();
     }
-    if (!is_debug) {
-        // TODO: somehow this causes segmentation fault in debug mode
-        restoreSystemMouseSettings();
-    }
+    restoreSystemMouseSettings();
     exit(-1);
 }
 
