@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <IOKit/hidsystem/event_status_driver.h>
 
+#include "WindowsFunction.hpp"
 
 #define LEFT_BUTTON     4
 #define RIGHT_BUTTON    1
@@ -17,6 +18,8 @@
 #define BUTTON_DOWN(button)             (((button) & event->buttons) == (button))
 #define BUTTON_UP(button)               (((button) & event->buttons) == 0)
 #define BUTTON_STATE_CHANGED(button)    ((buttons0 & (button)) != (event->buttons & (button)))
+
+WindowsFunction *win = NULL;
 
 extern BOOL is_debug;
 extern BOOL is_event;
@@ -44,7 +47,7 @@ static double get_distance(CGPoint pos0, CGPoint pos1) {
     return distance;
 }
 
-static char *event_type_to_string(CGEventType type) {
+static const char *event_type_to_string(CGEventType type) {
     switch(type) {
         case kCGEventLeftMouseUp:       return "kCGEventLeftMouseUp";
         case kCGEventLeftMouseDown:     return "kCGEventLeftMouseDown";
@@ -132,18 +135,42 @@ bool mouse_init() {
 }
 
 void mouse_cleanup() {
+    if (win != NULL) {
+        delete win;
+        win = NULL;
+    }
     CFRelease(eventSource);
 }
 
-/*
- This function handles events received from kernel module.
- */
-void mouse_handle(mouse_event_t *event, double velocity) {
+void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve) {
     CGPoint newPos;
     CGPoint currentPos = get_current_mouse_pos();
 
-    float calcdx = (velocity * event->dx);
-	float calcdy = (velocity * event->dy);
+    float calcdx;
+    float calcdy;
+
+    if (curve == ACCELERATION_CURVE_WINDOWS) {
+        // map slider to [-5 <=> +5]
+        int slider = (int)((velocity * 4) - 6);
+        if (slider > 5) {
+            slider = 5;
+        }
+        if (win == NULL) {
+            win = new WindowsFunction(slider);
+        }
+        if (win->slider != slider) {
+            delete win;
+            win = new WindowsFunction(slider);
+        }
+        int newdx;
+        int newdy;
+        win->apply(event->dx, event->dy, &newdx, &newdy);
+        calcdx = (float) newdx;
+        calcdy = (float) newdy;
+    } else {
+        calcdx = (velocity * event->dx);
+        calcdy = (velocity * event->dy);
+    }
 
     newPos.x = currentPos.x + calcdx;
     newPos.y = currentPos.y + calcdy;
