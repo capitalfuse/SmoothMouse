@@ -14,10 +14,11 @@
     if (![self settingsFileExists]) {
         [self saveDefaultSettingsFile];
         NSLog(@"Default settings saved");
+        [self enableAutomaticallyCheckForUpdates:YES];
     }
-    
+
     NSMenu *menuCopy;
-    
+
     menuCopy = [buttonMenu copy];
     [accelerationCurveMouse setMenu: menuCopy];
     [menuCopy release];
