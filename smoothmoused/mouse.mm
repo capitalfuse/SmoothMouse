@@ -280,6 +280,7 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
                   currentPos.y,
                   deltaPosInt.x,
                   deltaPosInt.y);
+            debug_register_event(event);
         }
 
         CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, newPos, otherButton);
@@ -299,6 +300,6 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
 
     buttons0 = event->buttons;
     if (is_debug && !is_event) {
-        debug_log(event, currentPos, calcdx, calcdy);
+        debug_log_old(event, currentPos, calcdx, calcdy);
     }
 }
