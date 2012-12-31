@@ -1,8 +1,11 @@
 #!/bin/sh
+
 # Usage:
 # 1) Build packages for archiving (important!)
 # 2) Place them in this directory under Root/
 # 3) Run this script
+# Optionally, you may specify the version number for the entire package as the first argument.
+# Otherwise the script will use the version of PrefPane instead.
 
 PACKAGE_NAME="SmoothMouse"
 IDENTIFIER="com.cyberic"
@@ -10,6 +13,14 @@ IDENTIFIER="com.cyberic"
 if [ ! -d "Components" ] 
 then
     mkdir -p "Components"
+fi
+
+# 
+if [[ -z "$1" ]]
+then
+    VERSION=$(defaults read "$(pwd)/Root/SmoothMouse.prefPane/Contents/Info" CFBundleVersion)
+else
+    VERSION=$1
 fi
 
 # Parameters: file name, internal name, identifier, install location 
@@ -39,6 +50,6 @@ productbuild \
     --distribution "Distribution.xml" \
     --package-path "Components/" \
     --resources "Resources/" \
-    "$PACKAGE_NAME.pkg"
+    "$PACKAGE_NAME $VERSION.pkg"
 
-zip -r "$PACKAGE_NAME.zip" "$PACKAGE_NAME.pkg"
+zip -r "$PACKAGE_NAME $VERSION.zip" "$PACKAGE_NAME $VERSION.pkg"
