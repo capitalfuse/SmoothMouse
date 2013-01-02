@@ -27,11 +27,13 @@ extern BOOL is_event;
 static CGEventSourceRef eventSource = NULL;
 static CGPoint deltaPosInt;
 static CGPoint deltaPosFloat;
+static CGPoint lastPos;
 static int buttons0 = 0;
 static int nclicks = 0;
 static CGPoint lastClickPos;
 static double lastClickTime = 0;
 static double clickTime;
+static uint64_t lastSequenceNumber = 0;
 
 static double timestamp()
 {
@@ -118,7 +120,7 @@ bool mouse_init() {
         CGEventSourceSetLocalEventsFilterDuringSuppressionState(eventSource, kCGEventFilterMaskPermitLocalMouseEvents, kCGEventSuppressionStateSuppressionInterval);
     }
 
-	deltaPosFloat = deltaPosInt = get_current_mouse_pos();
+	deltaPosFloat = deltaPosInt = lastPos = get_current_mouse_pos();
 
     if (!is_event) {
         if (CGSetLocalEventsFilterDuringSuppressionState(kCGEventFilterMaskPermitAllEvents,
@@ -144,7 +146,16 @@ void mouse_cleanup() {
 
 void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve) {
     CGPoint newPos;
-    CGPoint currentPos = get_current_mouse_pos();
+    CGPoint currentPos = lastPos;
+
+    if (event->seqnum != (lastSequenceNumber + 1)) {
+        if (is_debug) {
+            NSLog(@"Cursor position dirty, need to fetch fresh");
+        }
+        currentPos = get_current_mouse_pos();
+    }
+
+    lastSequenceNumber = event->seqnum;
 
     float calcdx;
     float calcdy;
@@ -289,7 +300,6 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
         CGEventSetIntegerValueField(evt, kCGMouseEventDeltaY, deltaY);
         CGEventPost(kCGSessionEventTap, evt);
         CFRelease(evt);
-
     } else {
         /* post event */
         if (kCGErrorSuccess != CGPostMouseEvent(newPos, true, 1, BUTTON_DOWN(LEFT_BUTTON))) {
@@ -298,6 +308,7 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
         }
     }
 
+    lastPos = newPos;
     buttons0 = event->buttons;
     if (is_debug && !is_event) {
         debug_log_old(event, currentPos, calcdx, calcdy);

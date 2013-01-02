@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 typedef enum {
 	kDeviceTypeMouse,
 	kDeviceTypeTrackpad,
@@ -11,7 +13,8 @@ typedef struct mouse_event_s {
 	int buttons;
 	int dx;
 	int dy;
-    unsigned long long timestamp;
+    uint64_t timestamp;
+    uint64_t seqnum;
 } mouse_event_t;
 
 enum {

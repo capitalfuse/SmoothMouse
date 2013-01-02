@@ -1,7 +1,12 @@
 #import <IOKit/IODataQueueClient.h>
 #import <IOKit/kext/KextManager.h>
 #import <mach/mach.h>
+#include <mach/mach_init.h>
+#include <mach/thread_policy.h>
+#include <mach/mach_time.h>
 #include <pthread.h>
+#include <sched.h>
+#include <sys/sysctl.h>
 
 #import "kextdaemon.h"
 #import "constants.h"
@@ -97,6 +102,8 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 		NSLog(@"cannot open file %@", file);
         return NO;
 	}
+
+    NSLog(@"found %@", file);
 
     NSNumber *value;
 
@@ -301,11 +308,82 @@ error:
 	[super release];
 }
 
+
+BOOL set_high_prio_pthread() {
+    struct sched_param sp;
+
+    memset(&sp, 0, sizeof(struct sched_param));
+
+    sp.sched_priority = sched_get_priority_max(SCHED_RR);
+
+    if (pthread_setschedparam(pthread_self(), SCHED_RR, &sp)  == -1) {
+        NSLog(@"call to pthread_setschedparam failed");
+        return NO;
+    }
+
+    NSLog(@"Thread prio set to highest (%u)", sp.sched_priority);
+
+    return YES;
+}
+
+inline Float64 convert_from_nanos_to_mach_timebase(UInt64 nanos, mach_timebase_info_data_t *info)
+{
+    Float64 the_numerator = static_cast<Float64>(info->numer);
+    Float64 the_denominator = static_cast<Float64>(info->denom);
+    Float64 the_nanos = static_cast<Float64>(nanos);
+
+    Float64 the_partial_answer = the_nanos / the_numerator;
+    Float64 the_float_answer = the_partial_answer * the_denominator;
+    UInt64 the_answer = static_cast<UInt64>(the_float_answer);
+
+    //NSLog(@"convert_from_nanos_to_mach_timebase: %llu => %llu", nanos, the_answer);
+
+    return the_answer;
+}
+
+BOOL set_realtime_prio() {
+    mach_timebase_info_data_t info;
+    kern_return_t kret = mach_timebase_info(&info);
+    if (kret != KERN_SUCCESS) {
+        NSLog(@"call to mach_timebase_info failed: %d", kret);
+    }
+
+#define MS_TO_NANOS(ms) ((ms) * 1000000)
+
+    /* See http://developer.apple.com/library/mac/#documentation/Darwin/Conceptual/KernelProgramming/scheduler/scheduler.html */
+
+    struct thread_time_constraint_policy ttcpolicy;
+    // most common mouse hz is 127, meaning period is 7.874 ms
+    ttcpolicy.period        = convert_from_nanos_to_mach_timebase(MS_TO_NANOS(7.874), &info);
+    ttcpolicy.computation   = 8000000 ; // measured
+    ttcpolicy.constraint    = 16000000;
+    ttcpolicy.preemptible   = 0;
+
+    NSLog(@"period: %u, computation: %u, constraint: %u (all in mach timebase), preemtible: %u",
+          ttcpolicy.period,
+          ttcpolicy.computation,
+          ttcpolicy.constraint,
+          ttcpolicy.preemptible);
+
+#undef MS_TO_NANOS
+
+    kret = thread_policy_set(mach_thread_self(),
+                            THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &ttcpolicy,
+                            THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+
+    if (kret != KERN_SUCCESS) {
+        NSLog(@"call to thread_policy_set failed: %d", kret);
+        return NO;
+    }
+
+    NSLog(@"Time constraint policy set");
+
+    return YES;
+}
+
 void *HandleMouseEventThread(void *instance)
 {
     SmoothMouseDaemon *self = (SmoothMouseDaemon *) instance;
-
-    static const int MOUSE_THREAD_PRIORITY = 96; // real-time
 
     kern_return_t error;
 
@@ -315,12 +393,8 @@ void *HandleMouseEventThread(void *instance)
 		return NULL;
 	}
 
-    struct sched_param sp;
-    memset(&sp, 0, sizeof(struct sched_param));
-    sp.sched_priority = MOUSE_THREAD_PRIORITY;
-    if (pthread_setschedparam(pthread_self(), SCHED_RR, &sp)  == -1) {
-        NSLog(@"call to pthread_setschedparam failed");
-    }
+    set_high_prio_pthread();
+    set_realtime_prio();
 
     (void) mouse_init();
 
@@ -348,15 +422,6 @@ void *HandleMouseEventThread(void *instance)
                         default:
                             velocity = 1;
                             NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
-                    }
-                    struct sched_param sp;
-                    int policy;
-                    if (pthread_getschedparam(pthread_self(), &policy, &sp)  == -1) {
-                        NSLog(@"call to pthread_getschedparam failed");
-                    }
-                    if (is_debug && sp.sched_priority != MOUSE_THREAD_PRIORITY) {
-                        NSLog(@"mouse thread priority has changed (should be %d, is %d)",
-                              MOUSE_THREAD_PRIORITY, sp.sched_priority);
                     }
                     mouse_handle(mouse_event, velocity, curve);
                 } else {
