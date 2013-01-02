@@ -68,13 +68,13 @@
 							<int key="NSvFlags">12</int>
 							<string key="NSFrame">{{13, 10}, {642, 352}}</string>
 							<reference key="NSSuperview" ref="1037298196"/>
-							<reference key="NSNextKeyView" ref="802518675"/>
+							<reference key="NSNextKeyView" ref="586427292"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<array class="NSMutableArray" key="NSTabViewItems">
 								<object class="NSTabViewItem" id="1032424932">
 									<string key="NSIdentifier">1</string>
 									<object class="NSView" key="NSView" id="586427292">
-										<nil key="NSNextResponder"/>
+										<reference key="NSNextResponder" ref="800643468"/>
 										<int key="NSvFlags">256</int>
 										<array class="NSMutableArray" key="NSSubviews">
 											<object class="NSButton" id="887946673">
@@ -310,6 +310,7 @@
 											</object>
 										</array>
 										<string key="NSFrame">{{10, 33}, {622, 306}}</string>
+										<reference key="NSSuperview" ref="800643468"/>
 										<reference key="NSNextKeyView" ref="887946673"/>
 										<string key="NSReuseIdentifierKey">_NS:11</string>
 									</object>
@@ -320,7 +321,7 @@
 								<object class="NSTabViewItem" id="792044711">
 									<string key="NSIdentifier">2</string>
 									<object class="NSView" key="NSView" id="802518675">
-										<reference key="NSNextResponder" ref="800643468"/>
+										<nil key="NSNextResponder"/>
 										<int key="NSvFlags">256</int>
 										<array class="NSMutableArray" key="NSSubviews">
 											<object class="NSButton" id="374620801">
@@ -522,7 +523,6 @@
 											</object>
 										</array>
 										<string key="NSFrame">{{10, 33}, {622, 306}}</string>
-										<reference key="NSSuperview" ref="800643468"/>
 										<reference key="NSNextKeyView" ref="374620801"/>
 										<string key="NSReuseIdentifierKey">_NS:28</string>
 									</object>
@@ -531,7 +531,7 @@
 									<reference key="NSTabView" ref="800643468"/>
 								</object>
 								<object class="NSTabViewItem" id="629479847">
-									<string key="NSIdentifier">1</string>
+									<string key="NSIdentifier">3</string>
 									<object class="NSView" key="NSView" id="2874142">
 										<nil key="NSNextResponder"/>
 										<int key="NSvFlags">256</int>
@@ -992,13 +992,13 @@ wGw</bytes>
 									<reference key="NSTabView" ref="800643468"/>
 								</object>
 							</array>
-							<reference key="NSSelectedTabViewItem" ref="792044711"/>
+							<reference key="NSSelectedTabViewItem" ref="1032424932"/>
 							<reference key="NSFont" ref="415778044"/>
 							<int key="NSTvFlags">0</int>
 							<bool key="NSAllowTruncatedLabels">YES</bool>
 							<bool key="NSDrawsBackground">YES</bool>
 							<array class="NSMutableArray" key="NSSubviews">
-								<reference ref="802518675"/>
+								<reference ref="586427292"/>
 							</array>
 						</object>
 					</array>
@@ -1033,7 +1033,7 @@ wGw</bytes>
 				</array>
 			</object>
 			<object class="NSScrollView" id="34856516">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">256</int>
 				<array class="NSMutableArray" key="NSSubviews">
 					<object class="NSClipView" id="563070841">
@@ -1045,7 +1045,7 @@ wGw</bytes>
 								<int key="NSvFlags">2322</int>
 								<string key="NSFrameSize">{241, 133}</string>
 								<reference key="NSSuperview" ref="563070841"/>
-								<reference key="NSNextKeyView" ref="46568458"/>
+								<reference key="NSNextKeyView" ref="295377415"/>
 								<string key="NSReuseIdentifierKey">_NS:13</string>
 								<object class="NSTextContainer" key="NSTextContainer" id="918917362">
 									<object class="NSLayoutManager" key="NSLayoutManager">
@@ -1277,8 +1277,7 @@ wGw</bytes>
 					</object>
 				</array>
 				<string key="NSFrameSize">{240, 135}</string>
-				<reference key="NSSuperview"/>
-				<reference key="NSNextKeyView" ref="295377415"/>
+				<reference key="NSNextKeyView" ref="563070841"/>
 				<string key="NSReuseIdentifierKey">_NS:9</string>
 				<int key="NSsFlags">133266</int>
 				<reference key="NSVScroller" ref="46568458"/>
@@ -1498,6 +1497,22 @@ wGw</bytes>
 						<reference key="destination" ref="334221701"/>
 					</object>
 					<int key="connectionID">285</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">tabView</string>
+						<reference key="source" ref="294453543"/>
+						<reference key="destination" ref="800643468"/>
+					</object>
+					<int key="connectionID">286</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="800643468"/>
+						<reference key="destination" ref="294453543"/>
+					</object>
+					<int key="connectionID">288</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -2046,6 +2061,14 @@ wGw</bytes>
 				<string key="140.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="141.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="142.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<object class="NSMutableDictionary" key="150.IBAttributePlaceholdersKey">
+					<string key="NS.key.0">InitialTabViewItem</string>
+					<object class="IBInitialTabViewItemAttribute" key="NS.object.0">
+						<string key="name">InitialTabViewItem</string>
+						<reference key="object" ref="800643468"/>
+						<reference key="initialTabViewItem" ref="1032424932"/>
+					</object>
+				</object>
 				<string key="150.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="151.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="152.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2109,7 +2132,7 @@ wGw</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">285</int>
+			<int key="maxID">288</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>

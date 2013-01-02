@@ -17,42 +17,47 @@
         [self enableAutomaticallyCheckForUpdates:YES];
     }
 
+    NSNumber *tabNumber = [[NSUserDefaults standardUserDefaults] objectForKey:KEY_SELECTED_TAB];
+    if (tabNumber) {
+        [tabView selectTabViewItemAtIndex:[tabNumber intValue]];
+    }
+
     NSMenu *menuCopy;
 
     menuCopy = [buttonMenu copy];
     [accelerationCurveMouse setMenu: menuCopy];
     [menuCopy release];
-    
+
     menuCopy = [buttonMenu copy];
     [accelerationCurveTrackpad setMenu: menuCopy];
     [menuCopy release];
-	
+
     /* Mouse enabled state */
     if ([self getMouseEnabled]) {
         [enableForMouse setState:1];
     } else {
         [enableForMouse setState:0];
     }
-    
+
     /* Trackpad enabled state */
     if ([self getTrackpadEnabled]) {
         [enableForTrackpad setState:1];
     } else {
         [enableForTrackpad setState:0];
     }
-    
+
     /* Mouse acceleration curve */
     NSString *mouseAccelerationCurveString = [self getAccelerationCurveForMouse];
     if (mouseAccelerationCurveString) {
         [accelerationCurveMouse selectItemWithTitle:mouseAccelerationCurveString];
     }
-    
+
     /* Trackpad acceleration curve */
     NSString *trackpadAccelerationCurveString = [self getAccelerationCurveForTrackpad];
     if (trackpadAccelerationCurveString) {
         [accelerationCurveTrackpad selectItemWithTitle:trackpadAccelerationCurveString];
     }
-    
+
     /* Automatically check for updates */
     [automaticallyCheckForUpdates setState:[self isAutomaticallyCheckForUpdatesEnabled]];
 
@@ -63,18 +68,22 @@
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *version = [[bundle infoDictionary] objectForKey:@"CFBundleVersion"];
     [bundleVersion setStringValue:version];
-    
+
     NSString *filePath = [bundle pathForResource:@"Credits" ofType:@"rtf"];
     NSData *data = [NSData dataWithContentsOfFile:filePath];
-    
+
     if (data) {
         NSDictionary *docAttributes;
-        NSAttributedString *rtfString =
-            [[NSAttributedString alloc] initWithRTF:data documentAttributes:&docAttributes];
-        
+        NSAttributedString *rtfString = [[NSAttributedString alloc] initWithRTF:data documentAttributes:&docAttributes];
         [[credits textStorage] setAttributedString: rtfString];
         [rtfString release];
     }
+}
+
+- (void)tabView:(NSTabView *)tv didSelectTabViewItem:(NSTabViewItem *)tvi {
+    NSNumber *tabNumber = [NSNumber numberWithInteger: [tv indexOfTabViewItem:tvi]];
+    [[NSUserDefaults standardUserDefaults] setObject:tabNumber forKey:KEY_SELECTED_TAB];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(void) labelWasClicked {
@@ -128,25 +137,22 @@
     BOOL                ret = NO;
     OSStatus            status;
     AuthorizationRef    authorizationRef;
-    
+
     status = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment,
                                  kAuthorizationFlagDefaults, &authorizationRef);
     if (status != errAuthorizationSuccess) {
         goto cleanup;
     }
-    
+
     AuthorizationItem right = {kAuthorizationRightExecute, 0, NULL, 0};
     AuthorizationRights rights = {1, &right};
-    AuthorizationFlags flags =  kAuthorizationFlagDefaults |
-                                kAuthorizationFlagInteractionAllowed |
-                                kAuthorizationFlagPreAuthorize |
-                                kAuthorizationFlagExtendRights;
-    
+    AuthorizationFlags flags = kAuthorizationFlagDefaults | kAuthorizationFlagInteractionAllowed | kAuthorizationFlagPreAuthorize | kAuthorizationFlagExtendRights;
+
     status = AuthorizationCopyRights(authorizationRef, &rights, NULL, flags, NULL);
     if (status != errAuthorizationSuccess) {
         goto cleanup;
     }
-    
+
     const char *tool    = [script UTF8String];
     char *args[]        = { NULL, NULL };
     FILE *pipe          = NULL;
@@ -166,38 +172,37 @@
 cleanup:
 
     (void) AuthorizationFree(authorizationRef, kAuthorizationFlagDestroyRights);
-    
+
     return ret;
 }
 
-
 -(BOOL)launchExecutable:(NSString*)executable withArguments:(NSArray *)arguments {
     NSTask *task;
-    
+
     task = [[NSTask alloc] init];
-    
+
     [task setLaunchPath: executable];
     [task setArguments: arguments];
-    
+
     NSPipe *pipe;
     pipe = [NSPipe pipe];
     [task setStandardOutput: pipe];
-    
+
     NSFileHandle *file;
     file = [pipe fileHandleForReading];
-    
+
     [task launch];
-    
+
     NSData *data;
     data = [file readDataToEndOfFile];
-    
+
     NSString *string;
     string = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
     //NSLog (@"executable '%@' returned:\n%@", executable, string);
-    
+
     [string release];
     [task release];
-    
+
     return YES;
 }
 
@@ -205,7 +210,7 @@ cleanup:
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
-	
+
 	return [fm fileExistsAtPath:file];
 }
 
@@ -219,9 +224,9 @@ cleanup:
                           SETTINGS_MOUSE_ACCELERATION_CURVE_DEFAULT, SETTINGS_MOUSE_ACCELERATION_CURVE,
                           SETTINGS_TRACKPAD_ACCELERATION_CURVE_DEFAULT, SETTINGS_TRACKPAD_ACCELERATION_CURVE,
                           nil];
-    
+
     NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
-    
+
     [dict writeToFile:file atomically:YES];
 }
 
@@ -244,7 +249,7 @@ cleanup:
     } else {
         [self saveAccelerationCurveForTrackpad:title];
     }
-    
+
     [self restartDaemonIfRunning];
 }
 
@@ -270,7 +275,7 @@ cleanup:
             [self stopDaemon];
         }
         [self startDaemon];
-        
+
     } else {
         if ([self isDaemonRunning]) {
             [self stopDaemon];
@@ -284,9 +289,9 @@ cleanup:
 - (BOOL)isDaemonRunning
 {
 	CFDictionaryRef job;
-	
+
 	job = SMJobCopyDictionary(kSMDomainUserLaunchd, (CFStringRef)@"com.cyberic.smoothmouse");
-	
+
 	if (job) {
 		CFRelease(job);
 		return YES;
@@ -300,7 +305,7 @@ cleanup:
     NSArray *arguments;
     NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
     arguments = [NSArray arrayWithObjects: @"load", plistFile, nil];
-    
+
     return [self launchExecutable: @"/bin/launchctl" withArguments:arguments];
 }
 
@@ -309,7 +314,7 @@ cleanup:
     NSArray *arguments;
     NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
     arguments = [NSArray arrayWithObjects: @"unload", plistFile, nil];
-    
+
     return [self launchExecutable: @"/bin/launchctl" withArguments:arguments];
 }
 
@@ -317,7 +322,7 @@ cleanup:
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
-	
+
 	return [fm fileExistsAtPath:file];
 }
 
@@ -325,7 +330,7 @@ cleanup:
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_UPDATER_FILENAME];
-	
+
 	return [fm fileExistsAtPath:file];
 }
 
@@ -355,12 +360,12 @@ cleanup:
 
 -(void)createLaunchAgentsDirectory {
     mode_t oldMask = umask(S_IRWXO | S_IRWXG);
-    
+
     NSFileManager *filemgr = [NSFileManager defaultManager];
     NSString *launchAgentsDirectory = [NSHomeDirectory() stringByAppendingPathComponent: @"/Library/LaunchAgents"];
     NSURL *newDir = [NSURL fileURLWithPath:launchAgentsDirectory];
     [filemgr createDirectoryAtURL: newDir withIntermediateDirectories:YES attributes: nil error:nil];
-    
+
     (void) umask(oldMask);
 }
 
@@ -379,7 +384,7 @@ cleanup:
     } else {
         NSError *error;
         NSFileManager *fm = [NSFileManager defaultManager];
-        
+
         return [fm removeItemAtPath:file error:&error];
     }
 }
@@ -397,7 +402,7 @@ cleanup:
     } else {
         NSError *error;
         NSFileManager *fm = [NSFileManager defaultManager];
-        
+
         return [fm removeItemAtPath:file error:&error];
     }
 }
@@ -452,15 +457,15 @@ cleanup:
 {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:file];
-	
+
     NSNumber *num;
-    
+
     num = [NSNumber numberWithDouble:valueMouse];
 	[settings setValue:num forKey:SETTINGS_MOUSE_VELOCITY];
-    
+
     num = [NSNumber numberWithDouble:valueTrackpad];
 	[settings setValue:num forKey:SETTINGS_TRACKPAD_VELOCITY];
-    
+
 	// TODO: does num need releasing here?
     return [settings writeToFile:file atomically:YES];
 }

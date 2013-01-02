@@ -4,6 +4,7 @@
 
 @interface SmoothMousePrefPane : NSPreferencePane <NSTextFieldDelegate> {
 @private
+    IBOutlet NSTabView      *tabView;
     IBOutlet NSMenu         *buttonMenu;
     
     IBOutlet NSButton       *enableForMouse;
@@ -26,6 +27,8 @@
 }
 
 - (void)mainViewDidLoad;
+
+- (void)tabView:(NSTabView *)tv didSelectTabViewItem:(NSTabViewItem *)tvi;
 
 -(IBAction)pressCheckForUpdates:(id) sender;
 -(IBAction)pressEnableDisableAutomaticallyCheckForUpdates:(id) sender;
