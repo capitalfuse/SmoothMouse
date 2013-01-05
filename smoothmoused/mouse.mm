@@ -208,18 +208,19 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
                     }
                 }
                 changedIndex = buttonIndex;
-            } else {
-                if (BUTTON_DOWN(buttonIndex)) {
-                    switch(buttonIndex) {
-                        case LEFT_BUTTON:   mouseType = kCGEventLeftMouseDragged; break;
-                        case RIGHT_BUTTON:  mouseType = kCGEventRightMouseDragged; break;
-                        default:            mouseType = kCGEventOtherMouseDragged; break;
-                    }
-                    changedIndex = buttonIndex;
-                }
             }
         }
-        
+
+        if (changedIndex == -1) {
+            if (BUTTON_DOWN(LEFT_BUTTON)) {
+                mouseType = kCGEventLeftMouseDragged;
+            } else if (BUTTON_DOWN(RIGHT_BUTTON)) {
+                mouseType = kCGEventRightMouseDragged;
+            } else {
+                mouseType = kCGEventOtherMouseDragged;
+            }
+        }
+
         CGMouseButton otherButton = 0;
         if(changedIndex != -1) {
             switch(changedIndex) {
@@ -231,7 +232,7 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
                 case BUTTON6: otherButton = 5; break;
             }
         }
-        
+
         if (mouseType == kCGEventLeftMouseDown) {
             CGFloat maxDistanceAllowed = sqrt(2) + 0.0001;
             CGFloat distanceMovedSinceLastClick = get_distance(lastClickPos, newPos);
@@ -272,7 +273,7 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
         deltaPosInt.y += deltaY;
 
         if (is_debug) {
-            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex: %d, nclicks: %d, csv: %d, cur: %.2fx%.2f, delta: %.2fx%.2f",
+            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex(654LMR): %d, nclicks: %d, csv: %d, cur: %.2fx%.2f, delta: %.2fx%.2f",
                   event->dx,
                   event->dy,
                   BUTTON_DOWN(LEFT_BUTTON),
@@ -284,7 +285,7 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
                   event_type_to_string(mouseType),
                   mouseType,
                   otherButton,
-                  changedIndex,
+                  changedIndex == -1 ? -1 : ((int)log2(changedIndex)),
                   nclicks,
                   clickStateValue,
                   currentPos.x,
