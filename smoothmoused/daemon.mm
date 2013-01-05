@@ -24,8 +24,6 @@ static double velocity_trackpad;
 static AccelerationCurve curve_mouse;
 static AccelerationCurve curve_trackpad;
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
 @interface SmoothMouseDaemon : NSObject {
 @private
     BOOL connected;
@@ -159,8 +157,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     if (!connected) {
         kern_return_t error;
 
-        pthread_mutex_lock(&mutex);
-
         service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
         if (service == IO_OBJECT_NULL) {
             NSLog(@"IOServiceGetMatchingService() failed");
@@ -218,14 +214,11 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
         initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
 
         connected = YES;
-
-        pthread_mutex_unlock(&mutex);
     }
 
 	return YES;
 
 error:
-    pthread_mutex_unlock(&mutex);
     return NO;
 }
 
@@ -274,15 +267,17 @@ error:
 -(BOOL) disconnectFromDriver
 {
     if (connected) {
+        if (recvPort) {
+            mach_port_destroy(mach_task_self(), recvPort);
+        }
 
-        pthread_mutex_lock(&mutex);
+        int rv = pthread_join(mouseEventThreadID, NULL);
+        if (rv != 0) {
+            NSLog(@"Failed to wait for mouse event thread");
+        }
 
         if (address) {
             IOConnectUnmapMemory(connect, kIODefaultMemoryType, mach_task_self(), address);
-        }
-
-        if (recvPort) {
-            mach_port_destroy(mach_task_self(), recvPort);
         }
 
         if (connect) {
@@ -290,13 +285,6 @@ error:
         }
 
         connected = NO;
-
-        pthread_mutex_unlock(&mutex);
-
-        int rv = pthread_join(mouseEventThreadID, NULL);
-        if (rv != 0) {
-            NSLog(@"Failed to wait for mouse event thread");
-        }
     }
 
     return YES;
@@ -399,38 +387,30 @@ void *HandleMouseEventThread(void *instance)
     (void) mouse_init();
 
     while (IODataQueueWaitForAvailableData(self->queueMappedMemory, self->recvPort) == kIOReturnSuccess) {
-
-        pthread_mutex_lock(&mutex);
-
-        if (self->connected) {
-
-            while (IODataQueueDataAvailable(self->queueMappedMemory)) {
-                error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
-                if (!error) {
-                    mouse_event_t *mouse_event = (mouse_event_t *) buf;
-                    double velocity;
-                    AccelerationCurve curve;
-                    switch (mouse_event->device_type) {
-                        case kDeviceTypeMouse:
-                            velocity = velocity_mouse;
-                            curve = curve_mouse;
-                            break;
-                        case kDeviceTypeTrackpad:
-                            velocity = velocity_trackpad;
-                            curve = curve_trackpad;
-                            break;
-                        default:
-                            velocity = 1;
-                            NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
-                    }
-                    mouse_handle(mouse_event, velocity, curve);
-                } else {
-                    NSLog(@"IODataQueueDequeue() failed");
+        while (IODataQueueDataAvailable(self->queueMappedMemory)) {
+            error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
+            if (!error) {
+                mouse_event_t *mouse_event = (mouse_event_t *) buf;
+                double velocity;
+                AccelerationCurve curve;
+                switch (mouse_event->device_type) {
+                    case kDeviceTypeMouse:
+                        velocity = velocity_mouse;
+                        curve = curve_mouse;
+                        break;
+                    case kDeviceTypeTrackpad:
+                        velocity = velocity_trackpad;
+                        curve = curve_trackpad;
+                        break;
+                    default:
+                        velocity = 1;
+                        NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
                 }
+                mouse_handle(mouse_event, velocity, curve);
+            } else {
+                NSLog(@"IODataQueueDequeue() failed");
             }
         }
-
-        pthread_mutex_unlock(&mutex);
     }
 
 	free(buf);
