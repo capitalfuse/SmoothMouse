@@ -15,20 +15,26 @@
 #define BUTTON6         32
 #define NUM_BUTTONS     6
 
-#define BUTTON_DOWN(button)             (((button) & event->buttons) == (button))
-#define BUTTON_UP(button)               (((button) & event->buttons) == 0)
-#define BUTTON_STATE_CHANGED(button)    ((buttons0 & (button)) != (event->buttons & (button)))
+#define BUTTON_DOWN(curbuttons, button)                         (((button) & curbuttons) == (button))
+#define BUTTON_UP(curbuttons, button)                           (((button) & curbuttons) == 0)
+#define BUTTON_STATE_CHANGED(curbuttons, lastbuttons, button)   ((lastButtons & (button)) != (curbuttons & (button)))
 
 WindowsFunction *win = NULL;
 
 extern BOOL is_debug;
 extern BOOL is_event;
 
+extern double velocity_mouse;
+extern double velocity_trackpad;
+extern AccelerationCurve curve_mouse;
+extern AccelerationCurve curve_trackpad;
+
 static CGEventSourceRef eventSource = NULL;
 static CGPoint deltaPosInt;
 static CGPoint deltaPosFloat;
+static CGPoint currentPos;
 static CGPoint lastPos;
-static int buttons0 = 0;
+static int lastButtons = 0;
 static int nclicks = 0;
 static CGPoint lastClickPos;
 static double lastClickTime = 0;
@@ -51,6 +57,7 @@ static double get_distance(CGPoint pos0, CGPoint pos1) {
 
 static const char *event_type_to_string(CGEventType type) {
     switch(type) {
+        case kCGEventNull:              return "kCGEventNull";
         case kCGEventLeftMouseUp:       return "kCGEventLeftMouseUp";
         case kCGEventLeftMouseDown:     return "kCGEventLeftMouseDown";
         case kCGEventLeftMouseDragged:  return "kCGEventLeftMouseDragged";
@@ -120,7 +127,7 @@ bool mouse_init() {
         CGEventSourceSetLocalEventsFilterDuringSuppressionState(eventSource, kCGEventFilterMaskPermitLocalMouseEvents, kCGEventSuppressionStateSuppressionInterval);
     }
 
-	deltaPosFloat = deltaPosInt = lastPos = get_current_mouse_pos();
+	deltaPosFloat = deltaPosInt = get_current_mouse_pos();
 
     if (!is_event) {
         if (CGSetLocalEventsFilterDuringSuppressionState(kCGEventFilterMaskPermitAllEvents,
@@ -144,18 +151,8 @@ void mouse_cleanup() {
     CFRelease(eventSource);
 }
 
-void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve) {
+static void mouse_handle_move(int dx, int dy, double velocity, AccelerationCurve curve, int currentButtons) {
     CGPoint newPos;
-    CGPoint currentPos = lastPos;
-
-    if (event->seqnum != (lastSequenceNumber + 1)) {
-        if (is_debug) {
-            NSLog(@"Cursor position dirty, need to fetch fresh");
-        }
-        currentPos = get_current_mouse_pos();
-    }
-
-    lastSequenceNumber = event->seqnum;
 
     float calcdx;
     float calcdy;
@@ -175,12 +172,12 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
         }
         int newdx;
         int newdy;
-        win->apply(event->dx, event->dy, &newdx, &newdy);
+        win->apply(dx, dy, &newdx, &newdy);
         calcdx = (float) newdx;
         calcdy = (float) newdy;
     } else {
-        calcdx = (velocity * event->dx);
-        calcdy = (velocity * event->dy);
+        calcdx = (velocity * dx);
+        calcdy = (velocity * dy);
     }
 
     newPos.x = currentPos.x + calcdx;
@@ -190,11 +187,75 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
 
 	if (is_event) {
         CGEventType mouseType = kCGEventMouseMoved;
-        int changedIndex = -1;
+        CGMouseButton otherButton = 0;
+
+        if (BUTTON_DOWN(currentButtons, LEFT_BUTTON)) {
+            mouseType = kCGEventLeftMouseDragged;
+            otherButton = kCGMouseButtonLeft;
+        } else if (BUTTON_DOWN(currentButtons, RIGHT_BUTTON)) {
+            mouseType = kCGEventRightMouseDragged;
+            otherButton = kCGMouseButtonRight;
+        } else if (BUTTON_DOWN(currentButtons, MIDDLE_BUTTON)) {
+            mouseType = kCGEventOtherMouseDragged;
+            otherButton = kCGMouseButtonCenter;
+        } else if (BUTTON_DOWN(currentButtons, BUTTON4)) {
+            mouseType = kCGEventOtherMouseDragged;
+            otherButton = 3;
+        } else if (BUTTON_DOWN(currentButtons, BUTTON5)) {
+            mouseType = kCGEventOtherMouseDragged;
+            otherButton = 4;
+        } else if (BUTTON_DOWN(currentButtons, BUTTON6)) {
+            mouseType = kCGEventOtherMouseDragged;
+            otherButton = 5;
+        }
+
+        deltaPosFloat.x += calcdx;
+        deltaPosFloat.y += calcdy;
+        int deltaX = (int) (deltaPosFloat.x - deltaPosInt.x);
+        int deltaY = (int) (deltaPosFloat.y - deltaPosInt.y);
+        deltaPosInt.x += deltaX;
+        deltaPosInt.y += deltaY;
+
+        if (is_debug) {
+            LOG(@"move dx: %d, dy: %d, cur: %.2fx%.2f, delta: %.2fx%.2f, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d)",
+                  dx,
+                  dy,
+                  currentPos.x,
+                  currentPos.y,
+                  deltaPosInt.x,
+                  deltaPosInt.y,
+                  BUTTON_DOWN(currentButtons, LEFT_BUTTON),
+                  BUTTON_DOWN(currentButtons, MIDDLE_BUTTON),
+                  BUTTON_DOWN(currentButtons, RIGHT_BUTTON),
+                  BUTTON_DOWN(currentButtons, BUTTON4),
+                  BUTTON_DOWN(currentButtons, BUTTON5),
+                  BUTTON_DOWN(currentButtons, BUTTON6),
+                  event_type_to_string(mouseType),
+                  mouseType);
+        }
+
+        t1 = GET_TIME();
+        CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, newPos, otherButton);
+        CGEventSetIntegerValueField(evt, kCGMouseEventDeltaX, deltaX);
+        CGEventSetIntegerValueField(evt, kCGMouseEventDeltaY, deltaY);
+        t3 = GET_TIME();
+        CGEventPost(kCGSessionEventTap, evt);
+        t4 = GET_TIME();
+        CFRelease(evt);
+        t2 = GET_TIME();
+    }
+
+    currentPos = newPos;
+}
+
+static void mouse_handle_buttons(int buttons) {
+	if (is_event) {
+        CGEventType mouseType = kCGEventNull;
+        //int changedIndex = -1;
         for(int i = 0; i < NUM_BUTTONS; i++) {
             int buttonIndex = (1 << i);
-            if (BUTTON_STATE_CHANGED(buttonIndex)) {
-                if (BUTTON_DOWN(buttonIndex)) {
+            if (BUTTON_STATE_CHANGED(buttons, lastButtons, buttonIndex)) {
+                if (BUTTON_DOWN(buttons, buttonIndex)) {
                     switch(buttonIndex) {
                         case LEFT_BUTTON:   mouseType = kCGEventLeftMouseDown; break;
                         case RIGHT_BUTTON:  mouseType = kCGEventRightMouseDown; break;
@@ -207,114 +268,131 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
                         default:            mouseType = kCGEventOtherMouseUp; break;
                     }
                 }
-                changedIndex = buttonIndex;
-            }
-        }
+                //changedIndex = buttonIndex;
+                CGMouseButton otherButton = 0;
+                switch(buttonIndex) {
+                    case LEFT_BUTTON: otherButton = kCGMouseButtonLeft; break;
+                    case RIGHT_BUTTON: otherButton = kCGMouseButtonRight; break;
+                    case MIDDLE_BUTTON: otherButton = kCGMouseButtonCenter; break;
+                    case BUTTON4: otherButton = 3; break;
+                    case BUTTON5: otherButton = 4; break;
+                    case BUTTON6: otherButton = 5; break;
+                }
 
-        if (changedIndex == -1) {
-            if (BUTTON_DOWN(LEFT_BUTTON)) {
-                mouseType = kCGEventLeftMouseDragged;
-            } else if (BUTTON_DOWN(RIGHT_BUTTON)) {
-                mouseType = kCGEventRightMouseDragged;
-            } else if (BUTTON_DOWN(MIDDLE_BUTTON) ||
-                       BUTTON_DOWN(BUTTON4) ||
-                       BUTTON_DOWN(BUTTON5) ||
-                       BUTTON_DOWN(BUTTON6)) {
-                mouseType = kCGEventOtherMouseDragged;
-            }
-        }
+                if (mouseType == kCGEventLeftMouseDown) {
+                    CGFloat maxDistanceAllowed = sqrt(2) + 0.0001;
+                    CGFloat distanceMovedSinceLastClick = get_distance(lastClickPos, currentPos);
+                    double now = timestamp();
+                    if (now - lastClickTime <= clickTime &&
+                        distanceMovedSinceLastClick <= maxDistanceAllowed) {
+                        lastClickTime = timestamp();
+                        nclicks++;
+                    } else {
+                        nclicks = 1;
+                        lastClickTime = timestamp();
+                        lastClickPos = currentPos;
+                    }
+                }
 
-        CGMouseButton otherButton = 0;
-        if(changedIndex != -1) {
-            switch(changedIndex) {
-                case LEFT_BUTTON: otherButton = kCGMouseButtonLeft; break;
-                case RIGHT_BUTTON: otherButton = kCGMouseButtonRight; break;
-                case MIDDLE_BUTTON: otherButton = kCGMouseButtonCenter; break;
-                case BUTTON4: otherButton = 3; break;
-                case BUTTON5: otherButton = 4; break;
-                case BUTTON6: otherButton = 5; break;
-            }
-        }
+                int clickStateValue;
+                switch(mouseType) {
+                    case kCGEventLeftMouseDown:
+                    case kCGEventLeftMouseUp:
+                        clickStateValue = nclicks;
+                        break;
+                    case kCGEventRightMouseDown:
+                    case kCGEventOtherMouseDown:
+                    case kCGEventRightMouseUp:
+                    case kCGEventOtherMouseUp:
+                        clickStateValue = 1;
+                        break;
+                    default:
+                        clickStateValue = 0;
+                        break;
+                }
 
-        if (mouseType == kCGEventLeftMouseDown) {
-            CGFloat maxDistanceAllowed = sqrt(2) + 0.0001;
-            CGFloat distanceMovedSinceLastClick = get_distance(lastClickPos, newPos);
-            double now = timestamp();
-            if (now - lastClickTime <= clickTime &&
-                distanceMovedSinceLastClick <= maxDistanceAllowed) {
-                lastClickTime = timestamp();
-                nclicks++;
-            } else {
-                nclicks = 1;
-                lastClickTime = timestamp();
-                lastClickPos = newPos;
+                if (is_debug) {
+                    LOG(@"buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, buttonIndex(654LMR): %d, nclicks: %d, csv: %d",
+                          BUTTON_DOWN(buttons, LEFT_BUTTON),
+                          BUTTON_DOWN(buttons, MIDDLE_BUTTON),
+                          BUTTON_DOWN(buttons, RIGHT_BUTTON),
+                          BUTTON_DOWN(buttons, BUTTON4),
+                          BUTTON_DOWN(buttons, BUTTON5),
+                          BUTTON_DOWN(buttons, BUTTON6),
+                          event_type_to_string(mouseType),
+                          mouseType,
+                          otherButton,
+                          ((int)log2(buttonIndex)),
+                          nclicks,
+                          clickStateValue);
+                }
+
+                t1 = GET_TIME();
+                CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, currentPos, otherButton);
+                CGEventSetIntegerValueField(evt, kCGMouseEventClickState, clickStateValue);
+                t3 = GET_TIME();
+                CGEventPost(kCGSessionEventTap, evt);
+                t4 = GET_TIME();
+                CFRelease(evt);
+                t2 = GET_TIME();
             }
         }
-        
-        int clickStateValue;
-        switch(mouseType) {
-            case kCGEventLeftMouseDown:
-            case kCGEventLeftMouseUp:
-                clickStateValue = nclicks;
+    }
+
+    lastButtons = buttons;
+}
+
+void mouse_handle(mouse_event_t *event) {
+
+    if (event->seqnum != (lastSequenceNumber + 1)) {
+        if (is_debug) {
+            LOG(@"Cursor position dirty, need to fetch fresh");
+        }
+        currentPos = get_current_mouse_pos();
+    }
+
+    if (event->dx != 0 || event->dy != 0) {
+        double velocity;
+        AccelerationCurve curve;
+        switch (event->device_type) {
+            case kDeviceTypeMouse:
+                velocity = velocity_mouse;
+                curve = curve_mouse;
                 break;
-            case kCGEventRightMouseDown:
-            case kCGEventOtherMouseDown:
-            case kCGEventRightMouseUp:
-            case kCGEventOtherMouseUp:
-                clickStateValue = 1;
+            case kDeviceTypeTrackpad:
+                velocity = velocity_trackpad;
+                curve = curve_trackpad;
                 break;
             default:
-                clickStateValue = 0;
-                break;
+                velocity = 1;
+                NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
+                exit(0);
         }
 
-        deltaPosFloat.x += calcdx;
-        deltaPosFloat.y += calcdy;
-        int deltaX = (int) (deltaPosFloat.x - deltaPosInt.x);
-        int deltaY = (int) (deltaPosFloat.y - deltaPosInt.y);
-        deltaPosInt.x += deltaX;
-        deltaPosInt.y += deltaY;
+        mouse_handle_move(event->dx, event->dy, velocity, curve, event->buttons);
+    }
 
-        if (is_debug) {
-            NSLog(@"dx: %d, dy: %d, buttons(LMR456): %d%d%d%d%d%d, mouseType: %s(%d), otherButton: %d, changedIndex(654LMR): %d, nclicks: %d, csv: %d, cur: %.2fx%.2f, delta: %.2fx%.2f",
-                  event->dx,
-                  event->dy,
-                  BUTTON_DOWN(LEFT_BUTTON),
-                  BUTTON_DOWN(MIDDLE_BUTTON),
-                  BUTTON_DOWN(RIGHT_BUTTON),
-                  BUTTON_DOWN(BUTTON4),
-                  BUTTON_DOWN(BUTTON5),
-                  BUTTON_DOWN(BUTTON6),
-                  event_type_to_string(mouseType),
-                  mouseType,
-                  otherButton,
-                  changedIndex == -1 ? -1 : ((int)log2(changedIndex)),
-                  nclicks,
-                  clickStateValue,
-                  currentPos.x,
-                  currentPos.y,
-                  deltaPosInt.x,
-                  deltaPosInt.y);
-            debug_register_event(event);
-        }
+    if (event->buttons != lastButtons) {
+        mouse_handle_buttons(event->buttons);
+    }
 
-        CGEventRef evt = CGEventCreateMouseEvent(eventSource, mouseType, newPos, otherButton);
-        CGEventSetIntegerValueField(evt, kCGMouseEventClickState, clickStateValue);
-        CGEventSetIntegerValueField(evt, kCGMouseEventDeltaX, deltaX);
-        CGEventSetIntegerValueField(evt, kCGMouseEventDeltaY, deltaY);
-        CGEventPost(kCGSessionEventTap, evt);
-        CFRelease(evt);
-    } else {
+    if (!is_event) {
         /* post event */
-        if (kCGErrorSuccess != CGPostMouseEvent(newPos, true, 1, BUTTON_DOWN(LEFT_BUTTON))) {
+        if (kCGErrorSuccess != CGPostMouseEvent(currentPos, true, 1, BUTTON_DOWN(event->buttons, LEFT_BUTTON))) {
             NSLog(@"Failed to post mouse event");
             exit(0);
         }
     }
 
-    lastPos = newPos;
-    buttons0 = event->buttons;
-    if (is_debug && !is_event) {
-        debug_log_old(event, currentPos, calcdx, calcdy);
+    if (is_debug) {
+        if (is_event) {
+            debug_register_event(event);
+        } else {
+            debug_log_old(event, currentPos, currentPos.x - lastPos.x, currentPos.y - lastPos.y);
+        }
     }
+
+    lastSequenceNumber = event->seqnum;
+    lastButtons = event->buttons;
+    lastPos = currentPos;
 }

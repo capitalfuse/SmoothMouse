@@ -3,7 +3,6 @@
 #import <mach/mach.h>
 #include <mach/mach_init.h>
 #include <mach/thread_policy.h>
-#include <mach/mach_time.h>
 #include <pthread.h>
 #include <sched.h>
 #include <sys/sysctl.h>
@@ -14,15 +13,21 @@
 #import "mouse.h"
 #import "accel.h"
 
-BOOL is_debug;
+BOOL is_debug = 0;
+BOOL is_memory = 0;
+BOOL is_timings = 0;
+BOOL is_dumping = 0;
 BOOL is_event = 0;
 
 static BOOL mouse_enabled;
 static BOOL trackpad_enabled;
-static double velocity_mouse;
-static double velocity_trackpad;
-static AccelerationCurve curve_mouse;
-static AccelerationCurve curve_trackpad;
+double velocity_mouse;
+double velocity_trackpad;
+AccelerationCurve curve_mouse;
+AccelerationCurve curve_trackpad;
+
+double start, end, t1, t2, t3, t4, mhs, mhe, outerstart, outerend, outersum = 0, outernum = 0;
+NSMutableArray* logs = [[NSMutableArray alloc] init];
 
 @interface SmoothMouseDaemon : NSObject {
 @private
@@ -296,7 +301,6 @@ error:
 	[super release];
 }
 
-
 BOOL set_high_prio_pthread() {
     struct sched_param sp;
 
@@ -314,19 +318,20 @@ BOOL set_high_prio_pthread() {
     return YES;
 }
 
-inline Float64 convert_from_nanos_to_mach_timebase(UInt64 nanos, mach_timebase_info_data_t *info)
+inline uint64_t convert_from_nanos_to_mach_timebase(uint64_t nanos, mach_timebase_info_data_t *info)
 {
-    Float64 the_numerator = static_cast<Float64>(info->numer);
-    Float64 the_denominator = static_cast<Float64>(info->denom);
-    Float64 the_nanos = static_cast<Float64>(nanos);
+    Float64 timebase = static_cast<Float64>(info->denom) / static_cast<Float64>(info->numer);
+    uint64_t mach_time = nanos * timebase;
+    //NSLog(@"convert_from_nanos_to_mach_timebase: %llu => %llu", nanos, mach_time);
+    return mach_time;
+}
 
-    Float64 the_partial_answer = the_nanos / the_numerator;
-    Float64 the_float_answer = the_partial_answer * the_denominator;
-    UInt64 the_answer = static_cast<UInt64>(the_float_answer);
-
-    //NSLog(@"convert_from_nanos_to_mach_timebase: %llu => %llu", nanos, the_answer);
-
-    return the_answer;
+inline uint64_t convert_from_mach_timebase_to_nanos(uint64_t mach_time, mach_timebase_info_data_t *info)
+{
+    Float64 timebase = static_cast<Float64>(info->numer) / static_cast<Float64>(info->denom);
+    uint64_t nanos = mach_time * timebase;
+    //NSLog(@"convert_from_mach_timebase_to_nanos: %llu => %llu", mach_time, nanos);
+    return nanos;
 }
 
 BOOL set_realtime_prio() {
@@ -336,24 +341,27 @@ BOOL set_realtime_prio() {
         NSLog(@"call to mach_timebase_info failed: %d", kret);
     }
 
+    /* See:
+     http://developer.apple.com/library/mac/#documentation/Darwin/Conceptual/KernelProgramming/scheduler/scheduler.html
+     http://developer.apple.com/library/mac/#qa/qa1398/_index.html
+     */
+
 #define MS_TO_NANOS(ms) ((ms) * 1000000)
 
-    /* See http://developer.apple.com/library/mac/#documentation/Darwin/Conceptual/KernelProgramming/scheduler/scheduler.html */
-
     struct thread_time_constraint_policy ttcpolicy;
-    // most common mouse hz is 127, meaning period is 7.874 ms
-    ttcpolicy.period        = convert_from_nanos_to_mach_timebase(MS_TO_NANOS(7.874), &info);
-    ttcpolicy.computation   = 8000000 ; // measured
-    ttcpolicy.constraint    = 16000000;
-    ttcpolicy.preemptible   = 0;
+    // 500hz mouse = 2ms
+    ttcpolicy.period        = (uint32_t) convert_from_nanos_to_mach_timebase(MS_TO_NANOS(2), &info);
+    ttcpolicy.computation   = (uint32_t) convert_from_nanos_to_mach_timebase(30142, &info);
+    ttcpolicy.constraint    = (uint32_t) convert_from_nanos_to_mach_timebase(92539, &info);
+    ttcpolicy.preemptible   = 1;
+
+#undef MS_TO_NANOS
 
     NSLog(@"period: %u, computation: %u, constraint: %u (all in mach timebase), preemtible: %u",
           ttcpolicy.period,
           ttcpolicy.computation,
           ttcpolicy.constraint,
           ttcpolicy.preemptible);
-
-#undef MS_TO_NANOS
 
     kret = thread_policy_set(mach_thread_self(),
                             THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &ttcpolicy,
@@ -386,31 +394,36 @@ void *HandleMouseEventThread(void *instance)
 
     (void) mouse_init();
 
+    static int counter = 0;
     while (IODataQueueWaitForAvailableData(self->queueMappedMemory, self->recvPort) == kIOReturnSuccess) {
+        outerend = GET_TIME();
+        int numPackets = 0;
         while (IODataQueueDataAvailable(self->queueMappedMemory)) {
+            numPackets++;
+            counter++;
+            start = GET_TIME();
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
+            mouse_event_t *mouse_event = (mouse_event_t *) buf;
             if (!error) {
-                mouse_event_t *mouse_event = (mouse_event_t *) buf;
-                double velocity;
-                AccelerationCurve curve;
-                switch (mouse_event->device_type) {
-                    case kDeviceTypeMouse:
-                        velocity = velocity_mouse;
-                        curve = curve_mouse;
-                        break;
-                    case kDeviceTypeTrackpad:
-                        velocity = velocity_trackpad;
-                        curve = curve_trackpad;
-                        break;
-                    default:
-                        velocity = 1;
-                        NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
-                }
-                mouse_handle(mouse_event, velocity, curve);
+                mhs = GET_TIME();
+                mouse_handle(mouse_event);
+                mhe = GET_TIME();
             } else {
-                NSLog(@"IODataQueueDequeue() failed");
+                LOG(@"IODataQueueDequeue() failed");
+            }
+            end = GET_TIME();
+
+            if (is_timings) {
+                LOG(@"outer: %f, total for handle event: %f, prepare,post,and release event: %f, post event: %f, (mouse_handle): %f, seqnum: %llu, numPackets: %d", outerend-outerstart, end-start, t2-t1, t4-t3, mhe-mhs, mouse_event->seqnum, numPackets);
             }
         }
+
+        if (outerstart != 0 && outerend != 0) {
+            outernum += 1;
+            outersum += (outerend-outerstart);
+        }
+
+        outerstart = GET_TIME();
     }
 
 	free(buf);
@@ -455,7 +468,7 @@ void *HandleMouseEventThread(void *instance)
 
 void trap_signals(int sig)
 {
-    //NSLog(@"trapped signal: %d", sig);
+    NSLog(@"trapped signal: %d", sig);
     if (is_debug) {
         debug_end();
     }
@@ -467,12 +480,20 @@ int main(int argc, char **argv)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    is_debug = 0;
-
-    if (argc > 1) {
-        if (strcmp(argv[1], "--debug") == 0) {
+    for(int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--debug") == 0) {
             is_debug = 1;
-            NSLog(@"Debug mode on");
+            NSLog(@"Debug mode enabled");
+        }
+
+        if (strcmp(argv[i], "--memory") == 0) {
+            is_memory = 1;
+            NSLog(@"Memory logging enabled");
+        }
+
+        if (strcmp(argv[i], "--timings") == 0) {
+            is_timings = 1;
+            NSLog(@"Timing logging enabled");
         }
     }
 

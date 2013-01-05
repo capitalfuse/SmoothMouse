@@ -9,5 +9,6 @@ typedef enum AccelerationCurve_s {
 } AccelerationCurve;
 
 bool mouse_init();
-void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve);
+void mouse_handle(mouse_event_t *event);
+void mouse_post();
 void mouse_cleanup();
