@@ -216,7 +216,10 @@ void mouse_handle(mouse_event_t *event, double velocity, AccelerationCurve curve
                 mouseType = kCGEventLeftMouseDragged;
             } else if (BUTTON_DOWN(RIGHT_BUTTON)) {
                 mouseType = kCGEventRightMouseDragged;
-            } else {
+            } else if (BUTTON_DOWN(MIDDLE_BUTTON) ||
+                       BUTTON_DOWN(BUTTON4) ||
+                       BUTTON_DOWN(BUTTON5) ||
+                       BUTTON_DOWN(BUTTON6)) {
                 mouseType = kCGEventOtherMouseDragged;
             }
         }
