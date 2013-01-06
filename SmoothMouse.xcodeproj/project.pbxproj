@@ -12,6 +12,7 @@
 			buildConfigurationList = 03DB20FC1621798800CF4299 /* Build configuration list for PBXAggregateTarget "SmoothMouseBuild" */;
 			buildPhases = (
 				03DB2105162179A600CF4299 /* ShellScript */,
+				03E6F2551699EF6800FBDBD6 /* ShellScript */,
 			);
 			dependencies = (
 				03DB21001621799400CF4299 /* PBXTargetDependency */,
@@ -38,6 +39,8 @@
 		03DB20C91620CB5900CF4299 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20C81620CB5900CF4299 /* main.m */; };
 		03DB20CD1620CB5900CF4299 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03DB20CB1620CB5900CF4299 /* Credits.rtf */; };
 		03DB20D01620CB5900CF4299 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20CF1620CB5900CF4299 /* AppDelegate.m */; };
+		03E6F25316999C9300FBDBD6 /* VersionLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 03E6F25116999C9300FBDBD6 /* VersionLabel.h */; };
+		03E6F25416999C9300FBDBD6 /* VersionLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E6F25216999C9300FBDBD6 /* VersionLabel.m */; };
 		03F1B44A1647F19B00DB99E8 /* mouse.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03F1B4491647F19B00DB99E8 /* mouse.mm */; };
 		03F3CBB416220E0700D9A857 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03F3CBB316220E0400D9A857 /* Sparkle.framework */; };
 		03F3CBB516220E0D00D9A857 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03F3CBB316220E0400D9A857 /* Sparkle.framework */; };
@@ -133,6 +136,8 @@
 		03DB20CE1620CB5900CF4299 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		03DB20CF1620CB5900CF4299 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		03DB20DA1620CB5A00CF4299 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		03E6F25116999C9300FBDBD6 /* VersionLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionLabel.h; sourceTree = "<group>"; };
+		03E6F25216999C9300FBDBD6 /* VersionLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionLabel.m; sourceTree = "<group>"; };
 		03F1B4471647F17100DB99E8 /* mouse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mouse.h; sourceTree = "<group>"; };
 		03F1B4491647F19B00DB99E8 /* mouse.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mouse.mm; sourceTree = "<group>"; };
 		03F3CBB316220E0400D9A857 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = Dependencies/Sparkle.framework; sourceTree = "<group>"; };
@@ -291,6 +296,8 @@
 				ED0E122114D5495F008704EC /* Supporting Files */,
 				031386A71628B36000A04755 /* UrlLabel.h */,
 				031386A81628B36000A04755 /* UrlLabel.m */,
+				03E6F25116999C9300FBDBD6 /* VersionLabel.h */,
+				03E6F25216999C9300FBDBD6 /* VersionLabel.m */,
 			);
 			path = SmoothMousePrefPane;
 			sourceTree = "<group>";
@@ -344,6 +351,7 @@
 			files = (
 				ED0E122814D5495F008704EC /* SmoothMousePrefPane.h in Headers */,
 				031386A91628B36000A04755 /* UrlLabel.h in Headers */,
+				03E6F25316999C9300FBDBD6 /* VersionLabel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,6 +490,19 @@
 			shellPath = /bin/sh;
 			shellScript = "mv ${BUILT_PRODUCTS_DIR}/smoothmoused ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/MacOS/\nrm -rf ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app\nmv ${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\nchmod ug+x ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh\n#sudo rm -rf /Library/PreferencePanes/SmoothMouse.prefPane\n#sudo mv SmoothMouse.prefPane /Library/PreferencePanes/\n";
 		};
+		03E6F2551699EF6800FBDBD6 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "SHORT_COMMIT_ID=`git log --pretty=format:'%h' -n 1`\nDATE=`date \"+%Y-%m-%d\"`\nSHORT_VERSION=`defaults read ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist CFBundleVersion`\nCOMPLETE_VERSION=\"$SHORT_VERSION $DATE $SHORT_COMMIT_ID\"\ndefaults write ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist CFCompleteBundleVersion \"$COMPLETE_VERSION\"";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -500,6 +521,7 @@
 			files = (
 				ED0E122A14D5495F008704EC /* SmoothMousePrefPane.m in Sources */,
 				031386AA1628B36000A04755 /* UrlLabel.m in Sources */,
+				03E6F25416999C9300FBDBD6 /* VersionLabel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

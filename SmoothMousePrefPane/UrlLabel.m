@@ -6,8 +6,8 @@
     
     [super mouseUp:theEvent];
 
-    if (_delegate != nil && [_delegate respondsToSelector:@selector(labelWasClicked)]) {
-        [_delegate performSelector:@selector(labelWasClicked) withObject:nil];
+    if (_delegate != nil && [_delegate respondsToSelector:@selector(urlWasClicked)]) {
+        [_delegate performSelector:@selector(urlWasClicked) withObject:nil];
     }
 }
 

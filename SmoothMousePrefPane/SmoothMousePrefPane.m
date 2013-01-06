@@ -65,10 +65,9 @@
 	[velocityForMouse setDoubleValue:[self getVelocityForMouse]];
 	[velocityForTrackpad setDoubleValue:[self getVelocityForTrackpad]];
 
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *version = [[bundle infoDictionary] objectForKey:@"CFBundleVersion"];
-    [bundleVersion setStringValue:version];
+    [self toggleVersionString];
 
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *filePath = [bundle pathForResource:@"Credits" ofType:@"rtf"];
     NSData *data = [NSData dataWithContentsOfFile:filePath];
 
@@ -80,16 +79,57 @@
     }
 }
 
+-(void)toggleVersionString {
+    static int toggle = 0;
+    NSString *version;
+    int whichVersionToShow = toggle % 3;
+    if (whichVersionToShow == 0) { // official version
+        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+        version = [[bundle infoDictionary] objectForKey:@"CFBundleVersion"];
+    } else if (whichVersionToShow == 1) { // prefpane complete version
+        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+        version = [[bundle infoDictionary] objectForKey:@"CFCompleteBundleVersion"];
+        if (version) {
+            version = [version stringByAppendingString:@" (prefpane)"];
+        } else {
+            version = @"(CFCompleteBundleVersion not found)";
+        }
+        [self writeStringToClipboard: version];
+    } else { // kext complete version
+        NSBundle *bundle = [NSBundle bundleWithPath:KEXT_BUNDLE];
+        version = [[bundle infoDictionary] objectForKey:@"CFCompleteBundleVersion"];
+        if (version) {
+            version = [version stringByAppendingString:@" (kext)"];
+        } else {
+            version = @"(CFCompleteBundleVersion not found)";
+        }
+        [self writeStringToClipboard: version];
+    }
+    [bundleVersion setStringValue:version];
+    ++toggle;
+}
+
+-(void)writeStringToClipboard:(NSString *)string {
+    NSPasteboard *pasteBoard;
+    pasteBoard = [NSPasteboard generalPasteboard];
+    [pasteBoard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pasteBoard setString:string forType:NSStringPboardType];
+}
+
 - (void)tabView:(NSTabView *)tv didSelectTabViewItem:(NSTabViewItem *)tvi {
     NSNumber *tabNumber = [NSNumber numberWithInteger: [tv indexOfTabViewItem:tvi]];
     [[NSUserDefaults standardUserDefaults] setObject:tabNumber forKey:KEY_SELECTED_TAB];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
--(void) labelWasClicked {
+-(void) urlWasClicked {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *url = [[bundle infoDictionary] objectForKey:@"SMHomepageURL"];
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
+}
+
+-(void) versionWasClicked {
+    [self toggleVersionString];
 }
 
 -(IBAction)pressCheckForUpdates:(id) sender {

@@ -5,6 +5,7 @@
 #define DAEMON_FILENAME_BASE @"/Contents/MacOS/smoothmoused"
 #define UNINSTALL_SCRIPT_FILENAME_BASE @"/Contents/Resources/uninstall.sh"
 #define UPDATER_FILENAME_BASE @"/Contents/SmoothMouseUpdater.app/Contents/MacOS/SmoothMouseUpdater"
+#define KEXT_BUNDLE @"/System/Library/Extensions/SmoothMouse.kext"
 
 #define SETTINGS_MOUSE_ENABLED @"Mouse enabled"
 #define SETTINGS_TRACKPAD_ENABLED @"Trackpad enabled"
