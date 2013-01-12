@@ -488,7 +488,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mv ${BUILT_PRODUCTS_DIR}/smoothmoused ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/MacOS/\nrm -rf ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app\nmv ${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\nchmod ug+x ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh\n#sudo rm -rf /Library/PreferencePanes/SmoothMouse.prefPane\n#sudo mv SmoothMouse.prefPane /Library/PreferencePanes/\n";
+			shellScript = "mv \"${BUILT_PRODUCTS_DIR}/smoothmoused\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/MacOS/\"\nrm -rf \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app\"\nmv \"${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\"\nchmod ug+x \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh\"";
 		};
 		03E6F2551699EF6800FBDBD6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -501,7 +501,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SHORT_COMMIT_ID=`git log --pretty=format:'%h' -n 1`\nDATE=`date \"+%Y-%m-%d\"`\nSHORT_VERSION=`defaults read ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist CFBundleVersion`\nCOMPLETE_VERSION=\"$SHORT_VERSION $DATE $SHORT_COMMIT_ID\"\ndefaults write ${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist CFCompleteBundleVersion \"$COMPLETE_VERSION\"";
+			shellScript = "SHORT_COMMIT_ID=`git log --pretty=format:'%h' -n 1`\nDATE=`date \"+%Y-%m-%d\"`\nSHORT_VERSION=$(defaults read \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info\" CFBundleVersion)\nCOMPLETE_VERSION=\"$SHORT_VERSION $DATE $SHORT_COMMIT_ID\"\ndefaults write \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\" CFCompleteBundleVersion \"$COMPLETE_VERSION\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
