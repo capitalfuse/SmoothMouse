@@ -33,7 +33,6 @@ var productName = 'SmoothMouse';
 var supportURL = 'smoothmouse.com/support';
 		
 var incompatibleSoftware = [
-	['/System/Library/Extensions/ControllerMate.kext', 'ControllerMate'],
 	['/System/Library/Extensions/SteerMouse.kext', 'SteerMouse'],
 	['/System/Library/Extensions/USBOverdrive.kext', 'USB Overdrive']
 ]
@@ -48,7 +47,7 @@ function detectIncompatibleSoftware() {
 	}
 	
 	if (detected.length > 0) {
-		return {message: 'The following software is incompatible with the product and needs to be removed before proceeding with the installation: ' + detected.join(', ') + ".\n\nIf you don’t have such software installed, please contact support at " + supportURL};
+		return {message: 'The following software installed on your computer is incompatible with ' + productName + ':\n\n' + detected.join(', ') + "\n\nPlease uninstall it before proceeding with the installation. If you think this is a mistake, please contact support at " + supportURL};
 	}
 	
 	return false;

@@ -15,7 +15,7 @@ then
     mkdir -p "Components"
 fi
 
-# 
+# Use version number from args if specified
 if [[ -z "$1" ]]
 then
     VERSION=$(defaults read "$(pwd)/Root/SmoothMouse.prefPane/Contents/Info" CFBundleVersion)
@@ -23,7 +23,7 @@ else
     VERSION=$1
 fi
 
-# Parameters: file name, internal name, identifier, install location 
+# Parameters: file name, internal name, identifier, install location
 c_pkgbuild () {
     VERSION=$(defaults read "$(pwd)/Root/$1/Contents/Info" CFBundleVersion)
     
