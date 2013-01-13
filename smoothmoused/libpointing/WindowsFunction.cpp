@@ -1,3 +1,14 @@
+/*
+ Licence
+ Libpointing can be redistributed and/or modified under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+
+ Ad-hoc licences can be provided upon request.
+
+ We appreciate credit when you use it (cite the following paper), but don't require it:
+
+ G. Casiez and N. Roussel. No more bricolage! Methods and tools to characterize, replicate and compare pointing transfer functions. In Proceedings of UIST'11, the 24th ACM Symposium on User Interface Software and Technology, pages 603-614, October 2011. ACM.
+ */
+
 #include "WindowsFunction.hpp"
 
 #include <iostream>
