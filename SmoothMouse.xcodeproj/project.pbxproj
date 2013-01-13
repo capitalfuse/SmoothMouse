@@ -501,7 +501,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SHORT_COMMIT_ID=`git log --pretty=format:'%h' -n 1`\nDATE=`date \"+%Y-%m-%d\"`\nSHORT_VERSION=$(defaults read \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info\" CFBundleVersion)\nCOMPLETE_VERSION=\"$SHORT_VERSION $DATE $SHORT_COMMIT_ID\"\ndefaults write \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\" CFCompleteBundleVersion \"$COMPLETE_VERSION\"";
+			shellScript = "SHORT_COMMIT_ID=`git log --pretty=format:'%h' -n 1`\nDATE=`date \"+%Y-%m-%d\"`\nSHORT_VERSION=$(defaults read \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info\" CFBundleVersion)\nCOMPLETE_VERSION=\"$SHORT_VERSION $DATE $SHORT_COMMIT_ID\"\ndefaults write \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\" CFCompleteBundleVersion \"$COMPLETE_VERSION\"\nchmod 755 \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
