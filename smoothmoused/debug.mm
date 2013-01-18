@@ -72,7 +72,9 @@ void debug_end() {
         NSLog(@"%@", log);
     }
 
-    NSLog(@"outeravg: %f", (outersum / outernum));
+    if (is_timings) {
+        NSLog(@"outer average: %f", (outersum / outernum));
+    }
 
     NSLog(@"Summary: Average Hz: %.2f, Maximum Hz: %d", (sumHz / (float)numHz), maxHz);
 }

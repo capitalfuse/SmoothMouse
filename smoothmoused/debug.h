@@ -7,6 +7,7 @@
 
 extern BOOL is_memory;
 extern BOOL is_dumping;
+extern BOOL is_timings;
 extern double start, end, t1, t2, t3, t4, outerstart, outerend, outersum, outernum;
 extern NSMutableArray* logs;
 
