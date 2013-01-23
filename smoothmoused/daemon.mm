@@ -13,6 +13,9 @@
 #import "mouse.h"
 #import "accel.h"
 
+#define KEXT_CONNECT_RETRIES (3)
+#define SUPERVISOR_SLEEP_TIME_USEC (500000)
+
 BOOL is_debug = 0;
 BOOL is_memory = 0;
 BOOL is_timings = 0;
@@ -180,7 +183,7 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
 
         error = IOServiceOpen(service, mach_task_self(), 0, &connect);
         if (error) {
-            NSLog(@"IOServiceOpen() failed");
+            NSLog(@"IOServiceOpen() failed (kext is busy)");
             IOObjectRelease(service);
             goto error;
         }
@@ -435,19 +438,25 @@ void *HandleMouseEventThread(void *instance)
 
 -(void) mainLoop
 {
+    int retries_left = KEXT_CONNECT_RETRIES;
     while(1) {
         BOOL active = [self isActive];
         if (active) {
             BOOL ok = [self connectToDriver];
             if (!ok) {
-                NSLog(@"Failed to connect to kext");
-                exit(-1);
+                NSLog(@"Failed to connect to kext (retries_left = %d)", retries_left);
+                if (retries_left < 1) {
+                    exit(-1);
+                }
+                retries_left--;
+            } else {
+                retries_left = KEXT_CONNECT_RETRIES;
+                initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
             }
-            initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
         } else {
             [self disconnectFromDriver];
         }
-        sleep(2);
+        usleep(SUPERVISOR_SLEEP_TIME_USEC);
     }
 }
 
