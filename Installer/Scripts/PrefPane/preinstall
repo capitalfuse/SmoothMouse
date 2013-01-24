@@ -1,5 +1,4 @@
 #!/bin/sh
-echo "-----------------------------------------------------------------------"
 sudo -u $USER launchctl stop "com.cyberic.smoothmouse"
 sudo -u $USER osascript "preinstall.scpt"
-echo "-----------------------------------------------------------------------"
+exit 0
