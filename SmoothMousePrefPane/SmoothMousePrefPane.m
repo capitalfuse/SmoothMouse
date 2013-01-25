@@ -47,16 +47,12 @@
     }
 
     /* Mouse acceleration curve */
-    NSString *mouseAccelerationCurveString = [self getAccelerationCurveForMouse];
-    if (mouseAccelerationCurveString) {
-        [accelerationCurveMouse selectItemWithTitle:mouseAccelerationCurveString];
-    }
+    NSInteger mouseAccelerationCurveIndex = [self getAccelerationCurveForMouse];
+    [accelerationCurveMouse selectItemAtIndex:mouseAccelerationCurveIndex];
 
     /* Trackpad acceleration curve */
-    NSString *trackpadAccelerationCurveString = [self getAccelerationCurveForTrackpad];
-    if (trackpadAccelerationCurveString) {
-        [accelerationCurveTrackpad selectItemWithTitle:trackpadAccelerationCurveString];
-    }
+    NSInteger trackpadAccelerationCurveIndex = [self getAccelerationCurveForTrackpad];
+    [accelerationCurveTrackpad selectItemAtIndex:trackpadAccelerationCurveIndex];
 
     /* Automatically check for updates */
     [automaticallyCheckForUpdates setState:[self isAutomaticallyCheckForUpdatesEnabled]];
@@ -263,6 +259,7 @@ cleanup:
                           [NSNumber numberWithBool:SETTINGS_TRACKPAD_ENABLED_DEFAULT], SETTINGS_TRACKPAD_ENABLED,
                           SETTINGS_MOUSE_ACCELERATION_CURVE_DEFAULT, SETTINGS_MOUSE_ACCELERATION_CURVE,
                           SETTINGS_TRACKPAD_ACCELERATION_CURVE_DEFAULT, SETTINGS_TRACKPAD_ACCELERATION_CURVE,
+                          [NSNumber numberWithInt:SETTINGS_DRIVER_DEFAULT], SETTINGS_DRIVER,
                           nil];
 
     NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
@@ -282,8 +279,16 @@ cleanup:
 
 - (IBAction)changeAccelerationCurve:(id) sender {
     NSPopUpButton *popupButton = sender;
-    NSMenuItem *item = [popupButton selectedItem];
-    NSString *title = [item title];
+    NSInteger itemIndex = [popupButton indexOfSelectedItem];
+
+    NSString *title = NULL;
+    switch (itemIndex) {
+        default: /* fall through to Linear */
+        case 0: title = @"Linear"; break;
+        case 1: title = @"Windows"; break;
+        case 2: title = @"OS X"; break;
+    }
+
     if (popupButton == accelerationCurveMouse) {
         [self saveAccelerationCurveForMouse:title];
     } else {
@@ -479,18 +484,29 @@ cleanup:
 	return value ? [value boolValue] : FALSE;
 }
 
-- (NSString *)getAccelerationCurveForMouse {
-	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
-	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSString *value = [settings valueForKey:SETTINGS_MOUSE_ACCELERATION_CURVE];
-	return value;
+- (NSInteger)getAccelerationCurveForMouse {
+    return [self getAccelerationCurveForKey:SETTINGS_MOUSE_ACCELERATION_CURVE];
 }
 
-- (NSString *)getAccelerationCurveForTrackpad {
+- (NSInteger)getAccelerationCurveForTrackpad {
+    return [self getAccelerationCurveForKey:SETTINGS_TRACKPAD_ACCELERATION_CURVE];
+}
+
+-(NSInteger)getAccelerationCurveForKey: (NSString *) key {
 	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
 	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:file];
-	NSString *value = [settings valueForKey:SETTINGS_TRACKPAD_ACCELERATION_CURVE];
-	return value;
+	NSString *value = [settings valueForKey:key];
+    return [self getIndexFromAccelerationCurveString:value];
+}
+
+-(NSInteger)getIndexFromAccelerationCurveString: (NSString *) s {
+    if ([s compare:@"Windows"] == NSOrderedSame) {
+        return 1;
+    }
+    if ([s compare:@"OS X"] == NSOrderedSame) {
+        return 2;
+    }
+    return 0;
 }
 
 - (BOOL)saveVelocityForMouse:(double) valueMouse andTrackpad:(double) valueTrackpad;

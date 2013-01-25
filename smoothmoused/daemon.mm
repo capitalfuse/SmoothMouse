@@ -20,7 +20,6 @@ BOOL is_debug = 0;
 BOOL is_memory = 0;
 BOOL is_timings = 0;
 BOOL is_dumping = 0;
-BOOL is_event = 0;
 
 static BOOL mouse_enabled;
 static BOOL trackpad_enabled;
@@ -28,8 +27,9 @@ double velocity_mouse;
 double velocity_trackpad;
 AccelerationCurve curve_mouse;
 AccelerationCurve curve_trackpad;
+Driver driver;
 
-double start, end, t1, t2, t3, t4, mhs, mhe, outerstart, outerend, outersum = 0, outernum = 0;
+double start, end, e1, e2, mhs, mhe, outerstart, outerend, outersum = 0, outernum = 0;
 NSMutableArray* logs = [[NSMutableArray alloc] init];
 
 @interface SmoothMouseDaemon : NSObject {
@@ -41,8 +41,13 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
 	IODataQueueMemory *queueMappedMemory;
 	mach_port_t	recvPort;
 	uint32_t dataSize;
-	mach_vm_address_t address;
+#if !__LP64__ || defined(IOCONNECT_MAPMEMORY_10_6)
+    vm_address_t address;
+    vm_size_t size;
+#else
+    mach_vm_address_t address;
     mach_vm_size_t size;
+#endif
 }
 
 -(id)init;
@@ -95,6 +100,9 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
         if ([value compare:@"Windows"] == NSOrderedSame) {
             return ACCELERATION_CURVE_WINDOWS;
         }
+        if ([value compare:@"OS X"] == NSOrderedSame) {
+            return ACCELERATION_CURVE_OSX;
+        }
 	}
     return ACCELERATION_CURVE_LINEAR;
 }
@@ -141,11 +149,11 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
 		velocity_trackpad = 1.0;
 	}
 
-    value = [dict valueForKey:SETTINGS_EVENT_ENABLED];
+    value = [dict valueForKey:SETTINGS_DRIVER];
 	if (value) {
-		is_event = [value boolValue];
+		driver = (Driver) [value intValue];
 	} else {
-		is_event = 1;
+		driver = (Driver) SETTINGS_DRIVER_DEFAULT;
 	}
 
     curve_mouse = [self getAccelerationCurveFromDict:dict withKey:SETTINGS_MOUSE_ACCELERATION_CURVE];
@@ -248,8 +256,8 @@ error:
         configuration |= 1 << 1;
     }
 
-    if (!is_event) {
-        configuration |= 1 << 2;
+    if (driver == DRIVER_QUARTZ_OLD) {
+        configuration |= 1 << 2; // set compatibility mode in kernel
     }
 
     scalarI_64[0] = configuration;
@@ -369,8 +377,8 @@ BOOL set_realtime_prio() {
     thread_port_t thread_port = pthread_mach_thread_np(pthread_self());
 
     kret = thread_policy_set(thread_port,
-                            THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &ttcpolicy,
-                            THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+                             THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &ttcpolicy,
+                             THREAD_TIME_CONSTRAINT_POLICY_COUNT);
 
     if (kret != KERN_SUCCESS) {
         NSLog(@"call to thread_policy_set failed: %d", kret);
@@ -404,9 +412,9 @@ void *HandleMouseEventThread(void *instance)
         outerend = GET_TIME();
         int numPackets = 0;
         while (IODataQueueDataAvailable(self->queueMappedMemory)) {
+            start = GET_TIME();
             numPackets++;
             counter++;
-            start = GET_TIME();
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
             mouse_event_t *mouse_event = (mouse_event_t *) buf;
             if (!error) {
@@ -415,11 +423,11 @@ void *HandleMouseEventThread(void *instance)
                 mhe = GET_TIME();
             } else {
                 LOG(@"IODataQueueDequeue() failed");
+                exit(0);
             }
             end = GET_TIME();
-
             if (is_timings) {
-                LOG(@"outer: %f, total for handle event: %f, prepare,post,and release event: %f, post event: %f, (mouse_handle): %f, seqnum: %llu, numPackets: %d", outerend-outerstart, end-start, t2-t1, t4-t3, mhe-mhs, mouse_event->seqnum, numPackets);
+                LOG(@"outer: %f, inner: %f, post event: %f, (mouse_handle): %f, seqnum: %llu, data entries handled: %d", outerend-outerstart, end-start, e2-e1, mhe-mhs, mouse_event->seqnum, numPackets);
             }
         }
 
@@ -452,6 +460,7 @@ void *HandleMouseEventThread(void *instance)
             } else {
                 retries_left = KEXT_CONNECT_RETRIES;
                 initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
+                mouse_update_clicktime();
             }
         } else {
             [self disconnectFromDriver];
@@ -485,6 +494,24 @@ void trap_signals(int sig)
     }
     restoreSystemMouseSettings();
     exit(-1);
+}
+
+const char *get_driver_string(int mouse_driver) {
+    switch (mouse_driver) {
+        case DRIVER_QUARTZ_OLD: return "QUARTZ_OLD";
+        case DRIVER_QUARTZ: return "QUARTZ";
+        case DRIVER_IOHID: return "IOHID";
+        default: return "?";
+    }
+}
+
+const char *get_acceleration_string(AccelerationCurve curve) {
+    switch (curve) {
+        case ACCELERATION_CURVE_LINEAR: return "LINEAR";
+        case ACCELERATION_CURVE_WINDOWS: return "WINDOWS";
+        case ACCELERATION_CURVE_OSX: return "OSX";
+        default: return "?";
+    }
 }
 
 int main(int argc, char **argv)
@@ -524,21 +551,20 @@ int main(int argc, char **argv)
     signal(SIGKILL, trap_signals);
     signal(SIGTERM, trap_signals);
 
-    NSLog(@"Mouse enabled: %d Mouse velocity: %f Mouse curve: %d",
+    NSLog(@"Mouse enabled: %d Mouse velocity: %f Mouse curve: %s",
           mouse_enabled,
           velocity_mouse,
-          curve_mouse);
-
-    NSLog(@"Trackpad enabled: %d Trackpad velocity: %f Trackpad curve: %d",
+          get_acceleration_string(curve_mouse));
+    
+    NSLog(@"Trackpad enabled: %d Trackpad velocity: %f Trackpad curve: %s",
           trackpad_enabled,
           velocity_trackpad,
-          curve_trackpad);
-
-    NSLog(@"Event system enabled: %d",
-          is_event);
-
+          get_acceleration_string(curve_trackpad));
+    
+    NSLog(@"Driver: %s (%d)", get_driver_string(driver), driver);
+    
 	[daemon mainLoop];
-
+    
 	[daemon release];
 	
 	[pool release];

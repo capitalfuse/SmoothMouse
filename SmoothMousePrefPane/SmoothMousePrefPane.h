@@ -64,13 +64,15 @@
 - (double)getVelocityForTrackpad;
 - (BOOL)getMouseEnabled;
 - (BOOL)getTrackpadEnabled;
-- (NSString *)getAccelerationCurveForMouse;
-- (NSString *)getAccelerationCurveForTrackpad;
+- (NSInteger)getAccelerationCurveForMouse;
+- (NSInteger)getAccelerationCurveForTrackpad;
+- (NSInteger)getAccelerationCurveForKey: (NSString *) key;
 - (BOOL)saveVelocityForMouse:(double) valueMouse andTrackpad:(double) valueTrackpad;
 - (BOOL)saveMouseEnabled:(BOOL) value;
 - (BOOL)saveTrackpadEnabled:(BOOL) value;
 - (BOOL)saveAccelerationCurveForMouse:(NSString *) value;
 - (BOOL)saveAccelerationCurveForTrackpad:(NSString *) value;
+- (NSInteger)getIndexFromAccelerationCurveString: (NSString *) s;
 
 - (void)restartDaemonIfRunning;
 @end

@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 
+#define KEXT_CONF_MOUSE_ENABLED     (1 << 0)
+#define KEXT_CONF_TRACKPAD_ENABLED  (1 << 1)
+#define KEXT_CONF_QUARTZ_OLD        (1 << 2)
+
 typedef enum {
 	kDeviceTypeMouse,
 	kDeviceTypeTrackpad,
