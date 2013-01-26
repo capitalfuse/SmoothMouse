@@ -1,4 +1,5 @@
 #!/bin/sh
+sudo -u $USER find ~/Library/Caches -iname "*cyberic.SmoothMouse*" -exec rm -rf {} \;
 sudo -u $USER launchctl start "com.cyberic.smoothmouse"
 sudo -u $USER osascript "postinstall.scpt"
 sudo ln -sf "/Library/PreferencePanes/SmoothMouse.prefPane/Contents/MacOS/smoothmoused" "/usr/bin/smoothmouse"

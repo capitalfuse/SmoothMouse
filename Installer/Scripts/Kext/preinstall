@@ -1,6 +1,6 @@
 #!/bin/sh
 KEXT="/System/Library/Extensions/SmoothMouse.kext"
 if [ -d "$KEXT" ]; then
-    sudo kextunload -quiet "$KEXT"
+    sudo kextunload "$KEXT"
 fi
 exit 0
