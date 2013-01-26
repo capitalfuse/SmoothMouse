@@ -35,6 +35,9 @@ rm -f ~/Library/LaunchAgents/com.cyberic.smoothmouse.plist
 rm -f ~/Library/LaunchAgents/com.cyberic.smoothmouseupdater.plist
 rm /usr/bin/smoothmouse
 
+pkgutil --forget "com.cyberic.pkg.SmoothMouseKext"
+pkgutil --forget "com.cyberic.pkg.SmoothMousePrefPane"
+
 /usr/bin/killall $DAEMON
 
 /usr/bin/killall -u $USER "System Preferences"
