@@ -1,4 +1,3 @@
 #!/bin/sh
 KEXT="/System/Library/Extensions/SmoothMouse.kext"
 sudo kextload "$KEXT"
-exit 0

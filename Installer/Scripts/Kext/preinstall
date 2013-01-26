@@ -1,6 +1,9 @@
 #!/bin/sh
-KEXT="/System/Library/Extensions/SmoothMouse.kext"
-if [ -d "$KEXT" ]; then
-    sudo kextunload "$KEXT"
-fi
+
+KEXT_IDENTIFIER="com.cyberic.SmoothMouse"
+KEXT_LOCATION="/System/Library/Extensions/SmoothMouse.kext"
+
+sudo kextunload -b "$KEXT_IDENTIFIER"
+sudo kextunload "$KEXT_LOCATION"
+
 exit 0

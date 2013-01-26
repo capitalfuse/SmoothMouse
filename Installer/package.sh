@@ -13,23 +13,25 @@ then
     mkdir -p "Components"
 fi
 
+VERSION=$(defaults read "$(pwd)/Root/SmoothMouse.prefPane/Contents/Info" CFBundleVersion)
+
 # Parameters: file name, internal name, identifier, install location
 c_pkgbuild () {
-    VERSION=$(defaults read "$(pwd)/Root/$1/Contents/Info" CFBundleVersion)
+    C_VERSION=$(defaults read "$(pwd)/Root/$1/Contents/Info" CFBundleVersion)
     
     echo "\nBuilding a component package: 
     file name: $1
     internal name: $2
-    identifier: $IDENTIFIER.$3
+    identifier: $IDENTIFIER.pkg.$3
     install location: $4
-    version: $VERSION\n"
+    version: $C_VERSION\n"
     
     pkgbuild \
-        --identifier "$IDENTIFIER.$3" \
+        --identifier "$IDENTIFIER.pkg.$3" \
         --component "Root/$1" \
         --scripts "Scripts/$2/" \
         --install-location "$4" \
-        --version "$VERSION" \
+        --version "$C_VERSION" \
         "Components/$2.pkg"
 }
 
