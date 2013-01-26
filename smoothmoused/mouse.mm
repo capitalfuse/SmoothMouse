@@ -127,7 +127,7 @@ bool mouse_init() {
         CGEventSourceSetLocalEventsFilterDuringSuppressionState(eventSource, kCGEventFilterMaskPermitLocalMouseEvents, kCGEventSuppressionStateSuppressionInterval);
     }
 
-	deltaPosFloat = deltaPosInt = get_current_mouse_pos();
+	currentPos = deltaPosFloat = deltaPosInt = get_current_mouse_pos();
 
     if (!is_event) {
         if (CGSetLocalEventsFilterDuringSuppressionState(kCGEventFilterMaskPermitAllEvents,
