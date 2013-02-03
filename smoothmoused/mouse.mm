@@ -206,6 +206,14 @@ void mouse_cleanup() {
         delete win;
         win = NULL;
     }
+    if (osx_mouse != NULL) {
+        delete osx_mouse;
+        osx_mouse = NULL;
+    }
+    if (osx_trackpad != NULL) {
+        delete osx_trackpad;
+        osx_trackpad = NULL;
+    }
 
     switch (driver) {
         case DRIVER_QUARTZ_OLD:
@@ -317,11 +325,13 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
     deltaPosInt.y += deltaY;
 
     if (is_debug) {
-        LOG(@"move dx: %d, dy: %d, cur: %.2fx%.2f, delta: %.2fx%.2f, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
+        LOG(@"move dx: %02d, dy: %02d, new pos: %.2fx%.2f, delta: %02d,%02d, deltaPos: %.2fx%.2f, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
             dx,
             dy,
-            currentPos.x,
-            currentPos.y,
+            newPos.x,
+            newPos.y,
+            deltaX,
+            deltaY,
             deltaPosInt.x,
             deltaPosInt.y,
             BUTTON_DOWN(currentButtons, LEFT_BUTTON),
@@ -555,7 +565,7 @@ static void mouse_handle_buttons(int buttons) {
                     static NXEventData eventData;
                     memset(&eventData, 0, sizeof(NXEventData));
 
-                    eventData.mouse.subType = NX_SUBTYPE_TABLET_POINT;
+                    eventData.mouse.subType = NX_SUBTYPE_DEFAULT;
                     eventData.mouse.click = clickStateValue;
                     eventData.mouse.buttonNumber = otherButton;
 
