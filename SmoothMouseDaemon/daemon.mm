@@ -1,3 +1,5 @@
+#import "daemon.h"
+
 #import <IOKit/IODataQueueClient.h>
 #import <IOKit/kext/KextManager.h>
 #import <mach/mach.h>
@@ -20,9 +22,9 @@ BOOL is_debug = 0;
 BOOL is_memory = 0;
 BOOL is_timings = 0;
 BOOL is_dumping = 0;
+BOOL mouse_enabled;
+BOOL trackpad_enabled;
 
-static BOOL mouse_enabled;
-static BOOL trackpad_enabled;
 double velocity_mouse;
 double velocity_trackpad;
 AccelerationCurve curve_mouse;
@@ -32,39 +34,42 @@ Driver driver;
 double start, end, e1, e2, mhs, mhe, outerstart, outerend, outersum = 0, outernum = 0;
 NSMutableArray* logs = [[NSMutableArray alloc] init];
 
-@interface SmoothMouseDaemon : NSObject {
-@private
-    BOOL connected;
-    pthread_t mouseEventThreadID;
-    io_service_t service;
-	io_connect_t connect;
-	IODataQueueMemory *queueMappedMemory;
-	mach_port_t	recvPort;
-	uint32_t dataSize;
-#if !__LP64__ || defined(IOCONNECT_MAPMEMORY_10_6)
-    vm_address_t address;
-    vm_size_t size;
-#else
-    mach_vm_address_t address;
-    mach_vm_size_t size;
-#endif
+MouseSupervisor *sMouseSupervisor;
+
+Daemon *sDaemonInstance = NULL;
+
+static void *HandleMouseEventThread(void *instance);
+
+void trap_signals(int sig)
+{
+    NSLog(@"trapped signal: %d", sig);
+    [sDaemonInstance release];
+    if (is_debug) {
+        debug_end();
+    }
+    restoreSystemMouseSettings();
+    exit(-1);
 }
 
--(id)init;
--(oneway void) release;
+const char *get_driver_string(int mouse_driver) {
+    switch (mouse_driver) {
+        case DRIVER_QUARTZ_OLD: return "QUARTZ_OLD";
+        case DRIVER_QUARTZ: return "QUARTZ";
+        case DRIVER_IOHID: return "IOHID";
+        default: return "?";
+    }
+}
 
--(BOOL) loadSettings;
--(BOOL) loadDriver;
--(BOOL) connectToDriver;
--(BOOL) configureDriver;
--(BOOL) disconnectFromDriver;
--(BOOL) isActive;
+const char *get_acceleration_string(AccelerationCurve curve) {
+    switch (curve) {
+        case ACCELERATION_CURVE_LINEAR: return "LINEAR";
+        case ACCELERATION_CURVE_WINDOWS: return "WINDOWS";
+        case ACCELERATION_CURVE_OSX: return "OSX";
+        default: return "?";
+    }
+}
 
-@end
-
-/* -------------------------------------------------------------------------- */
-
-@implementation SmoothMouseDaemon
+@implementation Daemon
 
 -(id)init
 {
@@ -90,7 +95,55 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
         trackpad_enabled = 1;
     }
 
+#if 0
+    for (int i = 0; i != 31; ++i) {
+        signal(i, trap_signals);
+    }
+#endif
+
+    signal(SIGINT, trap_signals);
+    signal(SIGKILL, trap_signals);
+    signal(SIGTERM, trap_signals);
+
+    sMouseSupervisor = [[MouseSupervisor alloc] init];
+
+    NSLog(@"Mouse enabled: %d Mouse velocity: %f Mouse curve: %s",
+          mouse_enabled,
+          velocity_mouse,
+          get_acceleration_string(curve_mouse));
+
+    NSLog(@"Trackpad enabled: %d Trackpad velocity: %f Trackpad curve: %s",
+          trackpad_enabled,
+          velocity_trackpad,
+          get_acceleration_string(curve_trackpad));
+
+    NSLog(@"Driver: %s (%d)", get_driver_string(driver), driver);
+
+    [NSEvent setMouseCoalescingEnabled:FALSE];
+    [NSEvent addGlobalMonitorForEventsMatchingMask:(NSMouseMovedMask | NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask)
+                                           handler:^(NSEvent *event) {
+                                               [self handleGlobalMouseMovedEvent:event];
+                                           }];
+
 	return self;
+}
+
+-(void) handleGlobalMouseMovedEvent:(NSEvent *) event
+{
+    BOOL match = [sMouseSupervisor popMouseEvent:(int) [event deltaX]: (int) [event deltaY]];
+    if (!match) {
+        mouse_refresh();
+        if (is_debug) {
+            NSLog(@"Another application altered mouse location");
+        }
+    } else {
+        //NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
+        //      match,
+        //      [sMouseSupervisor numItems],
+        //      [event deltaX],
+        //      [event deltaY]
+        //      );
+    }
 }
 
 -(AccelerationCurve) getAccelerationCurveFromDict:(NSDictionary *)dictionary withKey:(NSString *)key {
@@ -176,16 +229,6 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
         service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
         if (service == IO_OBJECT_NULL) {
             NSLog(@"IOServiceGetMatchingService() failed");
-            if ([self loadDriver]) {
-                NSLog(@"driver is loaded manually, try again");
-                service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
-                if (service == IO_OBJECT_NULL) {
-                    goto error;
-                }
-            } else {
-                NSLog(@"cannot load driver manually");
-            }
-
             goto error;
         }
 
@@ -219,7 +262,10 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
         queueMappedMemory = (IODataQueueMemory *) address;
         dataSize = (uint32_t) size;
 
-        [self configureDriver];
+        BOOL ok = [self configureDriver];
+        if (!ok) {
+            NSLog(@"Failed to configure driver");
+        }
 
         int threadError = pthread_create(&mouseEventThreadID, NULL, &HandleMouseEventThread, self);
         if (threadError != 0)
@@ -227,7 +273,7 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
             NSLog(@"Failed to start mouse event thread");
         }
 
-        initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
+        initializeSystemMouseSettings();
 
         connected = YES;
     }
@@ -243,39 +289,33 @@ error:
     kern_return_t	kernResult;
 
     uint64_t scalarI_64[1];
-    uint64_t scalarO_64;
-    uint32_t outputCount = 1;
 
     uint32_t configuration = 0;
 
     if (mouse_enabled) {
-        configuration |= 1 << 0;
+        configuration |= KEXT_CONF_MOUSE_ENABLED;
     }
 
     if (trackpad_enabled) {
-        configuration |= 1 << 1;
+        configuration |= KEXT_CONF_TRACKPAD_ENABLED;
     }
 
     if (driver == DRIVER_QUARTZ_OLD) {
-        configuration |= 1 << 2; // set compatibility mode in kernel
+        configuration |= KEXT_CONF_QUARTZ_OLD; // set compatibility mode in kernel
     }
 
     scalarI_64[0] = configuration;
 
-    kernResult = IOConnectCallScalarMethod(connect,					// an io_connect_t returned from IOServiceOpen().
-                                           kConfigureMethod,        // selector of the function to be called via the user client.
-                                           scalarI_64,				// array of scalar (64-bit) input values.
-                                           1,						// the number of scalar input values.
-                                           &scalarO_64,				// array of scalar (64-bit) output values.
-                                           &outputCount				// pointer to the number of scalar output values.
-                                           );
+    kernResult = IOConnectCallScalarMethod(connect,
+                                           kConfigureMethod,
+                                           scalarI_64,
+                                           1,
+                                           NULL,
+                                           NULL);
 
     if (kernResult == KERN_SUCCESS) {
-        NSLog(@"Driver configured successfully (%u)", (uint32_t) scalarO_64);
         return YES;
-    }
-	else {
-		NSLog(@"Failed to configure driver");
+    } else {
         return NO;
     }
 }
@@ -301,6 +341,8 @@ error:
         }
 
         connected = NO;
+
+        NSLog(@"Disconnected from driver");
     }
 
     return YES;
@@ -390,9 +432,11 @@ BOOL set_realtime_prio() {
     return YES;
 }
 
-void *HandleMouseEventThread(void *instance)
+static void *HandleMouseEventThread(void *instance)
 {
-    SmoothMouseDaemon *self = (SmoothMouseDaemon *) instance;
+    Daemon *self = (Daemon *) instance;
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     kern_return_t error;
 
@@ -441,6 +485,8 @@ void *HandleMouseEventThread(void *instance)
 
 	free(buf);
 
+    [pool drain];
+
     return NULL;
 }
 
@@ -459,7 +505,7 @@ void *HandleMouseEventThread(void *instance)
                 retries_left--;
             } else {
                 retries_left = KEXT_CONNECT_RETRIES;
-                initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
+                initializeSystemMouseSettings();
                 mouse_update_clicktime();
             }
         } else {
@@ -485,89 +531,3 @@ void *HandleMouseEventThread(void *instance)
 }
 
 @end
-
-void trap_signals(int sig)
-{
-    NSLog(@"trapped signal: %d", sig);
-    if (is_debug) {
-        debug_end();
-    }
-    restoreSystemMouseSettings();
-    exit(-1);
-}
-
-const char *get_driver_string(int mouse_driver) {
-    switch (mouse_driver) {
-        case DRIVER_QUARTZ_OLD: return "QUARTZ_OLD";
-        case DRIVER_QUARTZ: return "QUARTZ";
-        case DRIVER_IOHID: return "IOHID";
-        default: return "?";
-    }
-}
-
-const char *get_acceleration_string(AccelerationCurve curve) {
-    switch (curve) {
-        case ACCELERATION_CURVE_LINEAR: return "LINEAR";
-        case ACCELERATION_CURVE_WINDOWS: return "WINDOWS";
-        case ACCELERATION_CURVE_OSX: return "OSX";
-        default: return "?";
-    }
-}
-
-int main(int argc, char **argv)
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    for(int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--debug") == 0) {
-            is_debug = 1;
-            NSLog(@"Debug mode enabled");
-        }
-
-        if (strcmp(argv[i], "--memory") == 0) {
-            is_memory = 1;
-            NSLog(@"Memory logging enabled");
-        }
-
-        if (strcmp(argv[i], "--timings") == 0) {
-            is_timings = 1;
-            NSLog(@"Timing logging enabled");
-        }
-    }
-
-	SmoothMouseDaemon *daemon = [[SmoothMouseDaemon alloc] init];
-    if (daemon == NULL) {
-        NSLog(@"Daemon failed to initialize. BYE.");
-        exit(-1);
-    }
-
-#if 0
-    for (int i = 0; i != 31; ++i) {
-        signal(i, trap_signals);
-    }
-#endif
-
-    signal(SIGINT, trap_signals);
-    signal(SIGKILL, trap_signals);
-    signal(SIGTERM, trap_signals);
-
-    NSLog(@"Mouse enabled: %d Mouse velocity: %f Mouse curve: %s",
-          mouse_enabled,
-          velocity_mouse,
-          get_acceleration_string(curve_mouse));
-    
-    NSLog(@"Trackpad enabled: %d Trackpad velocity: %f Trackpad curve: %s",
-          trackpad_enabled,
-          velocity_trackpad,
-          get_acceleration_string(curve_trackpad));
-    
-    NSLog(@"Driver: %s (%d)", get_driver_string(driver), driver);
-    
-	[daemon mainLoop];
-    
-	[daemon release];
-	
-	[pool release];
-    
-	return EXIT_SUCCESS;
-}

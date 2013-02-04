@@ -1,8 +1,10 @@
 
+#import "daemon.h"
+
 #include "mouse.h"
 #include "debug.h"
-
 #include <sys/time.h>
+#include <pthread.h>
 #include <IOKit/hidsystem/event_status_driver.h>
 #include <IOKit/hidsystem/IOHIDShared.h>
 
@@ -46,6 +48,7 @@ static CGPoint lastClickPos;
 static double lastClickTime = 0;
 static double doubleClickSpeed;
 static uint64_t lastSequenceNumber = 0;
+static int needs_refresh = 0;
 
 static pthread_mutex_t clickCountMutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -63,7 +66,7 @@ static double get_distance(CGPoint pos0, CGPoint pos1) {
     return distance;
 }
 
-static const char *event_type_to_string(CGEventType type) {
+static const char *quartz_event_type_to_string(CGEventType type) {
     switch(type) {
         case kCGEventNull:              return "kCGEventNull";
         case kCGEventLeftMouseUp:       return "kCGEventLeftMouseUp";
@@ -77,6 +80,23 @@ static const char *event_type_to_string(CGEventType type) {
         case kCGEventOtherMouseDragged: return "kCGEventOtherMouseDragged";
         case kCGEventMouseMoved:        return "kCGEventMouseMoved";
         default:                        return "?";
+    }
+}
+
+static const char *iohid_event_type_to_string(int type) {
+    switch(type) {
+        case NX_NULLEVENT:      return "NX_NULLEVENT";
+        case NX_LMOUSEUP:       return "NX_LMOUSEUP";
+        case NX_LMOUSEDOWN:     return "NX_LMOUSEDOWN";
+        case NX_LMOUSEDRAGGED:  return "NX_LMOUSEDRAGGED";
+        case NX_RMOUSEUP:       return "NX_RMOUSEUP";
+        case NX_RMOUSEDOWN:     return "NX_RMOUSEDOWN";
+        case NX_RMOUSEDRAGGED:  return "NX_RMOUSEDRAGGED";
+        case NX_OMOUSEUP:       return "NX_OMOUSEUP";
+        case NX_OMOUSEDOWN:     return "NX_OMOUSEDOWN";
+        case NX_OMOUSEDRAGGED:  return "NX_OMOUSEDRAGGED";
+        case NX_MOUSEMOVED:     return "NX_MOUSEMOVED";
+        default:                return "?";
     }
 }
 
@@ -115,11 +135,38 @@ static CGPoint restrict_to_screen_boundaries(CGPoint lastPos, CGPoint newPos) {
 }
 
 static CGPoint get_current_mouse_pos() {
+    CGPoint currentPos;
+
+#if 1
     CGEventRef event = CGEventCreate(NULL);
-    CGPoint currentPos = CGEventGetLocation(event);
+    currentPos = CGEventGetLocation(event);
     CFRelease(event);
+#else
+    NSPoint mouseLoc = [NSEvent mouseLocation];
+    currentPos.x = mouseLoc.x;
+    currentPos.y = mouseLoc.y;
+#endif
+
     //NSLog(@"got cursor position: %f,%f", currentPos.x, currentPos.y);
+
+    // truncate coordinates
+    currentPos.x = (int)currentPos.x;
+    currentPos.y = (int)currentPos.y;
+
     return currentPos;
+}
+
+static void refresh_mouse_location() {
+    CGPoint oldPos = currentPos;
+    currentPos = get_current_mouse_pos();
+
+    float movedX = oldPos.x - currentPos.x;
+    float movedY = oldPos.y - currentPos.y;
+
+    deltaPosFloat.x += movedX;
+    deltaPosFloat.y += movedY;
+    deltaPosInt.x += movedX;
+    deltaPosInt.y += movedY;
 }
 
 void mouse_update_clicktime() {
@@ -165,18 +212,6 @@ bool mouse_init() {
         {
             io_connect_t service_connect = IO_OBJECT_NULL;
             io_service_t service;
-            mach_port_t io_master_port = MACH_PORT_NULL;
-
-            kern_return_t kern_ret = IOMasterPort(MACH_PORT_NULL, &io_master_port);
-            if (kern_ret != KERN_SUCCESS) {
-                NSLog(@"call to IOMasterPort failed");
-                return NO;
-            }
-
-            if (io_master_port == MACH_PORT_NULL) {
-                NSLog(@"failed to get io master port");
-                return NO;
-            }
 
             service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching(kIOHIDSystemClass));
             if (!service) {
@@ -184,7 +219,7 @@ bool mouse_init() {
                 return NO;
             }
 
-            kern_ret = IOServiceOpen(service, mach_task_self(), kIOHIDParamConnectType, &service_connect);
+            kern_return_t kern_ret = IOServiceOpen(service, mach_task_self(), kIOHIDParamConnectType, &service_connect);
             if (kern_ret != KERN_SUCCESS) {
                 NSLog(@"call to IOServiceOpen failed");
                 return NO;
@@ -289,8 +324,15 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
         calcdy = (velocity * dy);
     }
 
-    newPos.x = currentPos.x + calcdx;
-    newPos.y = currentPos.y + calcdy;
+    deltaPosFloat.x += calcdx;
+    deltaPosFloat.y += calcdy;
+    int deltaX = (int) (deltaPosFloat.x - deltaPosInt.x);
+    int deltaY = (int) (deltaPosFloat.y - deltaPosInt.y);
+    deltaPosInt.x += deltaX;
+    deltaPosInt.y += deltaY;
+
+    newPos.x = currentPos.x + deltaX;
+    newPos.y = currentPos.y + deltaY;
 
     newPos = restrict_to_screen_boundaries(currentPos, newPos);
 
@@ -317,33 +359,28 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
         otherButton = 5;
     }
 
-    deltaPosFloat.x += calcdx;
-    deltaPosFloat.y += calcdy;
-    int deltaX = (int) (deltaPosFloat.x - deltaPosInt.x);
-    int deltaY = (int) (deltaPosFloat.y - deltaPosInt.y);
-    deltaPosInt.x += deltaX;
-    deltaPosInt.y += deltaY;
-
     if (is_debug) {
-        LOG(@"move dx: %02d, dy: %02d, new pos: %.2fx%.2f, delta: %02d,%02d, deltaPos: %.2fx%.2f, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
+        LOG(@"move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03df, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
             dx,
             dy,
-            newPos.x,
-            newPos.y,
+            (int)newPos.x,
+            (int)newPos.y,
             deltaX,
             deltaY,
-            deltaPosInt.x,
-            deltaPosInt.y,
+            (int)deltaPosInt.x,
+            (int)deltaPosInt.y,
             BUTTON_DOWN(currentButtons, LEFT_BUTTON),
             BUTTON_DOWN(currentButtons, MIDDLE_BUTTON),
             BUTTON_DOWN(currentButtons, RIGHT_BUTTON),
             BUTTON_DOWN(currentButtons, BUTTON4),
             BUTTON_DOWN(currentButtons, BUTTON5),
             BUTTON_DOWN(currentButtons, BUTTON6),
-            event_type_to_string(eventType),
+            quartz_event_type_to_string(eventType),
             eventType,
             otherButton);
     }
+
+    [sMouseSupervisor pushMouseEvent: deltaX: deltaY];
 
     int driver_to_use = driver;
 
@@ -392,14 +429,20 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                     exit(0);
             }
 
-            static NXEventData eventData;
-            memset(&eventData, 0, sizeof(NXEventData));
+            NXEventData eventData;
 
-            IOGPoint newPoint = { (SInt16) newPos.x, (SInt16) newPos.y };
+            IOGPoint newPoint = { (SInt16) newPos.x, (SInt16) newPos.y};
 
-            eventData.mouseMove.subType = NX_SUBTYPE_TABLET_POINT;
+            bzero(&eventData, sizeof(NXEventData));
             eventData.mouseMove.dx = (SInt32)(deltaX);
             eventData.mouseMove.dy = (SInt32)(deltaY);
+
+            IOOptionBits options;
+            if (iohidEventType == NX_MOUSEMOVED) {
+                options = kIOHIDSetRelativeCursorPosition;
+            } else {
+                options = kIOHIDSetCursorPosition;
+            }
 
             (void)IOHIDPostEvent(iohid_connect,
                                  iohidEventType,
@@ -407,7 +450,18 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                                  &eventData,
                                  kNXEventDataVersion,
                                  0,
-                                 kIOHIDSetCursorPosition);
+                                 options);
+
+            if (is_debug) {
+                NSLog(@"eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d",
+                      iohid_event_type_to_string(iohidEventType),
+                      (int)iohidEventType,
+                      (int)newPoint.x,
+                      (int)newPoint.y,
+                      (int)eventData.mouseMove.dx,
+                      (int)eventData.mouseMove.dy);
+            }
+
             break;
         }
         default:
@@ -463,7 +517,7 @@ static void mouse_handle_buttons(int buttons) {
                 theDoubleClickSpeed = doubleClickSpeed;
                 pthread_mutex_unlock(&clickCountMutex);
 
-                if (now - lastClickTime <= doubleClickSpeed &&
+                if (now - lastClickTime <= theDoubleClickSpeed &&
                     distanceMovedSinceLastClick <= maxDistanceAllowed) {
                     lastClickTime = timestamp();
                     nclicks++;
@@ -499,7 +553,7 @@ static void mouse_handle_buttons(int buttons) {
                     BUTTON_DOWN(buttons, BUTTON4),
                     BUTTON_DOWN(buttons, BUTTON5),
                     BUTTON_DOWN(buttons, BUTTON6),
-                    event_type_to_string(eventType),
+                    quartz_event_type_to_string(eventType),
                     eventType,
                     otherButton,
                     ((int)log2(buttonIndex)),
@@ -509,8 +563,8 @@ static void mouse_handle_buttons(int buttons) {
 
             int driver_to_use = driver;
 
-            // can't get middle mouse to work in iohid, so let's channel all "other" events
-            // through quartz
+            // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
+            //       through quartz
             if (driver == DRIVER_IOHID &&
                 (eventType == kCGEventOtherMouseDown || eventType == kCGEventOtherMouseUp)) {
                 driver_to_use = DRIVER_QUARTZ;
@@ -537,6 +591,7 @@ static void mouse_handle_buttons(int buttons) {
                 case DRIVER_IOHID:
                 {
                     int iohidEventType;
+                    int is_down_event = 1;
 
                     switch(eventType) {
                         case kCGEventLeftMouseDown:
@@ -544,48 +599,66 @@ static void mouse_handle_buttons(int buttons) {
                             break;
                         case kCGEventLeftMouseUp:
                             iohidEventType = NX_LMOUSEUP;
+                            is_down_event = 0;
                             break;
                         case kCGEventRightMouseDown:
                             iohidEventType = NX_RMOUSEDOWN;
                             break;
                         case kCGEventRightMouseUp:
                             iohidEventType = NX_RMOUSEUP;
+                            is_down_event = 0;
                             break;
                         case kCGEventOtherMouseDown:
                             iohidEventType = NX_OMOUSEDOWN;
                             break;
                         case kCGEventOtherMouseUp:
                             iohidEventType = NX_OMOUSEUP;
+                            is_down_event = 0;
                             break;
                         default:
                             NSLog(@"INTERNAL ERROR: unknown eventType: %d", eventType);
                             exit(0);
                     }
 
-                    static NXEventData eventData;
-                    memset(&eventData, 0, sizeof(NXEventData));
+                    // on clicks, refresh own mouse position
+                    needs_refresh = 1;
 
-                    eventData.mouse.subType = NX_SUBTYPE_DEFAULT;
-                    eventData.mouse.click = clickStateValue;
+                    static int eventNumber = 0;
+                    if (is_down_event) eventNumber++;
+
+                    NXEventData eventData;
+                    bzero(&eventData, sizeof(NXEventData));
+                    eventData.mouse.click = is_down_event ? clickStateValue : 0;
+                    eventData.mouse.pressure = is_down_event ? 255 : 0;
+                    eventData.mouse.eventNum = eventNumber;
                     eventData.mouse.buttonNumber = otherButton;
-
-                    if (is_debug) {
-                        NSLog(@"eventType: %d, subt: %d, click: %d, buttonNumber: %d",
-                              iohidEventType,
-                              eventData.mouse.subType,
-                              eventData.mouse.click,
-                              eventData.mouse.buttonNumber);
-                    }
 
                     IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };
 
-                    IOHIDPostEvent(iohid_connect,
-                                   iohidEventType,
-                                   newPoint,
-                                   &eventData,
-                                   kNXEventDataVersion,
-                                   0,
-                                   0);
+                    if (is_debug) {
+                        NSLog(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
+                              iohid_event_type_to_string(iohidEventType),
+                              (int)iohidEventType,
+                              (int)newPoint.x,
+                              (int)newPoint.y,
+                              (int)eventData.mouse.subType,
+                              (int)eventData.mouse.click,
+                              (int)eventData.mouse.pressure,
+                              (int)eventData.mouse.eventNum,
+                              (int)eventData.mouse.buttonNumber);
+                    }
+
+                    kern_return_t result = IOHIDPostEvent(iohid_connect,
+                                                          iohidEventType,
+                                                          newPoint,
+                                                          &eventData,
+                                                          kNXEventDataVersion,
+                                                          0,
+                                                          0);
+
+                    if (result != KERN_SUCCESS) {
+                        NSLog(@"failed to post button event");
+                    }
 
                     break;
                 }
@@ -599,19 +672,29 @@ static void mouse_handle_buttons(int buttons) {
             e2 = GET_TIME();
         }
     }
-
-    lastButtons = buttons;
 }
 
-void mouse_handle(mouse_event_t *event) {
-
-    if (event->seqnum != (lastSequenceNumber + 1)) {
+void check_needs_refresh(mouse_event_t *event) {
+    if (needs_refresh || event->seqnum != (lastSequenceNumber + 1)) {
         if (is_debug) {
             LOG(@"Cursor position dirty, need to fetch fresh");
         }
 
-        currentPos = get_current_mouse_pos();
+        refresh_mouse_location();
+
+        needs_refresh = 0;
     }
+}
+
+void mouse_handle(mouse_event_t *event) {
+
+    check_needs_refresh(event);
+
+    if (event->buttons != lastButtons) {
+        mouse_handle_buttons(event->buttons);
+    }
+
+    check_needs_refresh(event);
 
     if (event->dx != 0 || event->dy != 0) {
         double velocity;
@@ -626,16 +709,11 @@ void mouse_handle(mouse_event_t *event) {
                 curve = curve_trackpad;
                 break;
             default:
-                velocity = 1;
                 NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
                 exit(0);
         }
 
         mouse_handle_move(event->device_type, event->dx, event->dy, velocity, curve, event->buttons);
-    }
-
-    if (event->buttons != lastButtons) {
-        mouse_handle_buttons(event->buttons);
     }
 
     if (is_debug) {
@@ -645,4 +723,8 @@ void mouse_handle(mouse_event_t *event) {
     lastSequenceNumber = event->seqnum;
     lastButtons = event->buttons;
     lastPos = currentPos;
+}
+
+void mouse_refresh() {
+    needs_refresh = 1;
 }
