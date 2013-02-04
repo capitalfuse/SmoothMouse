@@ -81,7 +81,7 @@ Base64::encode(std::string input) {
     dtable[62]= '+';
     dtable[63]= '/';
 
-    unsigned int length = input.length() ;
+    unsigned int length = (unsigned int)input.length() ;
     for (unsigned int iInput=0; iInput<length;) {
         unsigned char igroup[3],ogroup[4];
         igroup[0]= igroup[1]= igroup[2]= 0;
@@ -121,7 +121,7 @@ Base64::decode(std::string input) {
     dtable[(int)'/']= 63;
     dtable[(int)'=']= 0;
 
-    unsigned int length = input.length() ;
+    unsigned int length = (unsigned int)input.length() ;
     for (unsigned int iInput=0 ;;) {
         unsigned char a[4],b[4],o[3];
 
@@ -400,7 +400,7 @@ bool SetupAcceleration (OSData * data, IOFixed desired, IOFixed devScale, IOFixe
     // or take all the high one
     else {
         lowTable	= highTable;
-        lowAccl		= highAccl;
+        //lowAccl		= highAccl; // dead store
         lowPoints	= 0;
     }
 
@@ -587,19 +587,7 @@ void ScaleAxes (void * scaleSegments, int * axis1p, IOFixed *axis1Fractp, int * 
  */
 #if (defined (__i386__) || defined(__x86_64__)) && __GNUC__ && defined(__APPLE__) // NR: added __APPLE__
 
-// For comments, see the annotated version below.
-#define _IntSaturate(x)     ({				\
-int _Result = (int) (x);				\
-__asm__("                                   \
-ucomisd %[LimitFloat], %[xx]    \n  \
-cmovae  %[LimitInt], %[_Result] "	\
-:   [_Result] "+r" (_Result)		\
-:   [LimitFloat] "mx" (0x1p31),		\
-[LimitInt] "mr" (0x7fffffff),		\
-[xx] "x" ((double)(x))		\
-:   "cc"					\
-);					\
-_Result; })
+#define _IntSaturate(x) ((int) (x))
 /*
  // Assume result will be x.
  int _Result = (x);
@@ -708,7 +696,7 @@ OSXFunction::clearState(void) {
 
 void
 OSXFunction::configure(float s) {
-    if (Wrapped_SetupAcceleration((void*)accltable.c_str(), accltable.size(),
+    if (Wrapped_SetupAcceleration((void*)accltable.c_str(), (uint32_t)accltable.size(),
                                   400 /*dpi, TODO*/, s,
                                   &scaleSegments, &scaleSegCount)) {
         setting = s ;

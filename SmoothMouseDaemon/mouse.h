@@ -1,6 +1,8 @@
 
 #pragma once
 
+#import "MouseSupervisor.h"
+
 #include "kextdaemon.h"
 
 typedef enum AccelerationCurve_s {
@@ -17,6 +19,6 @@ typedef enum Driver_s {
 
 bool mouse_init();
 void mouse_handle(mouse_event_t *event);
-void mouse_post();
 void mouse_cleanup();
+void mouse_refresh();
 void mouse_update_clicktime();

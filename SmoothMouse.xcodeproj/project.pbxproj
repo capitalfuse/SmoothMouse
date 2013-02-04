@@ -15,8 +15,8 @@
 				03E6F2551699EF6800FBDBD6 /* ShellScript */,
 			);
 			dependencies = (
+				03FCEC5216BFE4DB00F35E4A /* PBXTargetDependency */,
 				03DB21001621799400CF4299 /* PBXTargetDependency */,
-				03DB21021621799600CF4299 /* PBXTargetDependency */,
 				03DB21041621799700CF4299 /* PBXTargetDependency */,
 			);
 			name = SmoothMouseBuild;
@@ -27,12 +27,21 @@
 /* Begin PBXBuildFile section */
 		031386A91628B36000A04755 /* UrlLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 031386A71628B36000A04755 /* UrlLabel.h */; };
 		031386AA1628B36000A04755 /* UrlLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 031386A81628B36000A04755 /* UrlLabel.m */; };
-		0327029F1662B7C5003EECA0 /* WindowsFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0327029C1662B7C5003EECA0 /* WindowsFunction.cpp */; };
+		03193FE516BFAC41008FE899 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121914D5495F008704EC /* Cocoa.framework */; };
+		03193FEB16BFAC41008FE899 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 03193FE916BFAC41008FE899 /* InfoPlist.strings */; };
+		03193FED16BFAC41008FE899 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 03193FEC16BFAC41008FE899 /* main.m */; };
+		03193FF116BFAC41008FE899 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03193FEF16BFAC41008FE899 /* Credits.rtf */; };
+		03193FF416BFAC41008FE899 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03193FF316BFAC41008FE899 /* AppDelegate.mm */; };
+		0319400316BFB510008FE899 /* accel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03193FFD16BFB510008FE899 /* accel.mm */; };
+		0319400416BFB510008FE899 /* daemon.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03193FFE16BFB510008FE899 /* daemon.mm */; };
+		0319400516BFB510008FE899 /* debug.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0319400016BFB510008FE899 /* debug.mm */; };
+		0319400616BFB510008FE899 /* mouse.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0319400216BFB510008FE899 /* mouse.mm */; };
+		0319400916BFB612008FE899 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0319400816BFB612008FE899 /* IOKit.framework */; };
+		0319400F16BFB637008FE899 /* OSXFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400B16BFB637008FE899 /* OSXFunction.cpp */; };
+		0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400D16BFB637008FE899 /* WindowsFunction.cpp */; };
 		034215B41631F2BA0047E370 /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03D020D41631F22A00CD04C1 /* uninstall.sh */; };
-		0356EAE9162F436B001C371E /* accel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0356EAE8162F436B001C371E /* accel.mm */; };
-		036C5434160F50C600110497 /* debug.mm in Sources */ = {isa = PBXBuildFile; fileRef = 036C5433160F50C600110497 /* debug.mm */; };
+		035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.m */; };
 		036E3EF11637066600887DCE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 036E3EF01637066600887DCE /* Security.framework */; };
-		0384C5CB16B5DF6E007718D5 /* OSXFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0384C5C816B5DF6E007718D5 /* OSXFunction.cpp */; };
 		03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 03BA20FF161F757D0014A74E /* dsa_pub.pem */; };
 		03D020BD1631D0DA00CD04C1 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03D020BC1631D0DA00CD04C1 /* Credits.rtf */; };
 		03DB20C11620CB5900CF4299 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121914D5495F008704EC /* Cocoa.framework */; };
@@ -42,19 +51,14 @@
 		03DB20D01620CB5900CF4299 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20CF1620CB5900CF4299 /* AppDelegate.m */; };
 		03E6F25316999C9300FBDBD6 /* VersionLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 03E6F25116999C9300FBDBD6 /* VersionLabel.h */; };
 		03E6F25416999C9300FBDBD6 /* VersionLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E6F25216999C9300FBDBD6 /* VersionLabel.m */; };
-		03F1B44A1647F19B00DB99E8 /* mouse.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03F1B4491647F19B00DB99E8 /* mouse.mm */; };
 		03F3CBB416220E0700D9A857 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03F3CBB316220E0400D9A857 /* Sparkle.framework */; };
 		03F3CBB516220E0D00D9A857 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03F3CBB316220E0400D9A857 /* Sparkle.framework */; };
-		ED03CFA115D7D96000763D81 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA015D7D96000763D81 /* ApplicationServices.framework */; };
-		ED03CFA315D7D97400763D81 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA215D7D97400763D81 /* IOKit.framework */; };
 		ED03CFA615D7D9B500763D81 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA515D7D9B500763D81 /* ServiceManagement.framework */; };
 		ED0E121A14D5495F008704EC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121914D5495F008704EC /* Cocoa.framework */; };
 		ED0E121C14D5495F008704EC /* PreferencePanes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121B14D5495F008704EC /* PreferencePanes.framework */; };
 		ED0E122514D5495F008704EC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = ED0E122314D5495F008704EC /* InfoPlist.strings */; };
 		ED0E122814D5495F008704EC /* SmoothMousePrefPane.h in Headers */ = {isa = PBXBuildFile; fileRef = ED0E122714D5495F008704EC /* SmoothMousePrefPane.h */; };
 		ED0E122A14D5495F008704EC /* SmoothMousePrefPane.m in Sources */ = {isa = PBXBuildFile; fileRef = ED0E122914D5495F008704EC /* SmoothMousePrefPane.m */; };
-		ED0E123A14D5496F008704EC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E123914D5496F008704EC /* Foundation.framework */; };
-		ED0E123D14D5496F008704EC /* daemon.mm in Sources */ = {isa = PBXBuildFile; fileRef = ED0E123C14D5496F008704EC /* daemon.mm */; };
 		ED13219A14D6713200D07CC3 /* SmoothMousePrefPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED13219814D6713200D07CC3 /* SmoothMousePrefPane.xib */; };
 		ED13219C14D6721800D07CC3 /* SmoothMousePrefPane.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED13219B14D6721800D07CC3 /* SmoothMousePrefPane.icns */; };
 /* End PBXBuildFile section */
@@ -67,13 +71,6 @@
 			remoteGlobalIDString = ED0E121714D5495F008704EC;
 			remoteInfo = SmoothMousePrefPane;
 		};
-		03DB21011621799600CF4299 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ED0E11F214D5493A008704EC /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = ED0E123614D5496E008704EC;
-			remoteInfo = smoothmoused;
-		};
 		03DB21031621799700CF4299 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = ED0E11F214D5493A008704EC /* Project object */;
@@ -81,18 +78,16 @@
 			remoteGlobalIDString = 03DB20BE1620CB5900CF4299;
 			remoteInfo = SmoothMouseUpdater;
 		};
+		03FCEC5116BFE4DB00F35E4A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED0E11F214D5493A008704EC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 03193FE216BFAC41008FE899;
+			remoteInfo = SmoothMouseDaemon;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		03DB20161620BD2900CF4299 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		03DB20EF1620D17E00CF4299 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -103,29 +98,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ED0E123514D5496E008704EC /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		031386A71628B36000A04755 /* UrlLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UrlLabel.h; sourceTree = "<group>"; };
 		031386A81628B36000A04755 /* UrlLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UrlLabel.m; sourceTree = "<group>"; };
-		0327029C1662B7C5003EECA0 /* WindowsFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WindowsFunction.cpp; path = libpointing/WindowsFunction.cpp; sourceTree = "<group>"; };
-		0327029D1662B7C5003EECA0 /* WindowsFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WindowsFunction.hpp; path = libpointing/WindowsFunction.hpp; sourceTree = "<group>"; };
-		0356EAE8162F436B001C371E /* accel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = accel.mm; sourceTree = "<group>"; };
-		0356EAEB162F4387001C371E /* accel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = accel.h; sourceTree = "<group>"; };
-		036C5433160F50C600110497 /* debug.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = debug.mm; sourceTree = "<group>"; };
-		036C5436160F50D300110497 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		03193FE316BFAC41008FE899 /* SmoothMouseDaemon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmoothMouseDaemon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		03193FE816BFAC41008FE899 /* SmoothMouseDaemon-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SmoothMouseDaemon-Info.plist"; sourceTree = "<group>"; };
+		03193FEA16BFAC41008FE899 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		03193FEC16BFAC41008FE899 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		03193FEE16BFAC41008FE899 /* SmoothMouseDaemon-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SmoothMouseDaemon-Prefix.pch"; sourceTree = "<group>"; };
+		03193FF016BFAC41008FE899 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		03193FF216BFAC41008FE899 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		03193FF316BFAC41008FE899 /* AppDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
+		03193FFC16BFB510008FE899 /* accel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = accel.h; sourceTree = "<group>"; };
+		03193FFD16BFB510008FE899 /* accel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = accel.mm; sourceTree = "<group>"; };
+		03193FFE16BFB510008FE899 /* daemon.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = daemon.mm; sourceTree = "<group>"; };
+		03193FFF16BFB510008FE899 /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		0319400016BFB510008FE899 /* debug.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = debug.mm; sourceTree = "<group>"; };
+		0319400116BFB510008FE899 /* mouse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mouse.h; sourceTree = "<group>"; };
+		0319400216BFB510008FE899 /* mouse.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mouse.mm; sourceTree = "<group>"; };
+		0319400716BFB5AA008FE899 /* daemon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = daemon.h; sourceTree = "<group>"; };
+		0319400816BFB612008FE899 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/IOKit.framework; sourceTree = DEVELOPER_DIR; };
+		0319400B16BFB637008FE899 /* OSXFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSXFunction.cpp; sourceTree = "<group>"; };
+		0319400C16BFB637008FE899 /* OSXFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OSXFunction.hpp; sourceTree = "<group>"; };
+		0319400D16BFB637008FE899 /* WindowsFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WindowsFunction.cpp; sourceTree = "<group>"; };
+		0319400E16BFB637008FE899 /* WindowsFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WindowsFunction.hpp; sourceTree = "<group>"; };
+		035222EF16C0492E00DBE092 /* MouseSupervisor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseSupervisor.h; sourceTree = "<group>"; };
+		035222F016C0492E00DBE092 /* MouseSupervisor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MouseSupervisor.m; sourceTree = "<group>"; };
 		036E3EF01637066600887DCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
-		0384C5C816B5DF6E007718D5 /* OSXFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OSXFunction.cpp; path = libpointing/OSXFunction.cpp; sourceTree = "<group>"; };
-		0384C5C916B5DF6E007718D5 /* OSXFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = OSXFunction.hpp; path = libpointing/OSXFunction.hpp; sourceTree = "<group>"; };
 		03BA20FF161F757D0014A74E /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		03D020BC1631D0DA00CD04C1 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		03D020D41631F22A00CD04C1 /* uninstall.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = uninstall.sh; sourceTree = "<group>"; };
@@ -141,8 +142,6 @@
 		03DB20DA1620CB5A00CF4299 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		03E6F25116999C9300FBDBD6 /* VersionLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionLabel.h; sourceTree = "<group>"; };
 		03E6F25216999C9300FBDBD6 /* VersionLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionLabel.m; sourceTree = "<group>"; };
-		03F1B4471647F17100DB99E8 /* mouse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mouse.h; sourceTree = "<group>"; };
-		03F1B4491647F19B00DB99E8 /* mouse.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mouse.mm; sourceTree = "<group>"; };
 		03F3CBB316220E0400D9A857 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = Dependencies/Sparkle.framework; sourceTree = "<group>"; };
 		ED03CF9E15D7D95200763D81 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		ED03CFA015D7D96000763D81 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
@@ -162,10 +161,7 @@
 		ED0E122614D5495F008704EC /* SmoothMousePrefPane-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SmoothMousePrefPane-Prefix.pch"; sourceTree = "<group>"; };
 		ED0E122714D5495F008704EC /* SmoothMousePrefPane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SmoothMousePrefPane.h; sourceTree = "<group>"; };
 		ED0E122914D5495F008704EC /* SmoothMousePrefPane.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SmoothMousePrefPane.m; sourceTree = "<group>"; };
-		ED0E123714D5496E008704EC /* smoothmoused */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = smoothmoused; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED0E123914D5496F008704EC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		ED0E123C14D5496F008704EC /* daemon.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = daemon.mm; sourceTree = "<group>"; };
-		ED0E123F14D5496F008704EC /* smoothmoused-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "smoothmoused-Prefix.pch"; sourceTree = "<group>"; };
 		ED0E124E14D54A96008704EC /* kextdaemon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kextdaemon.h; sourceTree = SOURCE_ROOT; };
 		ED0E124F14D54A96008704EC /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
 		ED13219914D6713200D07CC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = SmoothMousePrefPane/en.lproj/SmoothMousePrefPane.xib; sourceTree = SOURCE_ROOT; };
@@ -173,6 +169,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		03193FE016BFAC41008FE899 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0319400916BFB612008FE899 /* IOKit.framework in Frameworks */,
+				03193FE516BFAC41008FE899 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		03DB20BC1620CB5900CF4299 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -193,28 +198,51 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ED0E123414D5496E008704EC /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				ED03CFA315D7D97400763D81 /* IOKit.framework in Frameworks */,
-				ED03CFA115D7D96000763D81 /* ApplicationServices.framework in Frameworks */,
-				ED0E123A14D5496F008704EC /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		032702981662B7A3003EECA0 /* libpointing */ = {
+		03193FE616BFAC41008FE899 /* SmoothMouseDaemon */ = {
 			isa = PBXGroup;
 			children = (
-				0384C5C816B5DF6E007718D5 /* OSXFunction.cpp */,
-				0384C5C916B5DF6E007718D5 /* OSXFunction.hpp */,
-				0327029C1662B7C5003EECA0 /* WindowsFunction.cpp */,
-				0327029D1662B7C5003EECA0 /* WindowsFunction.hpp */,
+				03193FFC16BFB510008FE899 /* accel.h */,
+				03193FFD16BFB510008FE899 /* accel.mm */,
+				03193FF216BFAC41008FE899 /* AppDelegate.h */,
+				03193FF316BFAC41008FE899 /* AppDelegate.mm */,
+				0319400716BFB5AA008FE899 /* daemon.h */,
+				03193FFE16BFB510008FE899 /* daemon.mm */,
+				03193FFF16BFB510008FE899 /* debug.h */,
+				0319400016BFB510008FE899 /* debug.mm */,
+				0319400A16BFB637008FE899 /* libpointing */,
+				0319400116BFB510008FE899 /* mouse.h */,
+				0319400216BFB510008FE899 /* mouse.mm */,
+				035222EF16C0492E00DBE092 /* MouseSupervisor.h */,
+				035222F016C0492E00DBE092 /* MouseSupervisor.m */,
+				03193FE716BFAC41008FE899 /* Supporting Files */,
 			);
-			name = libpointing;
+			path = SmoothMouseDaemon;
+			sourceTree = "<group>";
+		};
+		03193FE716BFAC41008FE899 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				03193FE816BFAC41008FE899 /* SmoothMouseDaemon-Info.plist */,
+				03193FE916BFAC41008FE899 /* InfoPlist.strings */,
+				03193FEC16BFAC41008FE899 /* main.m */,
+				03193FEE16BFAC41008FE899 /* SmoothMouseDaemon-Prefix.pch */,
+				03193FEF16BFAC41008FE899 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		0319400A16BFB637008FE899 /* libpointing */ = {
+			isa = PBXGroup;
+			children = (
+				0319400B16BFB637008FE899 /* OSXFunction.cpp */,
+				0319400C16BFB637008FE899 /* OSXFunction.hpp */,
+				0319400D16BFB637008FE899 /* WindowsFunction.cpp */,
+				0319400E16BFB637008FE899 /* WindowsFunction.hpp */,
+			);
+			path = libpointing;
 			sourceTree = "<group>";
 		};
 		03DB20C21620CB5900CF4299 /* SmoothMouseUpdater */ = {
@@ -242,13 +270,14 @@
 		ED0E11F014D5493A008704EC = {
 			isa = PBXGroup;
 			children = (
+				0319400816BFB612008FE899 /* IOKit.framework */,
 				036E3EF01637066600887DCE /* Security.framework */,
 				03DB20191620BF3B00CF4299 /* SmoothMouse.prefPane */,
 				ED0E124F14D54A96008704EC /* constants.h */,
 				ED0E124E14D54A96008704EC /* kextdaemon.h */,
 				ED0E122014D5495F008704EC /* SmoothMousePrefPane */,
-				ED0E123B14D5496F008704EC /* smoothmoused */,
 				03DB20C21620CB5900CF4299 /* SmoothMouseUpdater */,
+				03193FE616BFAC41008FE899 /* SmoothMouseDaemon */,
 				ED0E120114D54950008704EC /* Frameworks */,
 				ED0E120014D54950008704EC /* Products */,
 			);
@@ -258,8 +287,8 @@
 			isa = PBXGroup;
 			children = (
 				ED0E121814D5495F008704EC /* SmoothMouse.prefPane */,
-				ED0E123714D5496E008704EC /* smoothmoused */,
 				03DB20BF1620CB5900CF4299 /* SmoothMouseUpdater.app */,
+				03193FE316BFAC41008FE899 /* SmoothMouseDaemon.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -323,30 +352,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		ED0E123B14D5496F008704EC /* smoothmoused */ = {
-			isa = PBXGroup;
-			children = (
-				032702981662B7A3003EECA0 /* libpointing */,
-				0356EAEB162F4387001C371E /* accel.h */,
-				0356EAE8162F436B001C371E /* accel.mm */,
-				ED0E123C14D5496F008704EC /* daemon.mm */,
-				036C5436160F50D300110497 /* debug.h */,
-				036C5433160F50C600110497 /* debug.mm */,
-				03F1B4471647F17100DB99E8 /* mouse.h */,
-				03F1B4491647F19B00DB99E8 /* mouse.mm */,
-				ED0E123E14D5496F008704EC /* Supporting Files */,
-			);
-			path = smoothmoused;
-			sourceTree = "<group>";
-		};
-		ED0E123E14D5496F008704EC /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				ED0E123F14D5496F008704EC /* smoothmoused-Prefix.pch */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -363,6 +368,23 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		03193FE216BFAC41008FE899 /* SmoothMouseDaemon */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 03193FFA16BFAC41008FE899 /* Build configuration list for PBXNativeTarget "SmoothMouseDaemon" */;
+			buildPhases = (
+				03193FDF16BFAC41008FE899 /* Sources */,
+				03193FE016BFAC41008FE899 /* Frameworks */,
+				03193FE116BFAC41008FE899 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SmoothMouseDaemon;
+			productName = SmoothMouseDaemon;
+			productReference = 03193FE316BFAC41008FE899 /* SmoothMouseDaemon.app */;
+			productType = "com.apple.product-type.application";
+		};
 		03DB20BE1620CB5900CF4299 /* SmoothMouseUpdater */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 03DB20E81620CB5A00CF4299 /* Build configuration list for PBXNativeTarget "SmoothMouseUpdater" */;
@@ -400,24 +422,6 @@
 			productReference = ED0E121814D5495F008704EC /* SmoothMouse.prefPane */;
 			productType = "com.apple.product-type.bundle";
 		};
-		ED0E123614D5496E008704EC /* smoothmoused */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = ED0E124114D5496F008704EC /* Build configuration list for PBXNativeTarget "smoothmoused" */;
-			buildPhases = (
-				ED0E123314D5496E008704EC /* Sources */,
-				ED0E123414D5496E008704EC /* Frameworks */,
-				ED0E123514D5496E008704EC /* CopyFiles */,
-				03DB20161620BD2900CF4299 /* CopyFiles */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = smoothmoused;
-			productName = smoothmoused;
-			productReference = ED0E123714D5496E008704EC /* smoothmoused */;
-			productType = "com.apple.product-type.tool";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -439,14 +443,23 @@
 			projectRoot = "";
 			targets = (
 				ED0E121714D5495F008704EC /* SmoothMousePrefPane */,
-				ED0E123614D5496E008704EC /* smoothmoused */,
 				03DB20BE1620CB5900CF4299 /* SmoothMouseUpdater */,
 				03DB20FB1621798800CF4299 /* SmoothMouseBuild */,
+				03193FE216BFAC41008FE899 /* SmoothMouseDaemon */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		03193FE116BFAC41008FE899 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03193FEB16BFAC41008FE899 /* InfoPlist.strings in Resources */,
+				03193FF116BFAC41008FE899 /* Credits.rtf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		03DB20BD1620CB5900CF4299 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -493,7 +506,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mv \"${BUILT_PRODUCTS_DIR}/smoothmoused\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/MacOS/\"\nrm -rf \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app\"\nmv \"${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\"\nchmod ug+x \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh\"";
+			shellScript = "rm -rf \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app\"\nrm -rf \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseDaemon.app\"\nmv \"${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\"\nmv \"${BUILT_PRODUCTS_DIR}/SmoothMouseDaemon.app\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\"\nchmod ug+x \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh\"";
 		};
 		03E6F2551699EF6800FBDBD6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -511,6 +524,22 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		03193FDF16BFAC41008FE899 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03193FED16BFAC41008FE899 /* main.m in Sources */,
+				03193FF416BFAC41008FE899 /* AppDelegate.mm in Sources */,
+				0319400316BFB510008FE899 /* accel.mm in Sources */,
+				0319400416BFB510008FE899 /* daemon.mm in Sources */,
+				0319400516BFB510008FE899 /* debug.mm in Sources */,
+				0319400616BFB510008FE899 /* mouse.mm in Sources */,
+				0319400F16BFB637008FE899 /* OSXFunction.cpp in Sources */,
+				0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */,
+				035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		03DB20BB1620CB5900CF4299 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -530,19 +559,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ED0E123314D5496E008704EC /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				ED0E123D14D5496F008704EC /* daemon.mm in Sources */,
-				036C5434160F50C600110497 /* debug.mm in Sources */,
-				0356EAE9162F436B001C371E /* accel.mm in Sources */,
-				03F1B44A1647F19B00DB99E8 /* mouse.mm in Sources */,
-				0327029F1662B7C5003EECA0 /* WindowsFunction.cpp in Sources */,
-				0384C5CB16B5DF6E007718D5 /* OSXFunction.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -551,19 +567,35 @@
 			target = ED0E121714D5495F008704EC /* SmoothMousePrefPane */;
 			targetProxy = 03DB20FF1621799400CF4299 /* PBXContainerItemProxy */;
 		};
-		03DB21021621799600CF4299 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = ED0E123614D5496E008704EC /* smoothmoused */;
-			targetProxy = 03DB21011621799600CF4299 /* PBXContainerItemProxy */;
-		};
 		03DB21041621799700CF4299 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 03DB20BE1620CB5900CF4299 /* SmoothMouseUpdater */;
 			targetProxy = 03DB21031621799700CF4299 /* PBXContainerItemProxy */;
 		};
+		03FCEC5216BFE4DB00F35E4A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 03193FE216BFAC41008FE899 /* SmoothMouseDaemon */;
+			targetProxy = 03FCEC5116BFE4DB00F35E4A /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		03193FE916BFAC41008FE899 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				03193FEA16BFAC41008FE899 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		03193FEF16BFAC41008FE899 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				03193FF016BFAC41008FE899 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
 		03DB20C51620CB5900CF4299 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -609,6 +641,72 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		03193FF816BFAC41008FE899 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "SmoothMouseDaemon/SmoothMouseDaemon-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "SmoothMouseDaemon/SmoothMouseDaemon-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		03193FF916BFAC41008FE899 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "SmoothMouseDaemon/SmoothMouseDaemon-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "SmoothMouseDaemon/SmoothMouseDaemon-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 		03DB20E91620CB5A00CF4299 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -639,10 +737,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "SmoothMouseUpdater/SmoothMouseUpdater-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -671,9 +769,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "SmoothMouseUpdater/SmoothMouseUpdater-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -709,6 +807,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = NO;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -731,10 +830,10 @@
 					"$(inherited)",
 					"\"$(SDKROOT)/usr/lib/system\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = SmoothMouse;
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = prefPane;
 			};
 			name = Debug;
@@ -744,6 +843,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -763,68 +863,26 @@
 					"$(inherited)",
 					"\"$(SDKROOT)/usr/lib/system\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = SmoothMouse;
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = prefPane;
-			};
-			name = Release;
-		};
-		ED0E124214D5496F008704EC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "smoothmoused/smoothmoused-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INSTALL_PATH = /usr/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.7;
-			};
-			name = Debug;
-		};
-		ED0E124314D5496F008704EC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "smoothmoused/smoothmoused-Prefix.pch";
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INSTALL_PATH = /usr/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.7;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		03193FFA16BFAC41008FE899 /* Build configuration list for PBXNativeTarget "SmoothMouseDaemon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03193FF816BFAC41008FE899 /* Debug */,
+				03193FF916BFAC41008FE899 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		03DB20E81620CB5A00CF4299 /* Build configuration list for PBXNativeTarget "SmoothMouseUpdater" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -857,15 +915,6 @@
 			buildConfigurations = (
 				ED0E123114D5495F008704EC /* Debug */,
 				ED0E123214D5495F008704EC /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		ED0E124114D5496F008704EC /* Build configuration list for PBXNativeTarget "smoothmoused" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				ED0E124214D5496F008704EC /* Debug */,
-				ED0E124314D5496F008704EC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
