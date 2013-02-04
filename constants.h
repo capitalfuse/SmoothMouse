@@ -2,7 +2,7 @@
 #define LAUNCH_AGENT_DAEMON_FILENAME @"/Library/LaunchAgents/com.cyberic.smoothmouse.plist"
 #define LAUNCH_AGENT_UPDATER_FILENAME @"/Library/LaunchAgents/com.cyberic.smoothmouseupdater.plist"
 #define PREFERENCES_FILENAME @"/Library/Preferences/com.cyberic.SmoothMouse.plist"
-#define DAEMON_FILENAME_BASE @"/Contents/MacOS/smoothmoused"
+#define DAEMON_FILENAME_BASE @"/Contents/SmoothMouseDaemon.app/Contents/MacOS/SmoothMouseDaemon"
 #define UNINSTALL_SCRIPT_FILENAME_BASE @"/Contents/Resources/uninstall.sh"
 #define UPDATER_FILENAME_BASE @"/Contents/SmoothMouseUpdater.app/Contents/MacOS/SmoothMouseUpdater"
 #define KEXT_BUNDLE @"/System/Library/Extensions/SmoothMouse.kext"
