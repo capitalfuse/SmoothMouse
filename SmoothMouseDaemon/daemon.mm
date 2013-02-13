@@ -42,7 +42,6 @@ void trap_signals(int sig)
 {
     NSLog(@"trapped signal: %d", sig);
     [sDaemonInstance release];
-    NSLog(@"should be released");
     if (is_debug) {
         debug_end();
     }
@@ -289,8 +288,6 @@ error:
     kern_return_t	kernResult;
 
     uint64_t scalarI_64[1];
-    uint64_t scalarO_64;
-    uint32_t outputCount = 1;
 
     uint32_t configuration = 0;
 
@@ -308,20 +305,16 @@ error:
 
     scalarI_64[0] = configuration;
 
-    kernResult = IOConnectCallScalarMethod(connect,					// an io_connect_t returned from IOServiceOpen().
-                                           kConfigureMethod,        // selector of the function to be called via the user client.
-                                           scalarI_64,				// array of scalar (64-bit) input values.
-                                           1,						// the number of scalar input values.
-                                           &scalarO_64,				// array of scalar (64-bit) output values.
-                                           &outputCount				// pointer to the number of scalar output values.
-                                           );
+    kernResult = IOConnectCallScalarMethod(connect,
+                                           kConfigureMethod,
+                                           scalarI_64,
+                                           1,
+                                           NULL,
+                                           NULL);
 
     if (kernResult == KERN_SUCCESS) {
-        NSLog(@"Driver configured successfully (%u)", (uint32_t) scalarO_64);
         return YES;
-    }
-	else {
-		NSLog(@"Failed to configure driver");
+    } else {
         return NO;
     }
 }
