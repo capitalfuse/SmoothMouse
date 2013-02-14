@@ -124,17 +124,9 @@
 		0319400C16BFB637008FE899 /* OSXFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OSXFunction.hpp; sourceTree = "<group>"; };
 		0319400D16BFB637008FE899 /* WindowsFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WindowsFunction.cpp; sourceTree = "<group>"; };
 		0319400E16BFB637008FE899 /* WindowsFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WindowsFunction.hpp; sourceTree = "<group>"; };
-		0327029C1662B7C5003EECA0 /* WindowsFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WindowsFunction.cpp; path = libpointing/WindowsFunction.cpp; sourceTree = "<group>"; };
-		0327029D1662B7C5003EECA0 /* WindowsFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WindowsFunction.hpp; path = libpointing/WindowsFunction.hpp; sourceTree = "<group>"; };
 		035222EF16C0492E00DBE092 /* MouseSupervisor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseSupervisor.h; sourceTree = "<group>"; };
 		035222F016C0492E00DBE092 /* MouseSupervisor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MouseSupervisor.m; sourceTree = "<group>"; };
-		0356EAE8162F436B001C371E /* accel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = accel.mm; sourceTree = "<group>"; };
-		0356EAEB162F4387001C371E /* accel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = accel.h; sourceTree = "<group>"; };
-		036C5433160F50C600110497 /* debug.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = debug.mm; sourceTree = "<group>"; };
-		036C5436160F50D300110497 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
 		036E3EF01637066600887DCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
-		0384C5C816B5DF6E007718D5 /* OSXFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OSXFunction.cpp; path = libpointing/OSXFunction.cpp; sourceTree = "<group>"; };
-		0384C5C916B5DF6E007718D5 /* OSXFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = OSXFunction.hpp; path = libpointing/OSXFunction.hpp; sourceTree = "<group>"; };
 		03BA20FF161F757D0014A74E /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		03D020BC1631D0DA00CD04C1 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		03D020D41631F22A00CD04C1 /* uninstall.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = uninstall.sh; sourceTree = "<group>"; };
@@ -150,8 +142,6 @@
 		03DB20DA1620CB5A00CF4299 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		03E6F25116999C9300FBDBD6 /* VersionLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionLabel.h; sourceTree = "<group>"; };
 		03E6F25216999C9300FBDBD6 /* VersionLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionLabel.m; sourceTree = "<group>"; };
-		03F1B4471647F17100DB99E8 /* mouse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mouse.h; sourceTree = "<group>"; };
-		03F1B4491647F19B00DB99E8 /* mouse.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mouse.mm; sourceTree = "<group>"; };
 		03F3CBB316220E0400D9A857 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = Dependencies/Sparkle.framework; sourceTree = "<group>"; };
 		ED03CF9E15D7D95200763D81 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		ED03CFA015D7D96000763D81 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
@@ -172,8 +162,6 @@
 		ED0E122714D5495F008704EC /* SmoothMousePrefPane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SmoothMousePrefPane.h; sourceTree = "<group>"; };
 		ED0E122914D5495F008704EC /* SmoothMousePrefPane.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SmoothMousePrefPane.m; sourceTree = "<group>"; };
 		ED0E123914D5496F008704EC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		ED0E123C14D5496F008704EC /* daemon.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = daemon.mm; sourceTree = "<group>"; };
-		ED0E123F14D5496F008704EC /* smoothmoused-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "smoothmoused-Prefix.pch"; sourceTree = "<group>"; };
 		ED0E124E14D54A96008704EC /* kextdaemon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kextdaemon.h; sourceTree = SOURCE_ROOT; };
 		ED0E124F14D54A96008704EC /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
 		ED13219914D6713200D07CC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = SmoothMousePrefPane/en.lproj/SmoothMousePrefPane.xib; sourceTree = SOURCE_ROOT; };
@@ -257,17 +245,6 @@
 			path = libpointing;
 			sourceTree = "<group>";
 		};
-		032702981662B7A3003EECA0 /* libpointing */ = {
-			isa = PBXGroup;
-			children = (
-				0384C5C816B5DF6E007718D5 /* OSXFunction.cpp */,
-				0384C5C916B5DF6E007718D5 /* OSXFunction.hpp */,
-				0327029C1662B7C5003EECA0 /* WindowsFunction.cpp */,
-				0327029D1662B7C5003EECA0 /* WindowsFunction.hpp */,
-			);
-			name = libpointing;
-			sourceTree = "<group>";
-		};
 		03DB20C21620CB5900CF4299 /* SmoothMouseUpdater */ = {
 			isa = PBXGroup;
 			children = (
@@ -299,7 +276,6 @@
 				ED0E124F14D54A96008704EC /* constants.h */,
 				ED0E124E14D54A96008704EC /* kextdaemon.h */,
 				ED0E122014D5495F008704EC /* SmoothMousePrefPane */,
-				ED0E123B14D5496F008704EC /* smoothmoused */,
 				03DB20C21620CB5900CF4299 /* SmoothMouseUpdater */,
 				03193FE616BFAC41008FE899 /* SmoothMouseDaemon */,
 				ED0E120114D54950008704EC /* Frameworks */,
@@ -372,30 +348,6 @@
 				ED0E122614D5495F008704EC /* SmoothMousePrefPane-Prefix.pch */,
 				ED13219814D6713200D07CC3 /* SmoothMousePrefPane.xib */,
 				03D020D41631F22A00CD04C1 /* uninstall.sh */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		ED0E123B14D5496F008704EC /* smoothmoused */ = {
-			isa = PBXGroup;
-			children = (
-				032702981662B7A3003EECA0 /* libpointing */,
-				0356EAEB162F4387001C371E /* accel.h */,
-				0356EAE8162F436B001C371E /* accel.mm */,
-				ED0E123C14D5496F008704EC /* daemon.mm */,
-				036C5436160F50D300110497 /* debug.h */,
-				036C5433160F50C600110497 /* debug.mm */,
-				03F1B4471647F17100DB99E8 /* mouse.h */,
-				03F1B4491647F19B00DB99E8 /* mouse.mm */,
-				ED0E123E14D5496F008704EC /* Supporting Files */,
-			);
-			path = smoothmoused;
-			sourceTree = "<group>";
-		};
-		ED0E123E14D5496F008704EC /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				ED0E123F14D5496F008704EC /* smoothmoused-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
