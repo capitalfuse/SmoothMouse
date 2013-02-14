@@ -227,8 +227,6 @@ const char *get_acceleration_string(AccelerationCurve curve) {
         if (service == IO_OBJECT_NULL) {
             NSLog(@"IOServiceGetMatchingService() failed");
             goto error;
-        } else {
-            NSLog(@"Service Matched!");
         }
 
         error = IOServiceOpen(service, mach_task_self(), 0, &connect);
