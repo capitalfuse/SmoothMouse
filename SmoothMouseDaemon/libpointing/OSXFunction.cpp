@@ -81,7 +81,7 @@ Base64::encode(std::string input) {
     dtable[62]= '+';
     dtable[63]= '/';
 
-    unsigned int length = input.length() ;
+    unsigned int length = (unsigned int)input.length() ;
     for (unsigned int iInput=0; iInput<length;) {
         unsigned char igroup[3],ogroup[4];
         igroup[0]= igroup[1]= igroup[2]= 0;
@@ -121,7 +121,7 @@ Base64::decode(std::string input) {
     dtable[(int)'/']= 63;
     dtable[(int)'=']= 0;
 
-    unsigned int length = input.length() ;
+    unsigned int length = (unsigned int)input.length() ;
     for (unsigned int iInput=0 ;;) {
         unsigned char a[4],b[4],o[3];
 
@@ -708,7 +708,7 @@ OSXFunction::clearState(void) {
 
 void
 OSXFunction::configure(float s) {
-    if (Wrapped_SetupAcceleration((void*)accltable.c_str(), accltable.size(),
+    if (Wrapped_SetupAcceleration((void*)accltable.c_str(), (uint32_t)accltable.size(),
                                   400 /*dpi, TODO*/, s,
                                   &scaleSegments, &scaleSegCount)) {
         setting = s ;
