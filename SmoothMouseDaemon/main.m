@@ -8,6 +8,6 @@ int main(int argc, char *argv[])
         NSApplication *application = [NSApplication sharedApplication];
         [application setDelegate:delegate];
         [NSApp run];
+        [delegate release];
     }
 }
-

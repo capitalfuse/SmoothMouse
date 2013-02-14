@@ -470,7 +470,7 @@ static void mouse_handle_buttons(int buttons) {
                 theDoubleClickSpeed = doubleClickSpeed;
                 pthread_mutex_unlock(&clickCountMutex);
 
-                if (now - lastClickTime <= doubleClickSpeed &&
+                if (now - lastClickTime <= theDoubleClickSpeed &&
                     distanceMovedSinceLastClick <= maxDistanceAllowed) {
                     lastClickTime = timestamp();
                     nclicks++;
@@ -644,7 +644,6 @@ void mouse_handle(mouse_event_t *event) {
                 curve = curve_trackpad;
                 break;
             default:
-                velocity = 1;
                 NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
                 exit(0);
         }

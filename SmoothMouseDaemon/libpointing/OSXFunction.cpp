@@ -400,7 +400,7 @@ bool SetupAcceleration (OSData * data, IOFixed desired, IOFixed devScale, IOFixe
     // or take all the high one
     else {
         lowTable	= highTable;
-        lowAccl		= highAccl;
+        //lowAccl		= highAccl; // dead store
         lowPoints	= 0;
     }
 

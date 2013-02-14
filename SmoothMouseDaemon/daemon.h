@@ -29,7 +29,6 @@ extern MouseSupervisor *sMouseSupervisor;
     mach_vm_address_t address;
     mach_vm_size_t size;
 #endif
-    MouseSupervisor *supervisor;
 }
 
 -(id)init;

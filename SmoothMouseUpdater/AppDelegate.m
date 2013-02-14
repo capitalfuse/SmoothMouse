@@ -24,6 +24,7 @@
         NSAlert *alert = [[NSAlert alloc] init];
         [alert setMessageText:errorMessage];
         [alert runModal];
+        [alert release];
         return;
     }
 
