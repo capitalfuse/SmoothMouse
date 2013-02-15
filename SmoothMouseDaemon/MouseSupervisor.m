@@ -42,6 +42,9 @@
             storedDeltaSumX += [storedDeltaX intValue];
             storedDeltaSumY += [storedDeltaY intValue];
 
+            [storedDeltaX release];
+            [storedDeltaY release];
+
             if (storedDeltaSumX == deltaX && storedDeltaSumY == deltaY) {
                 //NSLog(@"same");
                 return YES;

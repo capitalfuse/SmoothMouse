@@ -38,6 +38,8 @@ MouseSupervisor *sMouseSupervisor;
 
 Daemon *sDaemonInstance = NULL;
 
+static void *HandleMouseEventThread(void *instance);
+
 void trap_signals(int sig)
 {
     NSLog(@"trapped signal: %d", sig);
@@ -429,7 +431,7 @@ BOOL set_realtime_prio() {
     return YES;
 }
 
-void *HandleMouseEventThread(void *instance)
+static void *HandleMouseEventThread(void *instance)
 {
     Daemon *self = (Daemon *) instance;
 

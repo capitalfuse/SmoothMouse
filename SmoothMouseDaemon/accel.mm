@@ -61,6 +61,8 @@ void initializeSystemMouseSettings(bool mouse_enabled, bool trackpad_enabled)
         ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueTrackpad);
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to get '%@'", key);
+            // trackpad is probably not available on this system
+            trackpad_enabled = false;
             return;
         }
         

@@ -578,10 +578,10 @@ static void mouse_handle_buttons(int buttons) {
 
                     if (is_debug) {
                         NSLog(@"eventType: %d, subt: %d, click: %d, buttonNumber: %d",
-                              iohidEventType,
-                              eventData.mouse.subType,
-                              eventData.mouse.click,
-                              eventData.mouse.buttonNumber);
+                              (int)iohidEventType,
+                              (int)eventData.mouse.subType,
+                              (int)eventData.mouse.click,
+                              (int)eventData.mouse.buttonNumber);
                     }
 
                     IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };

@@ -587,19 +587,7 @@ void ScaleAxes (void * scaleSegments, int * axis1p, IOFixed *axis1Fractp, int * 
  */
 #if (defined (__i386__) || defined(__x86_64__)) && __GNUC__ && defined(__APPLE__) // NR: added __APPLE__
 
-// For comments, see the annotated version below.
-#define _IntSaturate(x)     ({				\
-int _Result = (int) (x);				\
-__asm__("                                   \
-ucomisd %[LimitFloat], %[xx]    \n  \
-cmovae  %[LimitInt], %[_Result] "	\
-:   [_Result] "+r" (_Result)		\
-:   [LimitFloat] "mx" (0x1p31),		\
-[LimitInt] "mr" (0x7fffffff),		\
-[xx] "x" ((double)(x))		\
-:   "cc"					\
-);					\
-_Result; })
+#define _IntSaturate(x) ((int) (x))
 /*
  // Assume result will be x.
  int _Result = (x);

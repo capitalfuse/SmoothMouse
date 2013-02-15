@@ -408,8 +408,7 @@ cleanup:
 
     NSFileManager *filemgr = [NSFileManager defaultManager];
     NSString *launchAgentsDirectory = [NSHomeDirectory() stringByAppendingPathComponent: @"/Library/LaunchAgents"];
-    NSURL *newDir = [NSURL fileURLWithPath:launchAgentsDirectory];
-    [filemgr createDirectoryAtURL: newDir withIntermediateDirectories:YES attributes: nil error:nil];
+    [filemgr createDirectoryAtPath: launchAgentsDirectory withIntermediateDirectories:YES attributes: nil error:nil];
 
     (void) umask(oldMask);
 }

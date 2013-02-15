@@ -33,7 +33,7 @@ extern MouseSupervisor *sMouseSupervisor;
 
 -(id)init;
 -(oneway void) release;
-
+-(void) handleGlobalMouseMovedEvent:(NSEvent *) event;
 -(BOOL) loadSettings;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;

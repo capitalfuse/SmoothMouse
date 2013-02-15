@@ -28,6 +28,9 @@
 
 - (void)mainViewDidLoad;
 
+-(void)toggleVersionString;
+-(void)writeStringToClipboard:(NSString *)string;
+
 - (void)tabView:(NSTabView *)tv didSelectTabViewItem:(NSTabViewItem *)tvi;
 
 -(IBAction)pressCheckForUpdates:(id) sender;
