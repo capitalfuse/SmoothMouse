@@ -404,7 +404,13 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
 
             IOGPoint newPoint = { (SInt16) newPos.x, (SInt16) newPos.y };
 
-            eventData.mouseMove.subType = NX_SUBTYPE_TABLET_POINT;
+            NSPoint     mouseLoc;
+            mouseLoc = [NSEvent mouseLocation];
+
+            newPoint.x = mouseLoc.x;
+            newPoint.y = mouseLoc.y;
+
+//            eventData.mouseMove.subType = NX_SUBTYPE_TABLET_POINT;
             eventData.mouseMove.dx = (SInt32)(deltaX);
             eventData.mouseMove.dy = (SInt32)(deltaY);
 
@@ -414,7 +420,7 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                                  &eventData,
                                  kNXEventDataVersion,
                                  0,
-                                 kIOHIDSetCursorPosition);
+                                 kIOHIDSetRelativeCursorPosition);
             break;
         }
         default:
