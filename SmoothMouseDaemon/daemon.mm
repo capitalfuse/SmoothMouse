@@ -272,7 +272,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
             NSLog(@"Failed to start mouse event thread");
         }
 
-        initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
+        initializeSystemMouseSettings();
 
         connected = YES;
     }
@@ -500,7 +500,7 @@ static void *HandleMouseEventThread(void *instance)
                 retries_left--;
             } else {
                 retries_left = KEXT_CONNECT_RETRIES;
-                initializeSystemMouseSettings(mouse_enabled, trackpad_enabled);
+                initializeSystemMouseSettings();
                 mouse_update_clicktime();
             }
         } else {

@@ -6,11 +6,13 @@
 
 #import <Foundation/Foundation.h>
 
+#include "daemon.h"
+
 extern BOOL is_debug;
 static double savedMouseAcceleration = -1;
 static double savedTrackpadAcceleration = -1;
 
-void initializeSystemMouseSettings(bool mouse_enabled, bool trackpad_enabled)
+void initializeSystemMouseSettings()
 {
     NXEventHandle   handle;
     CFStringRef     key;
@@ -62,6 +64,7 @@ void initializeSystemMouseSettings(bool mouse_enabled, bool trackpad_enabled)
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to get '%@'", key);
             // trackpad is probably not available on this system
+            NSLog(@"Disabling trackpad");
             trackpad_enabled = false;
             return;
         }
