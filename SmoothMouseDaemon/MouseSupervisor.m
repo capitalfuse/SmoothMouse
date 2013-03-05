@@ -24,8 +24,10 @@
 
 - (void) pushMouseEvent: (int) deltaX :(int) deltaY {
     @synchronized(self) {
-        [events insertObject:[NSNumber numberWithInt:deltaY] atIndex:0];
-        [events insertObject:[NSNumber numberWithInt:deltaX] atIndex:0];
+        NSNumber *n1 = [NSNumber numberWithInt:deltaY];
+        NSNumber *n2 = [NSNumber numberWithInt:deltaX];
+        [events insertObject:n1 atIndex:0];
+        [events insertObject:n2 atIndex:0];
     }
 }
 
@@ -42,17 +44,10 @@
             storedDeltaSumX += [storedDeltaX intValue];
             storedDeltaSumY += [storedDeltaY intValue];
 
-            [storedDeltaX release];
-            [storedDeltaY release];
-
             if (storedDeltaSumX == deltaX && storedDeltaSumY == deltaY) {
-                //NSLog(@"same");
                 return YES;
-            } else {
-                //NSLog(@"NOT SAME, YET");
             }
         }
-        //NSLog(@"DIDN'T FIND MATCH");
         return NO;
     }
 }

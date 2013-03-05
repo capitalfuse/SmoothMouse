@@ -113,7 +113,7 @@ void restoreSystemMouseSettings()
     } else if (is_debug) {
         NSLog(@"No need to restore acceleration for '%@'", key);
     }
-    
+
     key = CFSTR(kIOHIDTrackpadAccelerationType);
     if (savedTrackpadAcceleration != -1) {        
         ret = IOHIDSetAccelerationWithKey(handle, key, savedTrackpadAcceleration);

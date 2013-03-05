@@ -136,13 +136,14 @@ const char *get_acceleration_string(AccelerationCurve curve) {
         if (is_debug) {
             NSLog(@"Another application altered mouse location");
         }
+    } else {
+        //NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
+        //      match,
+        //      [sMouseSupervisor numItems],
+        //      [event deltaX],
+        //      [event deltaY]
+        //      );
     }
-/*    NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
-          match,
-          [sMouseSupervisor numItems],
-          [event deltaX],
-          [event deltaY]
-          ); */
 }
 
 -(AccelerationCurve) getAccelerationCurveFromDict:(NSDictionary *)dictionary withKey:(NSString *)key {
@@ -435,6 +436,8 @@ static void *HandleMouseEventThread(void *instance)
 {
     Daemon *self = (Daemon *) instance;
 
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
     kern_return_t error;
 
 	char *buf = (char *)malloc(self->dataSize);
@@ -481,6 +484,8 @@ static void *HandleMouseEventThread(void *instance)
     }
 
 	free(buf);
+
+    [pool drain];
 
     return NULL;
 }

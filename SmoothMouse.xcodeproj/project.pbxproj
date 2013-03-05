@@ -204,7 +204,6 @@
 		03193FE616BFAC41008FE899 /* SmoothMouseDaemon */ = {
 			isa = PBXGroup;
 			children = (
-				0319400A16BFB637008FE899 /* libpointing */,
 				03193FFC16BFB510008FE899 /* accel.h */,
 				03193FFD16BFB510008FE899 /* accel.mm */,
 				03193FF216BFAC41008FE899 /* AppDelegate.h */,
@@ -213,11 +212,12 @@
 				03193FFE16BFB510008FE899 /* daemon.mm */,
 				03193FFF16BFB510008FE899 /* debug.h */,
 				0319400016BFB510008FE899 /* debug.mm */,
+				0319400A16BFB637008FE899 /* libpointing */,
 				0319400116BFB510008FE899 /* mouse.h */,
 				0319400216BFB510008FE899 /* mouse.mm */,
-				03193FE716BFAC41008FE899 /* Supporting Files */,
 				035222EF16C0492E00DBE092 /* MouseSupervisor.h */,
 				035222F016C0492E00DBE092 /* MouseSupervisor.m */,
+				03193FE716BFAC41008FE899 /* Supporting Files */,
 			);
 			path = SmoothMouseDaemon;
 			sourceTree = "<group>";
