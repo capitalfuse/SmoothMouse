@@ -406,14 +406,21 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
 
             static NXEventData eventData;
             memset(&eventData, 0, sizeof(NXEventData));
+            //NSLog(@"=======================");
 
             NSPoint mouseLoc = [NSEvent mouseLocation];
+            //NSLog(@"mouseloc before x: %d, y: %d", (int)mouseLoc.x, (int)mouseLoc.y);
             IOGPoint newPoint = { (SInt16) newPos.x, (SInt16) newPos.y };
 
-            newPoint.x = mouseLoc.x;
-            newPoint.y = mouseLoc.y;
+            //NSLog(@"newPoint.x: %d, newPoint.y: %d", (int)newPoint.x, (int)newPoint.y);
+            if (iohidEventType == NX_MOUSEMOVED) {
+                newPoint.x = mouseLoc.x;
+                newPoint.y = mouseLoc.y;
+            }
 
-            eventData.mouseMove.subType = NX_SUBTYPE_TABLET_POINT;
+            //NSLog(@"newPoint.x: %d, newPoint.y: %d", (int)newPoint.x, (int)newPoint.y);
+
+            //eventData.mouseMove.subType = NX_SUBTYPE_TABLET_POINT; rich's code doesn't have this
             eventData.mouseMove.dx = (SInt32)(deltaX);
             eventData.mouseMove.dy = (SInt32)(deltaY);
 
@@ -423,16 +430,20 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                                  &eventData,
                                  kNXEventDataVersion,
                                  0,
-                                 kIOHIDSetRelativeCursorPosition);
+                                 (iohidEventType == NX_MOUSEMOVED ? kIOHIDSetRelativeCursorPosition : kIOHIDSetCursorPosition));
 
             if (is_debug) {
-                NSLog(@"eventType: %s(%d), dx: %d, dy: %d",
+                NSLog(@"eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d",
                       iohid_event_type_to_string(iohidEventType),
                       (int)iohidEventType,
+                      (int)newPoint.x,
+                      (int)newPoint.y,
                       (int)eventData.mouseMove.dx,
                       (int)eventData.mouseMove.dy);
             }
 
+            //NSPoint mouseLoc2 = [NSEvent mouseLocation];
+            //NSLog(@"mouseloc after x: %d, y: %d", (int)mouseLoc2.x, (int)mouseLoc2.y);
             break;
         }
         default:
@@ -615,7 +626,6 @@ static void mouse_handle_buttons(int buttons) {
                     if (is_down_event) eventNumber++;
 
                     bzero(&eventData, sizeof(NXEventData));
-                    eventData.mouse.subType = NX_SUBTYPE_TABLET_POINT;
                     eventData.mouse.click = is_down_event ? clickStateValue : 0;
                     eventData.mouse.pressure = is_down_event ? 255 : 0;
                     eventData.mouse.eventNum = eventNumber;
