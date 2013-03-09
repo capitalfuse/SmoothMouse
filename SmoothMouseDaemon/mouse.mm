@@ -135,13 +135,38 @@ static CGPoint restrict_to_screen_boundaries(CGPoint lastPos, CGPoint newPos) {
 }
 
 static CGPoint get_current_mouse_pos() {
+    CGPoint currentPos;
+
+#if 1
     CGEventRef event = CGEventCreate(NULL);
-    CGPoint currentPos = CGEventGetLocation(event);
+    currentPos = CGEventGetLocation(event);
     CFRelease(event);
+#else
+    NSPoint mouseLoc = [NSEvent mouseLocation];
+    currentPos.x = mouseLoc.x;
+    currentPos.y = mouseLoc.y;
+#endif
+
     //NSLog(@"got cursor position: %f,%f", currentPos.x, currentPos.y);
+
+    // truncating
     currentPos.x = (int)currentPos.x;
     currentPos.y = (int)currentPos.y;
+
     return currentPos;
+}
+
+static void refresh_mouse_location() {
+    CGPoint oldPos = currentPos;
+    currentPos = get_current_mouse_pos();
+
+    float movedX = oldPos.x - currentPos.x;
+    float movedY = oldPos.y - currentPos.y;
+
+    deltaPosFloat.x += movedX;
+    deltaPosFloat.y += movedY;
+    deltaPosInt.x += movedX;
+    deltaPosInt.y += movedY;
 }
 
 void mouse_update_clicktime() {
@@ -359,7 +384,7 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
 
     int driver_to_use = driver;
 
-    if (0 && driver == DRIVER_IOHID && eventType == kCGEventOtherMouseDragged) {
+    if (driver == DRIVER_IOHID && eventType == kCGEventOtherMouseDragged) {
         driver_to_use = DRIVER_QUARTZ;
     }
 
@@ -547,7 +572,7 @@ static void mouse_handle_buttons(int buttons) {
 
             // can't get middle mouse to work in iohid, so let's channel all "other" events
             // through quartz
-            if (0 && driver == DRIVER_IOHID &&
+            if (driver == DRIVER_IOHID &&
                 (eventType == kCGEventOtherMouseDown || eventType == kCGEventOtherMouseUp)) {
                 driver_to_use = DRIVER_QUARTZ;
             }
@@ -608,6 +633,10 @@ static void mouse_handle_buttons(int buttons) {
                     IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };
                     NSPoint mouseLoc;
                     mouseLoc = [NSEvent mouseLocation];
+
+                    // on clicks, copy mouse click location to own mouse position
+                    needs_refresh = 1;
+
                     newPoint.x = mouseLoc.x;
                     newPoint.y = mouseLoc.y;
 
@@ -632,7 +661,7 @@ static void mouse_handle_buttons(int buttons) {
                     eventData.mouse.buttonNumber = otherButton;
 
                     if (is_debug) {
-                        NSLog(@"bajs eventType: %s(%d), subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
+                        NSLog(@"eventType: %s(%d), subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
                               iohid_event_type_to_string(iohidEventType),
                               (int)iohidEventType,
                               (int)eventData.mouse.subType,
@@ -677,16 +706,7 @@ void mouse_handle(mouse_event_t *event) {
             LOG(@"Cursor position dirty, need to fetch fresh");
         }
 
-        CGPoint oldPos = currentPos;
-        currentPos = get_current_mouse_pos();
-
-        float movedX = oldPos.x - currentPos.x;
-        float movedY = oldPos.y - currentPos.y;
-
-        deltaPosFloat.x += movedX;
-        deltaPosFloat.y += movedY;
-        deltaPosInt.x += movedX;
-        deltaPosInt.y += movedY;
+        refresh_mouse_location();
 
         needs_refresh = 0;
     }
