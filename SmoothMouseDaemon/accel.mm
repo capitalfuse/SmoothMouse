@@ -22,24 +22,24 @@ void initializeSystemMouseSettings()
     oldValueTrackpad,
     newValueTrackpad;
     double          resetValue = 0.0;
-    
+
     handle = NXOpenEventStatus();
 
     if (mouse_enabled) {
         key = CFSTR(kIOHIDMouseAccelerationType);
-        
+
         ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueMouse);
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to get '%@'", key);
             return;
         }
-        
+
         if (oldValueMouse != resetValue) {
             ret = IOHIDSetAccelerationWithKey(handle, key, resetValue);
             if (ret != KERN_SUCCESS) {
                 NSLog(@"Failed to disable acceleration for '%@'", key);
             }
-            
+
             if (savedMouseAcceleration == -1) {
                 savedMouseAcceleration = oldValueMouse;
             }
@@ -49,7 +49,7 @@ void initializeSystemMouseSettings()
                 NSLog(@"Failed to get '%@' (2)", key);
                 return;
             }
-            
+
             NSLog(@"System mouse settings initialized (%f/%f)", oldValueMouse, newValueMouse);
         }
         //else if (is_debug) {
@@ -59,7 +59,7 @@ void initializeSystemMouseSettings()
     
     if (trackpad_enabled) {
         key = CFSTR(kIOHIDTrackpadAccelerationType);
-        
+
         ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueTrackpad);
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to get '%@'", key);
@@ -68,23 +68,23 @@ void initializeSystemMouseSettings()
             trackpad_enabled = false;
             return;
         }
-        
+
         if (oldValueTrackpad != resetValue) {
             ret = IOHIDSetAccelerationWithKey(handle, key, resetValue);
             if (ret != KERN_SUCCESS) {
                 NSLog(@"Failed to disable acceleration for '%@'", key);
             }
-            
+
             if (savedTrackpadAcceleration == -1) {
                 savedTrackpadAcceleration = oldValueTrackpad;
             }
-            
+
             ret = IOHIDGetAccelerationWithKey(handle, key, &newValueTrackpad);
             if (ret != KERN_SUCCESS) {
                 NSLog(@"Failed to get '%@' (2)", key);
                 return;
             }
-            
+
             NSLog(@"System trackpad settings initialized (%f/%f)", oldValueTrackpad, newValueTrackpad);
         }
         //else if (is_debug) {
@@ -102,7 +102,7 @@ void restoreSystemMouseSettings()
     kern_return_t   ret;
 
     handle = NXOpenEventStatus();
-    
+
     key = CFSTR(kIOHIDMouseAccelerationType);
     if (savedMouseAcceleration != -1) {
         ret = IOHIDSetAccelerationWithKey(handle, key, savedMouseAcceleration);
