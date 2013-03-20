@@ -431,18 +431,7 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
 
             NXEventData eventData;
 
-            IOGPoint newPoint;
-            // NOTE: if we are moving the mouse use relative mode
-            //       with retrieved mouse location. Otherwise
-            //       use normal mode and own mouse location.
-            if (iohidEventType == NX_MOUSEMOVED) {
-                NSPoint mouseLoc = [NSEvent mouseLocation];
-                newPoint.x = (SInt16) mouseLoc.x;
-                newPoint.y = (SInt16) mouseLoc.y;
-            } else {
-                newPoint.x = (SInt16) newPos.x;
-                newPoint.y = (SInt16) newPos.y;
-            }
+            IOGPoint newPoint = { (SInt16) newPos.x, (SInt16) newPos.y};
 
             bzero(&eventData, sizeof(NXEventData));
             eventData.mouseMove.dx = (SInt32)(deltaX);
@@ -685,8 +674,7 @@ static void mouse_handle_buttons(int buttons) {
     }
 }
 
-void mouse_handle(mouse_event_t *event) {
-
+void check_needs_refresh(mouse_event_t *event) {
     if (needs_refresh || event->seqnum != (lastSequenceNumber + 1)) {
         if (is_debug) {
             LOG(@"Cursor position dirty, need to fetch fresh");
@@ -696,10 +684,17 @@ void mouse_handle(mouse_event_t *event) {
 
         needs_refresh = 0;
     }
+}
+
+void mouse_handle(mouse_event_t *event) {
+
+    check_needs_refresh(event);
 
     if (event->buttons != lastButtons) {
         mouse_handle_buttons(event->buttons);
     }
+
+    check_needs_refresh(event);
 
     if (event->dx != 0 || event->dy != 0) {
         double velocity;
