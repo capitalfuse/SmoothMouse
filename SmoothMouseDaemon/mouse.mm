@@ -620,27 +620,27 @@ static void mouse_handle_buttons(int buttons) {
                             exit(0);
                     }
 
-                    NXEventData eventData;
-
-                    NSPoint mouseLoc = [NSEvent mouseLocation];
-                    IOGPoint newPoint = { (SInt16) mouseLoc.x, (SInt16) mouseLoc.y };
-
                     // on clicks, refresh own mouse position
                     needs_refresh = 1;
 
                     static int eventNumber = 0;
                     if (is_down_event) eventNumber++;
 
+                    NXEventData eventData;
                     bzero(&eventData, sizeof(NXEventData));
                     eventData.mouse.click = is_down_event ? clickStateValue : 0;
                     eventData.mouse.pressure = is_down_event ? 255 : 0;
                     eventData.mouse.eventNum = eventNumber;
                     eventData.mouse.buttonNumber = otherButton;
 
+                    IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };
+
                     if (is_debug) {
-                        NSLog(@"eventType: %s(%d), subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
+                        NSLog(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
                               iohid_event_type_to_string(iohidEventType),
                               (int)iohidEventType,
+                              (int)newPoint.x,
+                              (int)newPoint.y,
                               (int)eventData.mouse.subType,
                               (int)eventData.mouse.click,
                               (int)eventData.mouse.pressure,
