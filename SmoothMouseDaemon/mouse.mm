@@ -429,25 +429,31 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                     exit(0);
             }
 
-            static NXEventData eventData;
-            memset(&eventData, 0, sizeof(NXEventData));
-            //NSLog(@"=======================");
+            NXEventData eventData;
 
-            NSPoint mouseLoc = [NSEvent mouseLocation];
-            //NSLog(@"mouseloc before x: %d, y: %d", (int)mouseLoc.x, (int)mouseLoc.y);
-            IOGPoint newPoint = { (SInt16) newPos.x, (SInt16) newPos.y };
-
-            //NSLog(@"newPoint.x: %d, newPoint.y: %d", (int)newPoint.x, (int)newPoint.y);
+            IOGPoint newPoint;
+            // NOTE: if we are moving the mouse use relative mode
+            //       with retrieved mouse location. Otherwise
+            //       use normal mode and own mouse location.
             if (iohidEventType == NX_MOUSEMOVED) {
-                newPoint.x = mouseLoc.x;
-                newPoint.y = mouseLoc.y;
+                NSPoint mouseLoc = [NSEvent mouseLocation];
+                newPoint.x = (SInt16) mouseLoc.x;
+                newPoint.y = (SInt16) mouseLoc.y;
+            } else {
+                newPoint.x = (SInt16) newPos.x;
+                newPoint.y = (SInt16) newPos.y;
             }
 
-            //NSLog(@"newPoint.x: %d, newPoint.y: %d", (int)newPoint.x, (int)newPoint.y);
-
-            //eventData.mouseMove.subType = NX_SUBTYPE_TABLET_POINT; rich's code doesn't have this
+            bzero(&eventData, sizeof(NXEventData));
             eventData.mouseMove.dx = (SInt32)(deltaX);
             eventData.mouseMove.dy = (SInt32)(deltaY);
+
+            IOOptionBits options;
+            if (iohidEventType == NX_MOUSEMOVED) {
+                options = kIOHIDSetRelativeCursorPosition;
+            } else {
+                options = kIOHIDSetCursorPosition;
+            }
 
             (void)IOHIDPostEvent(iohid_connect,
                                  iohidEventType,
@@ -455,7 +461,7 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                                  &eventData,
                                  kNXEventDataVersion,
                                  0,
-                                 (iohidEventType == NX_MOUSEMOVED ? kIOHIDSetRelativeCursorPosition : kIOHIDSetCursorPosition));
+                                 options);
 
             if (is_debug) {
                 NSLog(@"eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d",
@@ -467,8 +473,6 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                       (int)eventData.mouseMove.dy);
             }
 
-            //NSPoint mouseLoc2 = [NSEvent mouseLocation];
-            //NSLog(@"mouseloc after x: %d, y: %d", (int)mouseLoc2.x, (int)mouseLoc2.y);
             break;
         }
         default:
@@ -627,19 +631,15 @@ static void mouse_handle_buttons(int buttons) {
                             exit(0);
                     }
 
-                    static NXEventData eventData;
-                    bzero(&eventData, sizeof(NXEventData));
+                    NXEventData eventData;
 
-                    IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };
-                    NSPoint mouseLoc;
-                    mouseLoc = [NSEvent mouseLocation];
+                    NSPoint mouseLoc = [NSEvent mouseLocation];
+                    IOGPoint newPoint = { (SInt16) mouseLoc.x, (SInt16) mouseLoc.y };
 
-                    // on clicks, copy mouse click location to own mouse position
+                    // on clicks, refresh own mouse position
                     needs_refresh = 1;
 
-                    newPoint.x = mouseLoc.x;
-                    newPoint.y = mouseLoc.y;
-
+                    bzero(&eventData, sizeof(NXEventData));
                     eventData.compound.misc.L[0] = 1;
                     eventData.compound.misc.L[1] = is_down_event;
                     eventData.compound.subType = NX_SUBTYPE_AUX_MOUSE_BUTTONS;

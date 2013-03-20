@@ -293,15 +293,15 @@ error:
     uint32_t configuration = 0;
 
     if (mouse_enabled) {
-        configuration |= 1 << 0;
+        configuration |= KEXT_CONF_MOUSE_ENABLED;
     }
 
     if (trackpad_enabled) {
-        configuration |= 1 << 1;
+        configuration |= KEXT_CONF_TRACKPAD_ENABLED;
     }
 
     if (driver == DRIVER_QUARTZ_OLD) {
-        configuration |= 1 << 2; // set compatibility mode in kernel
+        configuration |= KEXT_CONF_QUARTZ_OLD; // set compatibility mode in kernel
     }
 
     scalarI_64[0] = configuration;
