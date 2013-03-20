@@ -149,7 +149,7 @@ static CGPoint get_current_mouse_pos() {
 
     //NSLog(@"got cursor position: %f,%f", currentPos.x, currentPos.y);
 
-    // truncating
+    // truncate coordinates
     currentPos.x = (int)currentPos.x;
     currentPos.y = (int)currentPos.y;
 
@@ -574,8 +574,8 @@ static void mouse_handle_buttons(int buttons) {
 
             int driver_to_use = driver;
 
-            // can't get middle mouse to work in iohid, so let's channel all "other" events
-            // through quartz
+            // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
+            //       through quartz
             if (driver == DRIVER_IOHID &&
                 (eventType == kCGEventOtherMouseDown || eventType == kCGEventOtherMouseUp)) {
                 driver_to_use = DRIVER_QUARTZ;
