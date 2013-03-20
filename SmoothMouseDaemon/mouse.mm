@@ -639,19 +639,7 @@ static void mouse_handle_buttons(int buttons) {
                     // on clicks, refresh own mouse position
                     needs_refresh = 1;
 
-                    bzero(&eventData, sizeof(NXEventData));
-                    eventData.compound.misc.L[0] = 1;
-                    eventData.compound.misc.L[1] = is_down_event;
-                    eventData.compound.subType = NX_SUBTYPE_AUX_MOUSE_BUTTONS;
-
-                    kern_return_t result = IOHIDPostEvent(iohid_connect, NX_SYSDEFINED, newPoint, &eventData, kNXEventDataVersion, 0, 0);
-
-                    if (result != KERN_SUCCESS) {
-                        NSLog(@"failed to post aux button event");
-                    }
-
                     static int eventNumber = 0;
-
                     if (is_down_event) eventNumber++;
 
                     bzero(&eventData, sizeof(NXEventData));
@@ -671,13 +659,13 @@ static void mouse_handle_buttons(int buttons) {
                               (int)eventData.mouse.buttonNumber);
                     }
 
-                    result = IOHIDPostEvent(iohid_connect,
-                                   iohidEventType,
-                                   newPoint,
-                                   &eventData,
-                                   kNXEventDataVersion,
-                                   0,
-                                   0);
+                    kern_return_t result = IOHIDPostEvent(iohid_connect,
+                                                          iohidEventType,
+                                                          newPoint,
+                                                          &eventData,
+                                                          kNXEventDataVersion,
+                                                          0,
+                                                          0);
 
                     if (result != KERN_SUCCESS) {
                         NSLog(@"failed to post button event");
