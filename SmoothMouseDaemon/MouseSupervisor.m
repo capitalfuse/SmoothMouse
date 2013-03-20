@@ -1,10 +1,3 @@
-//
-//  MouseSupervisor.m
-//  SmoothMouse
-//
-//  Created by Daniel Åkerud on 2/4/13.
-//
-//
 
 #import "MouseSupervisor.h"
 
@@ -20,7 +13,6 @@
     }
     return self;
 }
-
 
 - (void) pushMouseEvent: (int) deltaX :(int) deltaY {
     @synchronized(self) {

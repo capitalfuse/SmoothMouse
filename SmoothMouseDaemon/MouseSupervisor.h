@@ -1,10 +1,3 @@
-//
-//  MouseSupervisor.h
-//  SmoothMouse
-//
-//  Created by Daniel Åkerud on 2/4/13.
-//
-//
 
 #import <Foundation/Foundation.h>
 
