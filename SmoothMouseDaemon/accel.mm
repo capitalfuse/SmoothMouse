@@ -56,7 +56,7 @@ void initializeSystemMouseSettings()
         //    NSLog(@"Skipped settings for '%@'", key);
         //}
     }
-    
+
     if (trackpad_enabled) {
         key = CFSTR(kIOHIDTrackpadAccelerationType);
 
@@ -115,7 +115,7 @@ void restoreSystemMouseSettings()
     }
 
     key = CFSTR(kIOHIDTrackpadAccelerationType);
-    if (savedTrackpadAcceleration != -1) {        
+    if (savedTrackpadAcceleration != -1) {
         ret = IOHIDSetAccelerationWithKey(handle, key, savedTrackpadAcceleration);
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to restore acceleration for '%@'", key);
