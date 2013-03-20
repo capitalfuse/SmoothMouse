@@ -695,8 +695,6 @@ static void mouse_handle_buttons(int buttons) {
             e2 = GET_TIME();
         }
     }
-
-    lastButtons = buttons;
 }
 
 void mouse_handle(mouse_event_t *event) {
@@ -709,6 +707,10 @@ void mouse_handle(mouse_event_t *event) {
         refresh_mouse_location();
 
         needs_refresh = 0;
+    }
+
+    if (event->buttons != lastButtons) {
+        mouse_handle_buttons(event->buttons);
     }
 
     if (event->dx != 0 || event->dy != 0) {
@@ -729,10 +731,6 @@ void mouse_handle(mouse_event_t *event) {
         }
 
         mouse_handle_move(event->device_type, event->dx, event->dy, velocity, curve, event->buttons);
-    }
-
-    if (event->buttons != lastButtons) {
-        mouse_handle_buttons(event->buttons);
     }
 
     if (is_debug) {
