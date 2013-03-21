@@ -46,7 +46,7 @@ productbuild \
     --distribution "Distribution.xml" \
     --package-path "Components/" \
     --resources "Resources/" \
-    "$PACKAGE_NAME $VERSION (unsigned).pkg"
+    "$PACKAGE_NAME (unsigned).pkg"
 
 # Put back Welcome.rtf after patching
 if [ -f $WELCOME ]
@@ -58,9 +58,9 @@ fi
 if [[ -z "$1" ]]
 then
     echo "Not signing the package because certificate was not specified"
-    zip -r "$PACKAGE_NAME $VERSION (unsigned).zip" "$PACKAGE_NAME $VERSION (unsigned).pkg" 
+    zip -r "$PACKAGE_NAME $VERSION (unsigned).zip" "$PACKAGE_NAME (unsigned).pkg" 
 else
-    productsign --sign "Developer ID Installer: $1" "$PACKAGE_NAME $VERSION (unsigned).pkg" "$PACKAGE_NAME $VERSION.pkg"
-    rm -rf "$PACKAGE_NAME $VERSION (unsigned).pkg"
-    zip -r "$PACKAGE_NAME $VERSION.zip" "$PACKAGE_NAME $VERSION.pkg"
+    productsign --sign "Developer ID Installer: $1" "$PACKAGE_NAME (unsigned).pkg" "$PACKAGE_NAME.pkg"
+    rm -rf "$PACKAGE_NAME (unsigned).pkg"
+    zip -r "$PACKAGE_NAME $VERSION.zip" "$PACKAGE_NAME.pkg"
 fi
