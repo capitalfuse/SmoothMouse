@@ -151,9 +151,9 @@
 
 -(IBAction)pressUninstall:(id) sender {
     NSAlert *alert = [[NSAlert alloc] init];
-    [alert setMessageText:@"Uninstall"];
-    [alert setInformativeText:@"Are you sure you want to uninstall SmoothMouse"];
-    [alert addButtonWithTitle:@"OK"];
+    [alert setMessageText:@"Are you sure you want to uninstall SmoothMouse?"];
+    [alert setInformativeText:@"Please note that you do not have to uninstall the previous version before installing an update."];
+    [alert addButtonWithTitle:@"Uninstall"];
     [alert addButtonWithTitle:@"Cancel"];
     [alert setShowsSuppressionButton:YES];
     [[alert suppressionButton] setTitle:@"Keep preferences"];

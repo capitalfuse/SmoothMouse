@@ -5,8 +5,7 @@
 	<license file="License.rtf" />
 	
 	<options hostArchitectures="i386" />
-	<options rootVolumeOnly="true" />
-	<domains enable_localSystem="true" />
+	<options customize="never" rootVolumeOnly="true" />
 	
 	<choice id="choice0" title="Kernel Extension" enabled="false">
 		<pkg-ref id="com.cyberic.pkg.SmoothMouseKext"/>
@@ -28,7 +27,7 @@
 	
 	<script><![CDATA[
 
-var minOSVersion = '10.7.4';
+var minOSVersion = '10.6.8';
 var productName = 'SmoothMouse';
 var supportURL = 'smoothmouse.com/support';
 		
@@ -36,7 +35,7 @@ var incompatibleSoftware = [
 	['/System/Library/Extensions/SteerMouse.kext', 'SteerMouse'],
 	['/System/Library/Extensions/USBOverdrive.kext', 'USB Overdrive']
 ]
-		
+
 function detectIncompatibleSoftware() {
 	var detected = new Array();
 
@@ -53,7 +52,7 @@ function detectIncompatibleSoftware() {
 	return false;
 }
 
-function installationCheck() {	
+function installationCheck() {
 	var checkIncompatibleSoftware = detectIncompatibleSoftware();
 	if (checkIncompatibleSoftware) {
 		my.result.type = 'Fatal';
@@ -67,7 +66,8 @@ function installationCheck() {
 		my.result.title = 'Problem detected';
 		my.result.message = 'OS X version ' + minOSVersion + ' or higher is required.';
 	    return false;
-	}	
+	}
+	
 	return true;
 }
 ]]>
