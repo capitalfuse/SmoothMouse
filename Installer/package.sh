@@ -7,13 +7,17 @@
 
 PACKAGE_NAME="SmoothMouse"
 IDENTIFIER="com.cyberic"
+WELCOME="Resources/Welcome.rtf"
 
-if [ ! -d "Components" ] 
-then
-    mkdir -p "Components"
-fi
+mkdir -p "Components"
 
 VERSION=$(defaults read "$(pwd)/Root/SmoothMouse.prefPane/Contents/Info" CFBundleVersion)
+
+# Patch Welcome.rtf to include version number
+if [ -f $WELCOME ]
+then
+	sed -i .tpl "s/%VERSION%/$VERSION/g" "$WELCOME"
+fi
 
 # Parameters: file name, internal name, identifier, install location
 c_pkgbuild () {
@@ -43,6 +47,12 @@ productbuild \
     --package-path "Components/" \
     --resources "Resources/" \
     "$PACKAGE_NAME $VERSION (unsigned).pkg"
+
+# Put back Welcome.rtf after patching
+if [ -f $WELCOME ]
+then
+	mv "$WELCOME.tpl" "$WELCOME"
+fi
 
 # Signing and zip-archiving
 if [[ -z "$1" ]]
