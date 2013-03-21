@@ -7,7 +7,8 @@
 
 KEXT="/System/Library/Extensions/SmoothMouse.kext"
 PREFPANE="/Library/PreferencePanes/SmoothMouse.prefPane"
-DAEMON="smoothmoused"
+DAEMON="SmoothMouseDaemon"
+DAEMON_OLD="smoothmoused"
 
 while getopts “k” OPTION
 do
@@ -39,6 +40,7 @@ pkgutil --forget "com.cyberic.pkg.SmoothMouseKext"
 pkgutil --forget "com.cyberic.pkg.SmoothMousePrefPane"
 
 /usr/bin/killall $DAEMON
+/usr/bin/killall $DAEMON_OLD
 
 /usr/bin/killall -u $USER "System Preferences"
 sudo -u $USER /usr/bin/open "/Applications/System Preferences.app"
