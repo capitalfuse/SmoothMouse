@@ -632,6 +632,7 @@ static void mouse_handle_buttons(int buttons) {
                     eventData.mouse.pressure = is_down_event ? 255 : 0;
                     eventData.mouse.eventNum = eventNumber;
                     eventData.mouse.buttonNumber = otherButton;
+                    eventData.mouse.subType = NX_SUBTYPE_TABLET_POINT;
 
                     IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };
 
