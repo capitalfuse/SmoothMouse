@@ -265,12 +265,14 @@ const char *get_acceleration_string(AccelerationCurve curve) {
         BOOL ok = [self configureDriver];
         if (!ok) {
             NSLog(@"Failed to configure driver");
+            goto error;
         }
 
         int threadError = pthread_create(&mouseEventThreadID, NULL, &HandleMouseEventThread, self);
         if (threadError != 0)
         {
             NSLog(@"Failed to start mouse event thread");
+            goto error;
         }
 
         initializeSystemMouseSettings();

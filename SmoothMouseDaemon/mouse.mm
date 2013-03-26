@@ -453,13 +453,13 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                                  options);
 
             if (is_debug) {
-                NSLog(@"eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d",
-                      iohid_event_type_to_string(iohidEventType),
-                      (int)iohidEventType,
-                      (int)newPoint.x,
-                      (int)newPoint.y,
-                      (int)eventData.mouseMove.dx,
-                      (int)eventData.mouseMove.dy);
+                LOG(@"eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d",
+                    iohid_event_type_to_string(iohidEventType),
+                    (int)iohidEventType,
+                    (int)newPoint.x,
+                    (int)newPoint.y,
+                    (int)eventData.mouseMove.dx,
+                    (int)eventData.mouseMove.dy);
             }
 
             break;
@@ -637,16 +637,16 @@ static void mouse_handle_buttons(int buttons) {
                     IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };
 
                     if (is_debug) {
-                        NSLog(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
-                              iohid_event_type_to_string(iohidEventType),
-                              (int)iohidEventType,
-                              (int)newPoint.x,
-                              (int)newPoint.y,
-                              (int)eventData.mouse.subType,
-                              (int)eventData.mouse.click,
-                              (int)eventData.mouse.pressure,
-                              (int)eventData.mouse.eventNum,
-                              (int)eventData.mouse.buttonNumber);
+                        LOG(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
+                            iohid_event_type_to_string(iohidEventType),
+                            (int)iohidEventType,
+                            (int)newPoint.x,
+                            (int)newPoint.y,
+                            (int)eventData.mouse.subType,
+                            (int)eventData.mouse.click,
+                            (int)eventData.mouse.pressure,
+                            (int)eventData.mouse.eventNum,
+                            (int)eventData.mouse.buttonNumber);
                     }
 
                     kern_return_t result = IOHIDPostEvent(iohid_connect,
@@ -676,9 +676,12 @@ static void mouse_handle_buttons(int buttons) {
 }
 
 void check_needs_refresh(mouse_event_t *event) {
-    if (needs_refresh || event->seqnum != (lastSequenceNumber + 1)) {
+    int seqNumOk = (event->seqnum == (lastSequenceNumber + 1));
+
+    if (needs_refresh || !seqNumOk) {
         if (is_debug) {
-            LOG(@"Cursor position dirty, need to fetch fresh");
+            LOG(@"Cursor position dirty, need to fetch fresh (needs_refresh: %d, seqNumOk: %d)",
+                needs_refresh, seqNumOk);
         }
 
         refresh_mouse_location();
@@ -720,7 +723,7 @@ void mouse_handle(mouse_event_t *event) {
     if (is_debug) {
         debug_register_event(event);
     }
-    
+
     lastSequenceNumber = event->seqnum;
     lastButtons = event->buttons;
     lastPos = currentPos;
