@@ -623,18 +623,29 @@ static void mouse_handle_buttons(int buttons) {
                     // on clicks, refresh own mouse position
                     needs_refresh = 1;
 
+                    IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };
+
+                    NXEventData eventData;
+                    bzero(&eventData, sizeof(NXEventData));
+                    eventData.compound.misc.L[0] = 1;
+                    eventData.compound.misc.L[1] = is_down_event;
+                    eventData.compound.subType = NX_SUBTYPE_AUX_MOUSE_BUTTONS;
+
+                    kern_return_t result = IOHIDPostEvent(iohid_connect, NX_SYSDEFINED, newPoint, &eventData, kNXEventDataVersion, 0, 0);
+
+                    if (result != KERN_SUCCESS) {
+                        NSLog(@"failed to post aux button event");
+                    }
+
                     static int eventNumber = 0;
                     if (is_down_event) eventNumber++;
 
-                    NXEventData eventData;
                     bzero(&eventData, sizeof(NXEventData));
                     eventData.mouse.click = is_down_event ? clickStateValue : 0;
                     eventData.mouse.pressure = is_down_event ? 255 : 0;
                     eventData.mouse.eventNum = eventNumber;
                     eventData.mouse.buttonNumber = otherButton;
-                    eventData.mouse.subType = NX_SUBTYPE_TABLET_POINT;
-
-                    IOGPoint newPoint = { (SInt16) currentPos.x, (SInt16) currentPos.y };
+                    eventData.mouse.subType = NX_SUBTYPE_DEFAULT;
 
                     if (is_debug) {
                         LOG(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
@@ -649,13 +660,13 @@ static void mouse_handle_buttons(int buttons) {
                             (int)eventData.mouse.buttonNumber);
                     }
 
-                    kern_return_t result = IOHIDPostEvent(iohid_connect,
-                                                          iohidEventType,
-                                                          newPoint,
-                                                          &eventData,
-                                                          kNXEventDataVersion,
-                                                          0,
-                                                          0);
+                    result = IOHIDPostEvent(iohid_connect,
+                                            iohidEventType,
+                                            newPoint,
+                                            &eventData,
+                                            kNXEventDataVersion,
+                                            0,
+                                            0);
 
                     if (result != KERN_SUCCESS) {
                         NSLog(@"failed to post button event");
