@@ -1,8 +1,12 @@
 
 #include "debug.h"
 
+#import "Config.h"
+
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
+
+BOOL is_dumping;
 
 static int maxHz = -1;
 static int numHz = 0;
@@ -34,7 +38,7 @@ void debug_end() {
         NSLog(@"%@", log);
     }
 
-    if (is_timings) {
+    if ([[Config instance] timingsEnabled]) {
         NSLog(@"outer average: %f", (outersum / outernum));
     }
 

@@ -1,20 +1,16 @@
 #pragma once
 
-#import "MouseSupervisor.h"
-
 #import <IOKit/IODataQueueClient.h>
 
-extern BOOL is_debug;
-extern BOOL is_memory;
-extern BOOL is_timings;
-extern BOOL is_dumping;
-extern BOOL mouse_enabled;
-extern BOOL trackpad_enabled;
+#import "MouseSupervisor.h"
+#import "SystemMouseAcceleration.h"
 
 extern MouseSupervisor *sMouseSupervisor;
 
 @interface Daemon : NSObject {
 @private
+    SystemMouseAcceleration *accel;
+    id globalMouseMonitor;
     BOOL connected;
     pthread_t mouseEventThreadID;
     io_service_t service;
@@ -31,14 +27,14 @@ extern MouseSupervisor *sMouseSupervisor;
 #endif
 }
 
--(id)init;
--(oneway void) release;
+-(id) init;
++(id) instance;
+-(void) destroy;
 -(void) handleGlobalMouseMovedEvent:(NSEvent *) event;
--(BOOL) loadSettings;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;
 -(BOOL) configureDriver;
--(BOOL) disconnectFromDriver;
+-(BOOL) disconnectFromKext;
 -(BOOL) isActive;
 
 @end

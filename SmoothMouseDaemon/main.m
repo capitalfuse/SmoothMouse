@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        AppDelegate *delegate = [[AppDelegate alloc] initWithArgc: argc andArgv:argv];
+        AppDelegate *delegate = [[AppDelegate alloc] init];
         NSApplication *application = [NSApplication sharedApplication];
         [application setDelegate:delegate];
         [NSApp run];

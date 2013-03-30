@@ -1,45 +1,36 @@
 #import "AppDelegate.h"
-#import "daemon.h"
+#import "Daemon.h"
+#import "SystemMouseAcceleration.h"
+#import "Config.h"
+
 #import "debug.h"
-#import "accel.h"
 
 @implementation AppDelegate
 
--(id)initWithArgc:(int)argc_ andArgv:(char **)argv_
-{
-    if (self = [super init])
-    {
-        argc = argc_;
-        argv = argv_;
-    }
-    return self;
-}
-
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    for(int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--debug") == 0) {
-            is_debug = 1;
-            NSLog(@"Debug mode enabled");
-        }
+    BOOL ok;
 
-        if (strcmp(argv[i], "--memory") == 0) {
-            is_memory = 1;
-            NSLog(@"Memory logging enabled");
-        }
+    Config *config = [Config instance];
 
-        if (strcmp(argv[i], "--timings") == 0) {
-            is_timings = 1;
-            NSLog(@"Timing logging enabled");
-        }
+    ok = [config parseCommandLineArguments];
+    if (!ok) {
+        NSLog(@"Failed parse command line arguments");
+        exit(-1);
     }
 
-	daemon = [[Daemon alloc] init];
+    ok = [config readSettingsPlist];
+    if (!ok) {
+        NSLog(@"Failed to read settings .plist file (please open preference plane)");
+        exit(-1);
+    }
+
+    Daemon *daemon = [Daemon instance];
+
     if (daemon == NULL) {
         NSLog(@"Daemon failed to initialize. BYE.");
         exit(-1);
     }
-    sDaemonInstance = daemon;
 
     [NSThread detachNewThreadSelector:@selector(mainLoop) toTarget:daemon withObject:0];
 }
