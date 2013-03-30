@@ -39,8 +39,10 @@
 		0319400916BFB612008FE899 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0319400816BFB612008FE899 /* IOKit.framework */; };
 		0319400F16BFB637008FE899 /* OSXFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400B16BFB637008FE899 /* OSXFunction.cpp */; };
 		0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400D16BFB637008FE899 /* WindowsFunction.cpp */; };
+		033CB660170771D000D6B1DC /* driver.mm in Sources */ = {isa = PBXBuildFile; fileRef = 033CB65F170771D000D6B1DC /* driver.mm */; };
 		034215B41631F2BA0047E370 /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03D020D41631F22A00CD04C1 /* uninstall.sh */; };
 		035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.m */; };
+		03628254170481F000C2E371 /* prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* prio.mm */; };
 		036E3EF11637066600887DCE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 036E3EF01637066600887DCE /* Security.framework */; };
 		03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 03BA20FF161F757D0014A74E /* dsa_pub.pem */; };
 		03D020BD1631D0DA00CD04C1 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03D020BC1631D0DA00CD04C1 /* Credits.rtf */; };
@@ -124,8 +126,12 @@
 		0319400C16BFB637008FE899 /* OSXFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OSXFunction.hpp; sourceTree = "<group>"; };
 		0319400D16BFB637008FE899 /* WindowsFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WindowsFunction.cpp; sourceTree = "<group>"; };
 		0319400E16BFB637008FE899 /* WindowsFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WindowsFunction.hpp; sourceTree = "<group>"; };
+		033CB65F170771D000D6B1DC /* driver.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = driver.mm; sourceTree = "<group>"; };
+		033CB6611707720400D6B1DC /* driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = driver.h; sourceTree = "<group>"; };
 		035222EF16C0492E00DBE092 /* MouseSupervisor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseSupervisor.h; sourceTree = "<group>"; };
 		035222F016C0492E00DBE092 /* MouseSupervisor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MouseSupervisor.m; sourceTree = "<group>"; };
+		03628252170481BF00C2E371 /* prio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = prio.h; sourceTree = "<group>"; };
+		03628253170481F000C2E371 /* prio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = prio.mm; sourceTree = "<group>"; };
 		036E3EF01637066600887DCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		03BA20FF161F757D0014A74E /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		03D020BC1631D0DA00CD04C1 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
@@ -212,11 +218,15 @@
 				03193FFE16BFB510008FE899 /* daemon.mm */,
 				03193FFF16BFB510008FE899 /* debug.h */,
 				0319400016BFB510008FE899 /* debug.mm */,
+				033CB6611707720400D6B1DC /* driver.h */,
+				033CB65F170771D000D6B1DC /* driver.mm */,
 				0319400A16BFB637008FE899 /* libpointing */,
 				0319400116BFB510008FE899 /* mouse.h */,
 				0319400216BFB510008FE899 /* mouse.mm */,
 				035222EF16C0492E00DBE092 /* MouseSupervisor.h */,
 				035222F016C0492E00DBE092 /* MouseSupervisor.m */,
+				03628252170481BF00C2E371 /* prio.h */,
+				03628253170481F000C2E371 /* prio.mm */,
 				03193FE716BFAC41008FE899 /* Supporting Files */,
 			);
 			path = SmoothMouseDaemon;
@@ -537,6 +547,8 @@
 				0319400F16BFB637008FE899 /* OSXFunction.cpp in Sources */,
 				0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */,
 				035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */,
+				03628254170481F000C2E371 /* prio.mm in Sources */,
+				033CB660170771D000D6B1DC /* driver.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
