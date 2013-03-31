@@ -42,8 +42,9 @@
 		033CB660170771D000D6B1DC /* driver.mm in Sources */ = {isa = PBXBuildFile; fileRef = 033CB65F170771D000D6B1DC /* driver.mm */; };
 		034215B41631F2BA0047E370 /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03D020D41631F22A00CD04C1 /* uninstall.sh */; };
 		035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.m */; };
-		03628254170481F000C2E371 /* prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* prio.mm */; };
+		03628254170481F000C2E371 /* Prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* Prio.mm */; };
 		036E3EF11637066600887DCE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 036E3EF01637066600887DCE /* Security.framework */; };
+		03758F0017089405003E066D /* mac_timebase_util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03758EFF17089405003E066D /* mac_timebase_util.mm */; };
 		03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 03BA20FF161F757D0014A74E /* dsa_pub.pem */; };
 		03D020BD1631D0DA00CD04C1 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03D020BC1631D0DA00CD04C1 /* Credits.rtf */; };
 		03DB20C11620CB5900CF4299 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121914D5495F008704EC /* Cocoa.framework */; };
@@ -130,9 +131,11 @@
 		033CB6611707720400D6B1DC /* driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = driver.h; sourceTree = "<group>"; };
 		035222EF16C0492E00DBE092 /* MouseSupervisor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseSupervisor.h; sourceTree = "<group>"; };
 		035222F016C0492E00DBE092 /* MouseSupervisor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MouseSupervisor.m; sourceTree = "<group>"; };
-		03628252170481BF00C2E371 /* prio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = prio.h; sourceTree = "<group>"; };
-		03628253170481F000C2E371 /* prio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = prio.mm; sourceTree = "<group>"; };
+		03628252170481BF00C2E371 /* Prio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prio.h; sourceTree = "<group>"; };
+		03628253170481F000C2E371 /* Prio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Prio.mm; sourceTree = "<group>"; };
 		036E3EF01637066600887DCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		03758EFE170893BD003E066D /* mach_timebase_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mach_timebase_util.h; sourceTree = "<group>"; };
+		03758EFF17089405003E066D /* mac_timebase_util.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mac_timebase_util.mm; sourceTree = "<group>"; };
 		03BA20FF161F757D0014A74E /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		03D020BC1631D0DA00CD04C1 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		03D020D41631F22A00CD04C1 /* uninstall.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = uninstall.sh; sourceTree = "<group>"; };
@@ -225,9 +228,11 @@
 				0319400216BFB510008FE899 /* mouse.mm */,
 				035222EF16C0492E00DBE092 /* MouseSupervisor.h */,
 				035222F016C0492E00DBE092 /* MouseSupervisor.m */,
-				03628252170481BF00C2E371 /* prio.h */,
-				03628253170481F000C2E371 /* prio.mm */,
+				03628252170481BF00C2E371 /* Prio.h */,
+				03628253170481F000C2E371 /* Prio.mm */,
 				03193FE716BFAC41008FE899 /* Supporting Files */,
+				03758EFE170893BD003E066D /* mach_timebase_util.h */,
+				03758EFF17089405003E066D /* mac_timebase_util.mm */,
 			);
 			path = SmoothMouseDaemon;
 			sourceTree = "<group>";
@@ -547,8 +552,9 @@
 				0319400F16BFB637008FE899 /* OSXFunction.cpp in Sources */,
 				0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */,
 				035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */,
-				03628254170481F000C2E371 /* prio.mm in Sources */,
+				03628254170481F000C2E371 /* Prio.mm in Sources */,
 				033CB660170771D000D6B1DC /* driver.mm in Sources */,
+				03758F0017089405003E066D /* mac_timebase_util.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,11 +1,24 @@
 
-#include "prio.h"
+#import "Prio.h"
+#import "mach_timebase_util.h"
 
-#import <mach/mach.h>
-#import <mach/mach_time.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
 #include <pthread.h>
 
-static BOOL set_high_prio_pthread() {
+@implementation Prio
+
++(BOOL) setRealtimePrio
+{
+    BOOL ok = [self setHighPrioPthread];
+    if (ok) {
+        ok = [self setRealtimePrioMach];
+    }
+    return ok;
+}
+
+-(BOOL) setHighPrioPthread
+{
     struct sched_param sp;
 
     memset(&sp, 0, sizeof(struct sched_param));
@@ -22,23 +35,8 @@ static BOOL set_high_prio_pthread() {
     return YES;
 }
 
-static inline uint64_t convert_from_nanos_to_mach_timebase(uint64_t nanos, mach_timebase_info_data_t *info)
+-(BOOL) setRealtimePrioMach
 {
-    Float64 timebase = static_cast<Float64>(info->denom) / static_cast<Float64>(info->numer);
-    uint64_t mach_time = nanos * timebase;
-    //NSLog(@"convert_from_nanos_to_mach_timebase: %llu => %llu", nanos, mach_time);
-    return mach_time;
-}
-
-static inline uint64_t convert_from_mach_timebase_to_nanos(uint64_t mach_time, mach_timebase_info_data_t *info)
-{
-    Float64 timebase = static_cast<Float64>(info->numer) / static_cast<Float64>(info->denom);
-    uint64_t nanos = mach_time * timebase;
-    //NSLog(@"convert_from_mach_timebase_to_nanos: %llu => %llu", mach_time, nanos);
-    return nanos;
-}
-
-static BOOL set_realtime_prio() {
     mach_timebase_info_data_t info;
     kern_return_t kret = mach_timebase_info(&info);
     if (kret != KERN_SUCCESS) {
@@ -83,10 +81,5 @@ static BOOL set_realtime_prio() {
     return YES;
 }
 
-BOOL prio_set_realtime() {
-    BOOL ok = set_high_prio_pthread();
-    if (ok) {
-        ok = set_realtime_prio();
-    }
-    return ok;
-}
+@end
+

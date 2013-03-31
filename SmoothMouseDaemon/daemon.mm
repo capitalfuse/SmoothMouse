@@ -388,7 +388,7 @@ static void *HandleKernelEventThread(void *instance)
 		return NULL;
 	}
 
-    prio_set_realtime();
+    [Prio setRealtimePrio];
 
     (void) mouse_init();
 

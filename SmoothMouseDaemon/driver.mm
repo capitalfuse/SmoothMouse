@@ -101,7 +101,7 @@ const char *driver_iohid_event_type_to_string(int type) {
 
 static void *HandleDriverEventThread(void *instance)
 {
-    prio_set_realtime();
+    [Prio setRealtimePrio];
 
     LOG(@"HandleDriverEventThread started");
 

@@ -36,7 +36,9 @@ static double doubleClickSpeed;
 static uint64_t lastSequenceNumber = 0;
 static int needs_refresh = 0;
 
-static pthread_mutex_t clickCountMutex = PTHREAD_MUTEX_INITIALIZER;
+// NOTE: since we support 32-bit architectures we need to protect assignment
+//       to doubleClickSpeed.
+static pthread_mutex_t clickSpeedMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static double timestamp()
 {
@@ -122,11 +124,11 @@ static void refresh_mouse_location() {
 }
 
 void mouse_update_clicktime() {
-    pthread_mutex_lock(&clickCountMutex);
+    pthread_mutex_lock(&clickSpeedMutex);
     NXEventHandle handle = NXOpenEventStatus();
 	doubleClickSpeed = NXClickTime(handle);
     NXCloseEventStatus(handle);
-    pthread_mutex_unlock(&clickCountMutex);
+    pthread_mutex_unlock(&clickSpeedMutex);
     //NSLog(@"clicktime updated: %f", clickTime);
 }
 
@@ -318,9 +320,9 @@ static void mouse_handle_buttons(int buttons) {
                 double now = timestamp();
 
                 int theDoubleClickSpeed;
-                pthread_mutex_lock(&clickCountMutex);
+                pthread_mutex_lock(&clickSpeedMutex);
                 theDoubleClickSpeed = doubleClickSpeed;
-                pthread_mutex_unlock(&clickCountMutex);
+                pthread_mutex_unlock(&clickSpeedMutex);
 
                 if (now - lastClickTime <= theDoubleClickSpeed &&
                     distanceMovedSinceLastClick <= maxDistanceAllowed) {
