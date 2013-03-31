@@ -117,31 +117,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
     NSLog(@"Driver: %s (%d)", get_driver_string(driver), driver);
 
-    [NSEvent setMouseCoalescingEnabled:FALSE];
-    [NSEvent addGlobalMonitorForEventsMatchingMask:(NSMouseMovedMask | NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask)
-                                           handler:^(NSEvent *event) {
-                                               [self handleGlobalMouseMovedEvent:event];
-                                           }];
-
 	return self;
-}
-
--(void) handleGlobalMouseMovedEvent:(NSEvent *) event
-{
-    BOOL match = [sMouseSupervisor popMouseEvent:(int) [event deltaX]: (int) [event deltaY]];
-    if (!match) {
-        mouse_refresh();
-        if (is_debug) {
-            NSLog(@"Another application altered mouse location");
-        }
-    } else {
-        //NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
-        //      match,
-        //      [sMouseSupervisor numItems],
-        //      [event deltaX],
-        //      [event deltaY]
-        //      );
-    }
 }
 
 -(AccelerationCurve) getAccelerationCurveFromDict:(NSDictionary *)dictionary withKey:(NSString *)key {
@@ -275,6 +251,8 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
         initializeSystemMouseSettings();
 
+        [self hookGlobalMouseEvents];
+
         connected = YES;
     }
 
@@ -282,6 +260,46 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
 error:
     return NO;
+}
+
+-(BOOL) hookGlobalMouseEvents
+{
+    [NSEvent setMouseCoalescingEnabled:FALSE];
+    globalMouseMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:(NSMouseMovedMask | NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask)
+                                           handler:^(NSEvent *event) {
+                                               [self handleGlobalMouseMovedEvent:event];
+                                           }];
+
+    NSLog(@"Registered global mouse event listener");
+
+    return YES;
+}
+
+-(BOOL) unhookGlobalMouseEvents
+{
+    [NSEvent removeMonitor:globalMouseMonitor];
+
+    NSLog(@"Unregistered global mouse event listener");
+
+    return YES;
+}
+
+-(void) handleGlobalMouseMovedEvent:(NSEvent *) event
+{
+    BOOL match = [sMouseSupervisor popMouseEvent:(int) [event deltaX]: (int) [event deltaY]];
+    if (!match) {
+        mouse_refresh();
+        if (is_debug) {
+            NSLog(@"Another application altered mouse location");
+        }
+    } else {
+        //NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
+        //      match,
+        //      [sMouseSupervisor numItems],
+        //      [event deltaX],
+        //      [event deltaY]
+        //      );
+    }
 }
 
 -(BOOL) configureDriver
@@ -339,6 +357,8 @@ error:
         if (connect) {
             IOServiceClose(connect);
         }
+
+        [self unhookGlobalMouseEvents];
 
         connected = NO;
 

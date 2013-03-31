@@ -15,6 +15,7 @@ extern MouseSupervisor *sMouseSupervisor;
 
 @interface Daemon : NSObject {
 @private
+    id globalMouseMonitor;
     BOOL connected;
     pthread_t mouseEventThreadID;
     io_service_t service;
