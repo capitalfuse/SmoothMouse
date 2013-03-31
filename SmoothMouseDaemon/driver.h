@@ -1,6 +1,8 @@
 
 #pragma once
 
+extern int numCoalescedEvents;
+
 typedef enum Driver_s {
     DRIVER_QUARTZ_OLD,
     DRIVER_QUARTZ,

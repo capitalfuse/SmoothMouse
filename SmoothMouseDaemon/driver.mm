@@ -15,6 +15,8 @@
 extern Driver driver;
 extern BOOL is_debug;
 
+int numCoalescedEvents;
+
 static CGEventSourceRef eventSource = NULL;
 io_connect_t iohid_connect = MACH_PORT_NULL;
 pthread_t driverEventThreadID;
@@ -22,40 +24,42 @@ pthread_t driverEventThreadID;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t data_available = PTHREAD_COND_INITIALIZER;
 
-std::list<driver_event_t> event_list;
+std::list<driver_event_t> event_queue;
 BOOL keep_running;
 
 static void *HandleDriverEventThread(void *instance);
 static BOOL driver_handle_button_event(driver_button_event_t *event);
 static BOOL driver_handle_move_event(driver_move_event_t *event);
 
+BOOL is_move_event(driver_event_t *event) {
+    return (event->id == DRIVER_EVENT_ID_MOVE);
+}
+
+BOOL can_coalesce(driver_move_event_t *e1, driver_move_event_t *e2)
+{
+    if (e1->type == e2->type &&
+        e1->buttons == e2->buttons &&
+        e1->otherButton == e2->otherButton) {
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
 BOOL driver_post_event(driver_event_t *event) {
     pthread_mutex_lock(&mutex);
-    if (event->id == DRIVER_EVENT_ID_MOVE && event_list.size() > 0) {
-        // see if it's possible to merge two events
-        driver_event_t back = event_list.back();
-        if (back.move.type == event->move.type &&
-            back.move.buttons == event->move.buttons &&
-            back.move.otherButton == event->move.otherButton) {
+    if (!event_queue.empty() && is_move_event(event)) {
+        driver_event_t back = event_queue.back();
+        if (can_coalesce(&event->move, &(back.move))) {
+            event_queue.pop_back();
             back.move.pos = event->move.pos;
-            back.move.deltaX += event->move.deltaX;
-            back.move.deltaY += event->move.deltaY;
-            event_list.pop_back();
-            event_list.push_back(back);
-            //LOG(@"2 move events merged");
-        } else {
-/*            NSLog(@"Wrong kind of event, id: %d, type: %d %d, buttons: %d %d, other: %d %d",
-                  back.id,
-                  back.move.type,
-                  event->move.type,
-                  back.move.buttons,
-                  event->move.buttons,
-                  back.move.otherButton,
-                  event->move.otherButton); */
+            event->move.deltaX += back.move.deltaX;
+            event->move.deltaY += back.move.deltaY;
+            event_queue.push_back(back);
+            ++numCoalescedEvents;
         }
-    } else {
-        event_list.push_back(*event);
     }
+    event_queue.push_back(*event);
     pthread_cond_signal(&data_available);
     pthread_mutex_unlock(&mutex);
     return YES;
@@ -104,11 +108,11 @@ static void *HandleDriverEventThread(void *instance)
     while(keep_running) {
         driver_event_t event;
         pthread_mutex_lock(&mutex);
-        while(event_list.empty()) {
+        while(event_queue.empty()) {
             pthread_cond_wait(&data_available, &mutex);
         }
-        event = event_list.front();
-        event_list.pop_front();
+        event = event_queue.front();
+        event_queue.pop_front();
         pthread_mutex_unlock(&mutex);
         switch(event.id) {
             case DRIVER_EVENT_ID_MOVE:
@@ -131,6 +135,9 @@ static void *HandleDriverEventThread(void *instance)
 }
 
 BOOL driver_init() {
+
+    numCoalescedEvents = 0;
+
     switch (driver) {
         case DRIVER_QUARTZ_OLD:
         {

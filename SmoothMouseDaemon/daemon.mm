@@ -412,7 +412,7 @@ static void *HandleKernelEventThread(void *instance)
             }
             end = GET_TIME();
             if (is_timings) {
-                LOG(@"outer: %f, inner: %f, post event: %f, (mouse_handle): %f, seqnum: %llu, data entries handled: %d", outerend-outerstart, end-start, e2-e1, mhe-mhs, mouse_event->seqnum, numPackets);
+                LOG(@"outer: %f, inner: %f, post event: %f, (mouse_handle): %f, seqnum: %llu, data entries handled: %d, coalesced: %d", outerend-outerstart, end-start, e2-e1, mhe-mhs, mouse_event->seqnum, numPackets, numCoalescedEvents);
             }
         }
 
