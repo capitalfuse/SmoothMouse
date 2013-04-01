@@ -126,31 +126,6 @@ void mouse_update_clicktime() {
     //NSLog(@"clicktime updated: %f", clickTime);
 }
 
-BOOL mouse_init() {
-    mouse_update_clicktime();
-
-    currentPos = deltaPosFloat = deltaPosInt = get_current_mouse_pos();
-
-    return driver_init();
-}
-
-BOOL mouse_cleanup() {
-    if (win != NULL) {
-        delete win;
-        win = NULL;
-    }
-    if (osx_mouse != NULL) {
-        delete osx_mouse;
-        osx_mouse = NULL;
-    }
-    if (osx_trackpad != NULL) {
-        delete osx_trackpad;
-        osx_trackpad = NULL;
-    }
-
-    return driver_cleanup();
-}
-
 static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, AccelerationCurve curve, int currentButtons) {
     CGPoint newPos;
 
@@ -413,4 +388,34 @@ void mouse_handle(mouse_event_t *event) {
 
 void mouse_refresh() {
     needs_refresh = 1;
+}
+
+BOOL mouse_init() {
+    mouse_update_clicktime();
+
+    currentPos = deltaPosFloat = deltaPosInt = get_current_mouse_pos();
+
+    return driver_init();
+}
+
+BOOL mouse_cleanup() {
+    if (lastButtons != 0) {
+        NSLog(@"Force mouse button release");
+        mouse_handle_buttons(0);
+    }
+
+    if (win != NULL) {
+        delete win;
+        win = NULL;
+    }
+    if (osx_mouse != NULL) {
+        delete osx_mouse;
+        osx_mouse = NULL;
+    }
+    if (osx_trackpad != NULL) {
+        delete osx_trackpad;
+        osx_trackpad = NULL;
+    }
+
+    return driver_cleanup();
 }

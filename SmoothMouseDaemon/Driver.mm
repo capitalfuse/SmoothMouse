@@ -208,6 +208,11 @@ BOOL driver_cleanup() {
     terminate_event.id = DRIVER_EVENT_ID_TERMINATE;
     driver_post_event(&terminate_event);
 
+    int rv = pthread_join(driverEventThreadID, NULL);
+    if (rv != 0) {
+        NSLog(@"Failed to wait for driver event thread");
+    }
+
     switch ([[Config instance] driver]) {
         case DRIVER_QUARTZ_OLD:
             break;
@@ -225,11 +230,6 @@ BOOL driver_cleanup() {
             iohid_connect = MACH_PORT_NULL;
             break;
         }
-    }
-
-    int rv = pthread_join(driverEventThreadID, NULL);
-    if (rv != 0) {
-        NSLog(@"Failed to wait for driver event thread");
     }
 
     return YES;
