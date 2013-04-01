@@ -34,12 +34,12 @@
         }
     }
 
-	daemon = [[Daemon alloc] init];
+    Daemon *daemon = [Daemon instance];
+
     if (daemon == NULL) {
         NSLog(@"Daemon failed to initialize. BYE.");
         exit(-1);
     }
-    sDaemonInstance = daemon;
 
     [NSThread detachNewThreadSelector:@selector(mainLoop) toTarget:daemon withObject:0];
 }

@@ -1,8 +1,7 @@
 
-#pragma once
+#import <Foundation/Foundation.h>
 
-NS_ROOT_CLASS
-@interface Prio {
+@interface Prio : NSObject {
 }
 
 +(BOOL) setRealtimePrio;

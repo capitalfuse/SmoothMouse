@@ -17,7 +17,7 @@
     return ok;
 }
 
--(BOOL) setHighPrioPthread
++(BOOL) setHighPrioPthread
 {
     struct sched_param sp;
 
@@ -35,7 +35,7 @@
     return YES;
 }
 
--(BOOL) setRealtimePrioMach
++(BOOL) setRealtimePrioMach
 {
     mach_timebase_info_data_t info;
     kern_return_t kret = mach_timebase_info(&info);

@@ -34,14 +34,12 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
 
 MouseSupervisor *sMouseSupervisor;
 
-Daemon *sDaemonInstance = NULL;
-
 static void *KernelEventThread(void *instance);
 
 void trap_signals(int sig)
 {
     NSLog(@"trapped signal: %d", sig);
-    [sDaemonInstance release];
+    [[Daemon instance] destroy];
     if (is_debug) {
         debug_end();
     }
@@ -67,6 +65,17 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 }
 
 @implementation Daemon
+
++(Daemon *) instance
+{
+    static Daemon* instance = nil;
+
+    if (instance == nil) {
+        instance = [[Daemon alloc] init];
+    }
+
+    return instance;
+}
 
 -(id)init
 {
@@ -376,14 +385,10 @@ error:
     }
 }
 
--(oneway void) release
+-(void) destroy
 {
-    // for some weird reason release is called twice
-    @synchronized(self) {
-        [self disconnectFromKext];
-        [accel restore];
-        [super release];
-    }
+    [self disconnectFromKext];
+    [accel restore];
 }
 
 static void *KernelEventThread(void *instance)

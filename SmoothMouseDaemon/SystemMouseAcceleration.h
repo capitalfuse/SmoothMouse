@@ -1,4 +1,4 @@
-#pragma once
+#import <Foundation/Foundation.h>
 
 @interface SystemMouseAcceleration : NSObject {
     double savedMouseAcceleration;
@@ -10,4 +10,3 @@
 -(void) restore;
 
 @end
-
