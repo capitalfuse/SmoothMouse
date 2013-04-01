@@ -44,7 +44,7 @@
 		035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.m */; };
 		03628254170481F000C2E371 /* Prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* Prio.mm */; };
 		036E3EF11637066600887DCE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 036E3EF01637066600887DCE /* Security.framework */; };
-		03758F0017089405003E066D /* mac_timebase_util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03758EFF17089405003E066D /* mac_timebase_util.mm */; };
+		03758F0017089405003E066D /* mach_timebase_util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03758EFF17089405003E066D /* mach_timebase_util.mm */; };
 		03A3401B1709CF0300B4A1D8 /* Config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03A3401A1709CF0300B4A1D8 /* Config.mm */; };
 		03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 03BA20FF161F757D0014A74E /* dsa_pub.pem */; };
 		03D020BD1631D0DA00CD04C1 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03D020BC1631D0DA00CD04C1 /* Credits.rtf */; };
@@ -136,7 +136,7 @@
 		03628253170481F000C2E371 /* Prio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Prio.mm; sourceTree = "<group>"; };
 		036E3EF01637066600887DCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		03758EFE170893BD003E066D /* mach_timebase_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mach_timebase_util.h; sourceTree = "<group>"; };
-		03758EFF17089405003E066D /* mac_timebase_util.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mac_timebase_util.mm; sourceTree = "<group>"; };
+		03758EFF17089405003E066D /* mach_timebase_util.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mach_timebase_util.mm; sourceTree = "<group>"; };
 		03A340191709CE3300B4A1D8 /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		03A3401A1709CF0300B4A1D8 /* Config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Config.mm; sourceTree = "<group>"; };
 		03BA20FF161F757D0014A74E /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
@@ -227,7 +227,7 @@
 				033CB6611707720400D6B1DC /* driver.h */,
 				033CB65F170771D000D6B1DC /* driver.mm */,
 				0319400A16BFB637008FE899 /* libpointing */,
-				03758EFF17089405003E066D /* mac_timebase_util.mm */,
+				03758EFF17089405003E066D /* mach_timebase_util.mm */,
 				03758EFE170893BD003E066D /* mach_timebase_util.h */,
 				03193FEC16BFAC41008FE899 /* main.m */,
 				0319400116BFB510008FE899 /* mouse.h */,
@@ -559,7 +559,7 @@
 				035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */,
 				03628254170481F000C2E371 /* Prio.mm in Sources */,
 				033CB660170771D000D6B1DC /* driver.mm in Sources */,
-				03758F0017089405003E066D /* mac_timebase_util.mm in Sources */,
+				03758F0017089405003E066D /* mach_timebase_util.mm in Sources */,
 				03A3401B1709CF0300B4A1D8 /* Config.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
