@@ -6,13 +6,20 @@
 
 #import <Foundation/Foundation.h>
 
-#include "daemon.h"
+#import "daemon.h"
 
-extern BOOL is_debug;
-static double savedMouseAcceleration = -1;
-static double savedTrackpadAcceleration = -1;
+@implementation SystemMouseAcceleration
 
-void initializeSystemMouseSettings()
+-(id) init
+{
+    if (self = [super init]) {
+        savedMouseAcceleration = -1;
+        savedTrackpadAcceleration = -1;
+    }
+    return self;
+}
+
+-(void) reset
 {
     NXEventHandle   handle;
     CFStringRef     key;
@@ -24,7 +31,6 @@ void initializeSystemMouseSettings()
     double          resetValue = 0.0;
 
     handle = NXOpenEventStatus();
-
     if (mouse_enabled) {
         key = CFSTR(kIOHIDMouseAccelerationType);
 
@@ -95,7 +101,7 @@ void initializeSystemMouseSettings()
     NXCloseEventStatus(handle);
 }
 
-void restoreSystemMouseSettings()
+-(void) restore
 {
     NXEventHandle   handle;
     CFStringRef     key;
@@ -127,3 +133,5 @@ void restoreSystemMouseSettings()
 
     NXCloseEventStatus(handle);
 }
+
+@end

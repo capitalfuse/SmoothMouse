@@ -10,8 +10,8 @@
 #import "constants.h"
 #import "debug.h"
 #import "mouse.h"
-#import "accel.h"
-#import "prio.h"
+#import "SystemMouseAcceleration.h"
+#import "Prio.h"
 
 #define KEXT_CONNECT_RETRIES (3)
 #define SUPERVISOR_SLEEP_TIME_USEC (500000)
@@ -36,7 +36,7 @@ MouseSupervisor *sMouseSupervisor;
 
 Daemon *sDaemonInstance = NULL;
 
-static void *HandleKernelEventThread(void *instance);
+static void *KernelEventThread(void *instance);
 
 void trap_signals(int sig)
 {
@@ -45,8 +45,7 @@ void trap_signals(int sig)
     if (is_debug) {
         debug_end();
     }
-    restoreSystemMouseSettings();
-    exit(-1);
+    [NSApp terminate:nil];
 }
 
 const char *get_driver_string(int mouse_driver) {
@@ -74,6 +73,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 	self = [super init];
 
     connected = NO;
+    globalMouseMonitor = NULL;
 
 	BOOL settingsOK = [self loadSettings];
     if (!settingsOK) {
@@ -82,16 +82,16 @@ const char *get_acceleration_string(AccelerationCurve curve) {
         return nil;
     }
 
-    if (!is_debug) {
+//    if (!is_debug) {
         if (!mouse_enabled && !trackpad_enabled) {
             NSLog(@"neither mouse nor trackpad is enabled");
             [self dealloc];
             return nil;
         }
-    } else {
-        mouse_enabled = 1;
-        trackpad_enabled = 1;
-    }
+//    } else {
+//        mouse_enabled = 1;
+//        trackpad_enabled = 1;
+//    }
 
 #if 0
     for (int i = 0; i != 31; ++i) {
@@ -103,6 +103,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     signal(SIGKILL, trap_signals);
     signal(SIGTERM, trap_signals);
 
+    accel = [[SystemMouseAcceleration alloc] init];
     sMouseSupervisor = [[MouseSupervisor alloc] init];
 
     NSLog(@"Mouse enabled: %d Mouse velocity: %f Mouse curve: %s",
@@ -197,69 +198,70 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
 -(BOOL) connectToDriver
 {
-    if (!connected) {
-        kern_return_t error;
+    @synchronized(self) {
+        if (!connected) {
+            kern_return_t error;
 
-        service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
-        if (service == IO_OBJECT_NULL) {
-            NSLog(@"IOServiceGetMatchingService() failed");
-            goto error;
-        }
+            service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
+            if (service == IO_OBJECT_NULL) {
+                NSLog(@"IOServiceGetMatchingService() failed");
+                goto error;
+            }
 
-        error = IOServiceOpen(service, mach_task_self(), 0, &connect);
-        if (error) {
-            NSLog(@"IOServiceOpen() failed (kext is busy)");
+            error = IOServiceOpen(service, mach_task_self(), 0, &connect);
+            if (error) {
+                NSLog(@"IOServiceOpen() failed (kext is busy)");
+                IOObjectRelease(service);
+                goto error;
+            }
+
             IOObjectRelease(service);
-            goto error;
+
+            recvPort = IODataQueueAllocateNotificationPort();
+            if (MACH_PORT_NULL == recvPort) {
+                NSLog(@"IODataQueueAllocateNotificationPort returned a NULL mach_port_t\n");
+                goto error;
+            }
+
+            error = IOConnectSetNotificationPort(connect, kIODefaultMemoryType, recvPort, 0);
+            if (kIOReturnSuccess != error) {
+                NSLog(@"IOConnectSetNotificationPort returned %d\n", error);
+                goto error;
+            }
+
+            error = IOConnectMapMemory(connect, kIODefaultMemoryType, mach_task_self(), &address, &size, kIOMapAnywhere);
+            if (kIOReturnSuccess != error) {
+                NSLog(@"IOConnectMapMemory returned %d\n", error);
+                goto error;
+            }
+
+            queueMappedMemory = (IODataQueueMemory *) address;
+            dataSize = (uint32_t) size;
+
+            BOOL ok = [self configureDriver];
+            if (!ok) {
+                NSLog(@"Failed to configure driver");
+                goto error;
+            }
+
+            int threadError = pthread_create(&mouseEventThreadID, NULL, &KernelEventThread, self);
+            if (threadError != 0)
+            {
+                NSLog(@"Failed to start mouse event thread");
+                goto error;
+            }
+
+            [accel reset];
+
+            [self hookGlobalMouseEvents];
+
+            connected = YES;
         }
 
-        IOObjectRelease(service);
-
-        recvPort = IODataQueueAllocateNotificationPort();
-        if (MACH_PORT_NULL == recvPort) {
-            NSLog(@"IODataQueueAllocateNotificationPort returned a NULL mach_port_t\n");
-            goto error;
-        }
-
-        error = IOConnectSetNotificationPort(connect, kIODefaultMemoryType, recvPort, 0);
-        if (kIOReturnSuccess != error) {
-            NSLog(@"IOConnectSetNotificationPort returned %d\n", error);
-            goto error;
-        }
-
-        error = IOConnectMapMemory(connect, kIODefaultMemoryType, mach_task_self(), &address, &size, kIOMapAnywhere);
-        if (kIOReturnSuccess != error) {
-            NSLog(@"IOConnectMapMemory returned %d\n", error);
-            goto error;
-        }
-
-        queueMappedMemory = (IODataQueueMemory *) address;
-        dataSize = (uint32_t) size;
-
-        BOOL ok = [self configureDriver];
-        if (!ok) {
-            NSLog(@"Failed to configure driver");
-            goto error;
-        }
-
-        int threadError = pthread_create(&mouseEventThreadID, NULL, &HandleKernelEventThread, self);
-        if (threadError != 0)
-        {
-            NSLog(@"Failed to start mouse event thread");
-            goto error;
-        }
-
-        initializeSystemMouseSettings();
-
-        [self hookGlobalMouseEvents];
-
-        connected = YES;
-    }
-
-	return YES;
-
+        return YES;
 error:
     return NO;
+    }
 }
 
 -(BOOL) hookGlobalMouseEvents
@@ -277,9 +279,12 @@ error:
 
 -(BOOL) unhookGlobalMouseEvents
 {
-    [NSEvent removeMonitor:globalMouseMonitor];
+    if (globalMouseMonitor != NULL) {
+        [NSEvent removeMonitor:globalMouseMonitor];
+        globalMouseMonitor = NULL;
+    }
 
-    NSLog(@"Unregistered global mouse event listener");
+    //NSLog(@"Removed mouse monitor");
 
     return YES;
 }
@@ -338,45 +343,54 @@ error:
     }
 }
 
--(BOOL) disconnectFromDriver
+-(BOOL) disconnectFromKext
 {
-    if (connected) {
-        if (recvPort) {
-            mach_port_destroy(mach_task_self(), recvPort);
+    @synchronized(self) {
+        if (connected) {
+
+            connected = NO;
+
+            if (recvPort) {
+                mach_port_destroy(mach_task_self(), recvPort);
+            }
+
+            int rv = pthread_join(mouseEventThreadID, NULL);
+            if (rv != 0) {
+                NSLog(@"Failed to wait for kernel event thread");
+            }
+
+            if (address) {
+                IOConnectUnmapMemory(connect, kIODefaultMemoryType, mach_task_self(), address);
+            }
+
+            if (connect) {
+                IOServiceClose(connect);
+            }
+
+            [self unhookGlobalMouseEvents];
+            
+            NSLog(@"Disconnected from KEXT");
         }
-
-        int rv = pthread_join(mouseEventThreadID, NULL);
-        if (rv != 0) {
-            NSLog(@"Failed to wait for mouse event thread");
-        }
-
-        if (address) {
-            IOConnectUnmapMemory(connect, kIODefaultMemoryType, mach_task_self(), address);
-        }
-
-        if (connect) {
-            IOServiceClose(connect);
-        }
-
-        [self unhookGlobalMouseEvents];
-
-        connected = NO;
-
-        NSLog(@"Disconnected from driver");
+        
+        return YES;
     }
-
-    return YES;
 }
 
 -(oneway void) release
 {
-    [self disconnectFromDriver];
-	[super release];
+    // for some weird reason release is called twice
+    @synchronized(self) {
+        [self disconnectFromKext];
+        [accel restore];
+        [super release];
+    }
 }
 
-static void *HandleKernelEventThread(void *instance)
+static void *KernelEventThread(void *instance)
 {
     Daemon *self = (Daemon *) instance;
+
+    NSLog(@"KernelEventThread: Start");
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
@@ -430,6 +444,8 @@ static void *HandleKernelEventThread(void *instance)
 
     [pool drain];
 
+    NSLog(@"KernelEventThread: End");
+
     return NULL;
 }
 
@@ -448,11 +464,12 @@ static void *HandleKernelEventThread(void *instance)
                 retries_left--;
             } else {
                 retries_left = KEXT_CONNECT_RETRIES;
-                initializeSystemMouseSettings();
+                [accel reset];
                 mouse_update_clicktime();
             }
         } else {
-            [self disconnectFromDriver];
+            NSLog(@"calling disconnectFromKext from mainloop");
+            [self disconnectFromKext];
         }
         usleep(SUPERVISOR_SLEEP_TIME_USEC);
     }

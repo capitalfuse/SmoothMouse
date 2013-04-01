@@ -27,7 +27,7 @@ pthread_cond_t data_available = PTHREAD_COND_INITIALIZER;
 std::list<driver_event_t> event_queue;
 BOOL keep_running;
 
-static void *HandleDriverEventThread(void *instance);
+static void *DriverEventThread(void *instance);
 static BOOL driver_handle_button_event(driver_button_event_t *event);
 static BOOL driver_handle_move_event(driver_move_event_t *event);
 
@@ -99,11 +99,11 @@ const char *driver_iohid_event_type_to_string(int type) {
     }
 }
 
-static void *HandleDriverEventThread(void *instance)
+static void *DriverEventThread(void *instance)
 {
-    [Prio setRealtimePrio];
+    LOG(@"DriverEventThread: Start");
 
-    LOG(@"HandleDriverEventThread started");
+    [Prio setRealtimePrio];
 
     while(keep_running) {
         driver_event_t event;
@@ -129,7 +129,7 @@ static void *HandleDriverEventThread(void *instance)
         }
     }
 
-    LOG(@"HandleDriverEventThread ended");
+    LOG(@"DriverEventThread: End");
 
     return NULL;
 }
@@ -190,7 +190,7 @@ BOOL driver_init() {
 
     keep_running = YES;
 
-    int threadError = pthread_create(&driverEventThreadID, NULL, &HandleDriverEventThread, NULL);
+    int threadError = pthread_create(&driverEventThreadID, NULL, &DriverEventThread, NULL);
     if (threadError != 0)
     {
         NSLog(@"Failed to start driver event thread");
@@ -227,10 +227,9 @@ BOOL driver_cleanup() {
         }
     }
 
-    NSLog(@"Waiting for driver event thread to terminate");
     int rv = pthread_join(driverEventThreadID, NULL);
     if (rv != 0) {
-        NSLog(@"Failed to wait for mouse event thread");
+        NSLog(@"Failed to wait for driver event thread");
     }
 
     return YES;

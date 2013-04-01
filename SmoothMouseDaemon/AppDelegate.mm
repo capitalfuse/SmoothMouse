@@ -1,7 +1,7 @@
 #import "AppDelegate.h"
 #import "daemon.h"
 #import "debug.h"
-#import "accel.h"
+#import "SystemMouseAcceleration.h"
 
 @implementation AppDelegate
 
