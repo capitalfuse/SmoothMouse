@@ -5,13 +5,6 @@
 #import "MouseSupervisor.h"
 #import "SystemMouseAcceleration.h"
 
-extern BOOL is_debug;
-extern BOOL is_memory;
-extern BOOL is_timings;
-extern BOOL is_dumping;
-extern BOOL mouse_enabled;
-extern BOOL trackpad_enabled;
-
 extern MouseSupervisor *sMouseSupervisor;
 
 @interface Daemon : NSObject {
@@ -38,7 +31,6 @@ extern MouseSupervisor *sMouseSupervisor;
 +(id) instance;
 -(void) destroy;
 -(void) handleGlobalMouseMovedEvent:(NSEvent *) event;
--(BOOL) loadSettings;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;
 -(BOOL) configureDriver;

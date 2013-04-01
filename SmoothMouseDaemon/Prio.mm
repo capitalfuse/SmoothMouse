@@ -8,16 +8,16 @@
 
 @implementation Prio
 
-+(BOOL) setRealtimePrio
++(BOOL) setRealtimePrio: (NSString *) threadName
 {
-    BOOL ok = [self setHighPrioPthread];
+    BOOL ok = [self setHighPrioPthread: threadName];
     if (ok) {
-        ok = [self setRealtimePrioMach];
+        ok = [self setRealtimePrioMach: threadName];
     }
     return ok;
 }
 
-+(BOOL) setHighPrioPthread
++(BOOL) setHighPrioPthread: (NSString *) threadName
 {
     struct sched_param sp;
 
@@ -30,12 +30,12 @@
         return NO;
     }
 
-    NSLog(@"Thread prio set to highest (%u)", sp.sched_priority);
+    NSLog(@"Thread '%@': Priority set to highest (%u)", threadName, sp.sched_priority);
 
     return YES;
 }
 
-+(BOOL) setRealtimePrioMach
++(BOOL) setRealtimePrioMach: (NSString *) threadName
 {
     mach_timebase_info_data_t info;
     kern_return_t kret = mach_timebase_info(&info);
@@ -59,7 +59,8 @@
 
 #undef MS_TO_NANOS
 
-    NSLog(@"period: %u, computation: %u, constraint: %u (all in mach timebase), preemtible: %u",
+    NSLog(@"Thread '%@': Time constraint policy set (period: %u, computation: %u, constraint: %u (all in mach timebase), preemtible: %u)",
+          threadName,
           ttcpolicy.period,
           ttcpolicy.computation,
           ttcpolicy.constraint,
@@ -76,8 +77,6 @@
         return NO;
     }
 
-    NSLog(@"Time constraint policy set");
-    
     return YES;
 }
 

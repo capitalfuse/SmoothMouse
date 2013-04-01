@@ -4,6 +4,6 @@
 @interface Prio : NSObject {
 }
 
-+(BOOL) setRealtimePrio;
++(BOOL) setRealtimePrio: (NSString *) threadName;
 
 @end

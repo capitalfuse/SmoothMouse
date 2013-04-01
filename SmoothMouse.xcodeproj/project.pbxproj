@@ -45,6 +45,7 @@
 		03628254170481F000C2E371 /* Prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* Prio.mm */; };
 		036E3EF11637066600887DCE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 036E3EF01637066600887DCE /* Security.framework */; };
 		03758F0017089405003E066D /* mac_timebase_util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03758EFF17089405003E066D /* mac_timebase_util.mm */; };
+		03A3401B1709CF0300B4A1D8 /* Config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03A3401A1709CF0300B4A1D8 /* Config.mm */; };
 		03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 03BA20FF161F757D0014A74E /* dsa_pub.pem */; };
 		03D020BD1631D0DA00CD04C1 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03D020BC1631D0DA00CD04C1 /* Credits.rtf */; };
 		03DB20C11620CB5900CF4299 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121914D5495F008704EC /* Cocoa.framework */; };
@@ -136,6 +137,8 @@
 		036E3EF01637066600887DCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		03758EFE170893BD003E066D /* mach_timebase_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mach_timebase_util.h; sourceTree = "<group>"; };
 		03758EFF17089405003E066D /* mac_timebase_util.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mac_timebase_util.mm; sourceTree = "<group>"; };
+		03A340191709CE3300B4A1D8 /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		03A3401A1709CF0300B4A1D8 /* Config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Config.mm; sourceTree = "<group>"; };
 		03BA20FF161F757D0014A74E /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		03D020BC1631D0DA00CD04C1 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		03D020D41631F22A00CD04C1 /* uninstall.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = uninstall.sh; sourceTree = "<group>"; };
@@ -215,6 +218,8 @@
 			children = (
 				03193FF216BFAC41008FE899 /* AppDelegate.h */,
 				03193FF316BFAC41008FE899 /* AppDelegate.mm */,
+				03A340191709CE3300B4A1D8 /* Config.h */,
+				03A3401A1709CF0300B4A1D8 /* Config.mm */,
 				0319400716BFB5AA008FE899 /* Daemon.h */,
 				03193FFE16BFB510008FE899 /* Daemon.mm */,
 				03193FFF16BFB510008FE899 /* debug.h */,
@@ -555,6 +560,7 @@
 				03628254170481F000C2E371 /* Prio.mm in Sources */,
 				033CB660170771D000D6B1DC /* driver.mm in Sources */,
 				03758F0017089405003E066D /* mac_timebase_util.mm in Sources */,
+				03A3401B1709CF0300B4A1D8 /* Config.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

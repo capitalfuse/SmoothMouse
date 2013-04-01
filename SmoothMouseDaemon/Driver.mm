@@ -12,9 +12,6 @@
 #include "driver.h"
 #include "debug.h"
 
-extern Driver driver;
-extern BOOL is_debug;
-
 int numCoalescedEvents;
 
 static CGEventSourceRef eventSource = NULL;
@@ -101,9 +98,11 @@ const char *driver_iohid_event_type_to_string(int type) {
 
 static void *DriverEventThread(void *instance)
 {
-    LOG(@"DriverEventThread: Start");
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    [Prio setRealtimePrio];
+    //LOG(@"DriverEventThread: Start");
+
+    [Prio setRealtimePrio: @"DriverEventThread"];
 
     while(keep_running) {
         driver_event_t event;
@@ -129,16 +128,17 @@ static void *DriverEventThread(void *instance)
         }
     }
 
-    LOG(@"DriverEventThread: End");
+    //LOG(@"DriverEventThread: End");
+
+    [pool drain];
 
     return NULL;
 }
 
 BOOL driver_init() {
-
     numCoalescedEvents = 0;
 
-    switch (driver) {
+    switch ([[Config instance] driver]) {
         case DRIVER_QUARTZ_OLD:
         {
             if (CGSetLocalEventsFilterDuringSuppressionState(kCGEventFilterMaskPermitAllEvents,
@@ -208,7 +208,7 @@ BOOL driver_cleanup() {
     terminate_event.id = DRIVER_EVENT_ID_TERMINATE;
     driver_post_event(&terminate_event);
 
-    switch (driver) {
+    switch ([[Config instance] driver]) {
         case DRIVER_QUARTZ_OLD:
             break;
         case DRIVER_QUARTZ:
@@ -236,9 +236,9 @@ BOOL driver_cleanup() {
 }
 
 BOOL driver_handle_move_event(driver_move_event_t *event) {
-    int driver_to_use = driver;
+    int driver_to_use = [[Config instance] driver];
 
-    if (driver == DRIVER_IOHID && event->type == kCGEventOtherMouseDragged) {
+    if (driver_to_use == DRIVER_IOHID && event->type == kCGEventOtherMouseDragged) {
         driver_to_use = DRIVER_QUARTZ;
     }
 
@@ -306,7 +306,7 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
                                  0,
                                  options);
 
-            if (is_debug) {
+            if ([[Config instance] debugEnabled]) {
                 LOG(@"eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d",
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,
@@ -320,7 +320,7 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
         }
         default:
         {
-            NSLog(@"Driver %d not implemented: ", driver);
+            NSLog(@"Driver %d not implemented: ", driver_to_use);
             exit(0);
         }
     }
@@ -331,11 +331,11 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
 }
 
 BOOL driver_handle_button_event(driver_button_event_t *event) {
-    int driver_to_use = driver;
+    int driver_to_use = [[Config instance] driver];
 
     // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
     //       through quartz
-    if (driver == DRIVER_IOHID &&
+    if (driver_to_use == DRIVER_IOHID &&
         (event->type == kCGEventOtherMouseDown || event->type == kCGEventOtherMouseUp)) {
         driver_to_use = DRIVER_QUARTZ;
     }
@@ -434,7 +434,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             eventData.mouse.buttonNumber = event->otherButton;
             eventData.mouse.subType = NX_SUBTYPE_DEFAULT;
 
-            if (is_debug) {
+            if ([[Config instance] debugEnabled]) {
                 LOG(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,
@@ -463,7 +463,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
         }
         default:
         {
-            NSLog(@"Driver %d not implemented: ", driver);
+            NSLog(@"Driver %d not implemented: ", driver_to_use);
             exit(0);
         }
     }

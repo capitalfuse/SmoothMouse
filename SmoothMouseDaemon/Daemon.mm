@@ -12,22 +12,10 @@
 #import "mouse.h"
 #import "SystemMouseAcceleration.h"
 #import "Prio.h"
+#import "Config.h"
 
 #define KEXT_CONNECT_RETRIES (3)
 #define SUPERVISOR_SLEEP_TIME_USEC (500000)
-
-BOOL is_debug = 0;
-BOOL is_memory = 0;
-BOOL is_timings = 0;
-BOOL is_dumping = 0;
-BOOL mouse_enabled;
-BOOL trackpad_enabled;
-
-double velocity_mouse;
-double velocity_trackpad;
-AccelerationCurve curve_mouse;
-AccelerationCurve curve_trackpad;
-Driver driver;
 
 double start, end, e1, e2, mhs, mhe, outerstart, outerend, outersum = 0, outernum = 0;
 NSMutableArray* logs = [[NSMutableArray alloc] init];
@@ -40,7 +28,7 @@ void trap_signals(int sig)
 {
     NSLog(@"trapped signal: %d", sig);
     [[Daemon instance] destroy];
-    if (is_debug) {
+    if ([[Config instance] debugEnabled]) {
         debug_end();
     }
     [NSApp terminate:nil];
@@ -84,15 +72,8 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     connected = NO;
     globalMouseMonitor = NULL;
 
-	BOOL settingsOK = [self loadSettings];
-    if (!settingsOK) {
-        NSLog(@"settings doesn't exist (please open preference pane)");
-        [self dealloc];
-        return nil;
-    }
-
 //    if (!is_debug) {
-        if (!mouse_enabled && !trackpad_enabled) {
+        if (![[Config instance] mouseEnabled] && ![[Config instance] trackpadEnabled]) {
             NSLog(@"neither mouse nor trackpad is enabled");
             [self dealloc];
             return nil;
@@ -115,88 +96,21 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     accel = [[SystemMouseAcceleration alloc] init];
     sMouseSupervisor = [[MouseSupervisor alloc] init];
 
+    Config *config = [Config instance];
+
     NSLog(@"Mouse enabled: %d Mouse velocity: %f Mouse curve: %s",
-          mouse_enabled,
-          velocity_mouse,
-          get_acceleration_string(curve_mouse));
+          [config mouseEnabled],
+          [config mouseVelocity],
+          get_acceleration_string([config mouseCurve]));
 
     NSLog(@"Trackpad enabled: %d Trackpad velocity: %f Trackpad curve: %s",
-          trackpad_enabled,
-          velocity_trackpad,
-          get_acceleration_string(curve_trackpad));
+          [config trackpadEnabled],
+          [config trackpadVelocity],
+          get_acceleration_string([config trackpadCurve]));
 
-    NSLog(@"Driver: %s (%d)", get_driver_string(driver), driver);
+    NSLog(@"Driver: %s (%d)", get_driver_string([config driver]), [config driver]);
 
 	return self;
-}
-
--(AccelerationCurve) getAccelerationCurveFromDict:(NSDictionary *)dictionary withKey:(NSString *)key {
-    NSString *value;
-    value = [dictionary valueForKey:key];
-	if (value) {
-        if ([value compare:@"Windows"] == NSOrderedSame) {
-            return ACCELERATION_CURVE_WINDOWS;
-        }
-        if ([value compare:@"OS X"] == NSOrderedSame) {
-            return ACCELERATION_CURVE_OSX;
-        }
-	}
-    return ACCELERATION_CURVE_LINEAR;
-}
-
--(BOOL) loadSettings
-{
-	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
-	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:file];
-
-	if (!dict) {
-		NSLog(@"cannot open file %@", file);
-        return NO;
-	}
-
-    NSLog(@"found %@", file);
-
-    NSNumber *value;
-
-    value = [dict valueForKey:SETTINGS_MOUSE_ENABLED];
-	if (value) {
-		mouse_enabled = [value boolValue];
-	} else {
-		return NO;
-	}
-
-    value = [dict valueForKey:SETTINGS_TRACKPAD_ENABLED];
-	if (value) {
-		trackpad_enabled = [value boolValue];
-	} else {
-		return NO;
-	}
-
-	value = [dict valueForKey:SETTINGS_MOUSE_VELOCITY];
-	if (value) {
-        velocity_mouse = [value doubleValue];
-	} else {
-		velocity_mouse = 1.0;
-	}
-
-    value = [dict valueForKey:SETTINGS_TRACKPAD_VELOCITY];
-	if (value) {
-		velocity_trackpad = [value doubleValue];
-	} else {
-		velocity_trackpad = 1.0;
-	}
-
-    value = [dict valueForKey:SETTINGS_DRIVER];
-	if (value) {
-		driver = (Driver) [value intValue];
-	} else {
-		driver = (Driver) SETTINGS_DRIVER_DEFAULT;
-	}
-
-    curve_mouse = [self getAccelerationCurveFromDict:dict withKey:SETTINGS_MOUSE_ACCELERATION_CURVE];
-    curve_trackpad = [self getAccelerationCurveFromDict:dict withKey:SETTINGS_TRACKPAD_ACCELERATION_CURVE];
-
-    return YES;
 }
 
 -(BOOL) loadDriver
@@ -303,7 +217,7 @@ error:
     BOOL match = [sMouseSupervisor popMouseEvent:(int) [event deltaX]: (int) [event deltaY]];
     if (!match) {
         mouse_refresh();
-        if (is_debug) {
+        if ([[Config instance] debugEnabled]) {
             NSLog(@"Another application altered mouse location");
         }
     } else {
@@ -324,15 +238,17 @@ error:
 
     uint32_t configuration = 0;
 
-    if (mouse_enabled) {
+    Config *config = [Config instance];
+
+    if ([config mouseEnabled]) {
         configuration |= KEXT_CONF_MOUSE_ENABLED;
     }
 
-    if (trackpad_enabled) {
+    if ([config trackpadEnabled]) {
         configuration |= KEXT_CONF_TRACKPAD_ENABLED;
     }
 
-    if (driver == DRIVER_QUARTZ_OLD) {
+    if ([config driver] == DRIVER_QUARTZ_OLD) {
         configuration |= KEXT_CONF_QUARTZ_OLD; // set compatibility mode in kernel
     }
 
@@ -395,19 +311,19 @@ static void *KernelEventThread(void *instance)
 {
     Daemon *self = (Daemon *) instance;
 
-    NSLog(@"KernelEventThread: Start");
+    //NSLog(@"KernelEventThread: Start");
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     kern_return_t error;
 
-	char *buf = (char *)malloc(self->dataSize);
-	if (!buf) {
-		NSLog(@"malloc error");
-		return NULL;
-	}
+    char *buf = (char *)malloc(self->dataSize);
+    if (!buf) {
+        NSLog(@"malloc error");
+        return NULL;
+    }
 
-    [Prio setRealtimePrio];
+    [Prio setRealtimePrio: @"KernelEventThread"];
 
     (void) mouse_init();
 
@@ -430,7 +346,7 @@ static void *KernelEventThread(void *instance)
                 exit(0);
             }
             end = GET_TIME();
-            if (is_timings) {
+            if ([[Config instance] timingsEnabled]) {
                 LOG(@"outer: %f, inner: %f, post event: %f, (mouse_handle): %f, seqnum: %llu, data entries handled: %d, coalesced: %d", outerend-outerstart, end-start, e2-e1, mhe-mhs, mouse_event->seqnum, numPackets, numCoalescedEvents);
             }
         }
@@ -445,11 +361,11 @@ static void *KernelEventThread(void *instance)
 
     (void) mouse_cleanup();
 
-	free(buf);
+    free(buf);
 
     [pool drain];
 
-    NSLog(@"KernelEventThread: End");
+    //NSLog(@"KernelEventThread: End");
 
     return NULL;
 }

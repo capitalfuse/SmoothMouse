@@ -8,6 +8,8 @@
 #include <IOKit/hidsystem/event_status_driver.h>
 #include <IOKit/hidsystem/IOHIDShared.h>
 
+#import "Config.h"
+
 #include "WindowsFunction.hpp"
 #include "OSXFunction.hpp"
 #include "driver.h"
@@ -15,14 +17,6 @@
 WindowsFunction *win = NULL;
 OSXFunction *osx_mouse = NULL;
 OSXFunction *osx_trackpad = NULL;
-
-extern BOOL is_debug;
-
-extern double velocity_mouse;
-extern double velocity_trackpad;
-extern AccelerationCurve curve_mouse;
-extern AccelerationCurve curve_trackpad;
-extern Driver driver;
 
 static CGPoint deltaPosInt;
 static CGPoint deltaPosFloat;
@@ -246,7 +240,7 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
         otherButton = 5;
     }
 
-    if (is_debug) {
+    if ([[Config instance] debugEnabled]) {
         LOG(@"move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03df, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
             dx,
             dy,
@@ -335,7 +329,7 @@ static void mouse_handle_buttons(int buttons) {
                 }
             }
 
-            if (is_debug) {
+            if ([[Config instance] debugEnabled]) {
                 LOG(@"buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d, buttonIndex(654LMR): %d, nclicks: %d",
                     BUTTON_DOWN(buttons, LEFT_BUTTON),
                     BUTTON_DOWN(buttons, MIDDLE_BUTTON),
@@ -367,7 +361,7 @@ void check_needs_refresh(mouse_event_t *event) {
     int seqNumOk = (event->seqnum == (lastSequenceNumber + 1));
 
     if (needs_refresh || !seqNumOk) {
-        if (is_debug) {
+        if ([[Config instance] debugEnabled]) {
             LOG(@"Cursor position dirty, need to fetch fresh (needs_refresh: %d, seqNumOk: %d)",
                 needs_refresh, seqNumOk);
         }
@@ -393,12 +387,12 @@ void mouse_handle(mouse_event_t *event) {
         AccelerationCurve curve;
         switch (event->device_type) {
             case kDeviceTypeMouse:
-                velocity = velocity_mouse;
-                curve = curve_mouse;
+                velocity = [[Config instance] mouseVelocity];
+                curve = [[Config instance] mouseCurve];
                 break;
             case kDeviceTypeTrackpad:
-                velocity = velocity_trackpad;
-                curve = curve_trackpad;
+                velocity = [[Config instance] trackpadVelocity];
+                curve = [[Config instance] trackpadCurve];
                 break;
             default:
                 NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
@@ -408,7 +402,7 @@ void mouse_handle(mouse_event_t *event) {
         mouse_handle_move(event->device_type, event->dx, event->dy, velocity, curve, event->buttons);
     }
 
-    if (is_debug) {
+    if ([[Config instance] debugEnabled]) {
         debug_register_event(event);
     }
 

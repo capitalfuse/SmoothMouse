@@ -1,4 +1,6 @@
 
+#import "Config.h"
+
 #include <IOKit/hidsystem/event_status_driver.h>
 #include <IOKit/hidsystem/IOHIDParameter.h>
 #include <IOKit/hidsystem/IOHIDLib.h>
@@ -31,12 +33,15 @@
     double          resetValue = 0.0;
 
     handle = NXOpenEventStatus();
-    if (mouse_enabled) {
+    if ([[Config instance] mouseEnabled]) {
         key = CFSTR(kIOHIDMouseAccelerationType);
 
         ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueMouse);
         if (ret != KERN_SUCCESS) {
             NSLog(@"Failed to get '%@'", key);
+            // mouse is probably not available on this system
+            NSLog(@"Disabling mouse");
+            [[Config instance] setMouseEnabled: NO];
             return;
         }
 
@@ -63,7 +68,7 @@
         //}
     }
 
-    if (trackpad_enabled) {
+    if ([[Config instance] trackpadEnabled]) {
         key = CFSTR(kIOHIDTrackpadAccelerationType);
 
         ret = IOHIDGetAccelerationWithKey(handle, key, &oldValueTrackpad);
@@ -71,7 +76,7 @@
             NSLog(@"Failed to get '%@'", key);
             // trackpad is probably not available on this system
             NSLog(@"Disabling trackpad");
-            trackpad_enabled = false;
+            [[Config instance] setTrackpadEnabled: NO];
             return;
         }
 
@@ -116,7 +121,7 @@
             NSLog(@"Failed to restore acceleration for '%@'", key);
         }
         NSLog(@"System mouse settings restored to %f", savedMouseAcceleration);
-    } else if (is_debug) {
+    } else if ([[Config instance] debugEnabled]) {
         NSLog(@"No need to restore acceleration for '%@'", key);
     }
 
@@ -127,7 +132,7 @@
             NSLog(@"Failed to restore acceleration for '%@'", key);
         }
         NSLog(@"System trackpad settings restored to %f", savedTrackpadAcceleration);
-    } else if (is_debug) {
+    } else if ([[Config instance] debugEnabled]) {
         NSLog(@"No need to restore acceleration for '%@'", key);
     }
 
