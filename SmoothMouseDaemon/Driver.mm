@@ -436,7 +436,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             eventData.mouse.pressure = is_down_event ? 255 : 0;
             eventData.mouse.eventNum = eventNumber;
             eventData.mouse.buttonNumber = event->otherButton;
-            eventData.mouse.subType = NX_SUBTYPE_DEFAULT;
+            eventData.mouse.subType = NX_SUBTYPE_TABLET_POINT;
 
             if ([[Config instance] debugEnabled]) {
                 LOG(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
