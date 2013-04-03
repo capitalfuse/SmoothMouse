@@ -19,6 +19,7 @@
     BOOL memoryLoggingEnabled;
     BOOL timingsEnabled;
     BOOL sendAuxEventsEnabled;
+    NSString *activeAppBundleId;
 }
 
 @property BOOL mouseEnabled;
@@ -32,6 +33,7 @@
 @property BOOL memoryLoggingEnabled;
 @property BOOL timingsEnabled;
 @property BOOL sendAuxEventsEnabled;
+@property (copy) NSString* activeAppBundleId;
 
 +(Config *) instance;
 -(id) init;

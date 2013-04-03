@@ -16,6 +16,7 @@
 @synthesize memoryLoggingEnabled;
 @synthesize timingsEnabled;
 @synthesize sendAuxEventsEnabled;
+@synthesize activeAppBundleId;
 
 +(Config *) instance
 {

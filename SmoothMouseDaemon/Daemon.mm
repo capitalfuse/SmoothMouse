@@ -5,6 +5,11 @@
 #import <mach/mach.h>
 #include <pthread.h>
 
+// for hooking foreground app switch
+#include <Carbon/Carbon.h>
+#include <CoreServices/CoreServices.h>
+
+#import "Daemon.h"
 #import "driver.h"
 #import "kextdaemon.h"
 #import "constants.h"
@@ -32,6 +37,14 @@ void trap_signals(int sig)
         debug_end();
     }
     [NSApp terminate:nil];
+}
+
+// more information about getting notified when fron app changes:
+// http://stackoverflow.com/questions/763002/getting-notified-when-the-current-application-changes-in-cocoa
+static OSStatus AppFrontSwitchedHandler(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData)
+{
+    [(id)inUserData frontAppSwitched];
+    return 0;
 }
 
 const char *get_driver_string(int mouse_driver) {
@@ -110,7 +123,9 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
     NSLog(@"Driver: %s (%d)", get_driver_string([config driver]), [config driver]);
 
-	return self;
+    [self hookAppFrontChanged];
+
+    return self;
 }
 
 -(BOOL) loadDriver
@@ -198,6 +213,24 @@ error:
     NSLog(@"Registered global mouse event listener");
 
     return YES;
+}
+
+- (void) hookAppFrontChanged
+{
+    EventTypeSpec spec = { kEventClassApplication,  kEventAppFrontSwitched };
+    OSStatus err = InstallApplicationEventHandler(NewEventHandlerUPP(AppFrontSwitchedHandler), 1, &spec, (void*)self, NULL);
+
+    if (err)
+        NSLog(@"Could not install event handler");
+}
+
+- (void) frontAppSwitched {
+    NSDictionary *activeApplicationDict = [[NSWorkspace sharedWorkspace] activeApplication];
+    NSString *appBundleId = [activeApplicationDict valueForKey:@"NSApplicationBundleIdentifier"];
+    if ([[Config instance] debugEnabled]) {
+        LOG(@"Active App Bundle Id: %@", appBundleId);
+    }
+    [[Config instance] setActiveAppBundleId: appBundleId];
 }
 
 -(BOOL) unhookGlobalMouseEvents

@@ -40,6 +40,7 @@
 		0319400F16BFB637008FE899 /* OSXFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400B16BFB637008FE899 /* OSXFunction.cpp */; };
 		0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400D16BFB637008FE899 /* WindowsFunction.cpp */; };
 		033CB660170771D000D6B1DC /* driver.mm in Sources */ = {isa = PBXBuildFile; fileRef = 033CB65F170771D000D6B1DC /* driver.mm */; };
+		0341D0C0170CA67000D24E08 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0341D0BF170CA67000D24E08 /* Carbon.framework */; };
 		034215B41631F2BA0047E370 /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03D020D41631F22A00CD04C1 /* uninstall.sh */; };
 		035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.m */; };
 		03628254170481F000C2E371 /* Prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* Prio.mm */; };
@@ -130,6 +131,7 @@
 		0319400E16BFB637008FE899 /* WindowsFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WindowsFunction.hpp; sourceTree = "<group>"; };
 		033CB65F170771D000D6B1DC /* driver.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = driver.mm; sourceTree = "<group>"; };
 		033CB6611707720400D6B1DC /* driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = driver.h; sourceTree = "<group>"; };
+		0341D0BF170CA67000D24E08 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Carbon.framework; sourceTree = DEVELOPER_DIR; };
 		035222EF16C0492E00DBE092 /* MouseSupervisor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseSupervisor.h; sourceTree = "<group>"; };
 		035222F016C0492E00DBE092 /* MouseSupervisor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MouseSupervisor.m; sourceTree = "<group>"; };
 		03628252170481BF00C2E371 /* Prio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prio.h; sourceTree = "<group>"; };
@@ -185,6 +187,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0341D0C0170CA67000D24E08 /* Carbon.framework in Frameworks */,
 				0319400916BFB612008FE899 /* IOKit.framework in Frameworks */,
 				03193FE516BFAC41008FE899 /* Cocoa.framework in Frameworks */,
 			);
@@ -290,6 +293,7 @@
 		ED0E11F014D5493A008704EC = {
 			isa = PBXGroup;
 			children = (
+				0341D0BF170CA67000D24E08 /* Carbon.framework */,
 				0319400816BFB612008FE899 /* IOKit.framework */,
 				036E3EF01637066600887DCE /* Security.framework */,
 				03DB20191620BF3B00CF4299 /* SmoothMouse.prefPane */,

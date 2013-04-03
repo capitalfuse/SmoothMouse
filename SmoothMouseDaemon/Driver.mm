@@ -331,6 +331,8 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
 }
 
 BOOL driver_handle_button_event(driver_button_event_t *event) {
+    NSString *activeAppBundleId = [[Config instance] activeAppBundleId];
+
     int driver_to_use = [[Config instance] driver];
 
     // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
@@ -415,7 +417,11 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             NXEventData eventData;
             kern_return_t result;
 
-            if ([[Config instance] sendAuxEventsEnabled]) {
+            if ([[Config instance] sendAuxEventsEnabled] ||
+                [activeAppBundleId isEqualToString:@"com.twitter.twitter-mac"]) {
+                if ([[Config instance] debugEnabled]) {
+                    LOG(@"Sending AUX mouse button event");
+                }
                 bzero(&eventData, sizeof(NXEventData));
                 eventData.compound.misc.L[0] = 1;
                 eventData.compound.misc.L[1] = is_down_event;
@@ -431,12 +437,20 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             static int eventNumber = 0;
             if (is_down_event) eventNumber++;
 
+            UInt8 subType = NX_SUBTYPE_DEFAULT;
+            if ([activeAppBundleId isEqualToString:@"net.maxon.cinema4d"]) {
+                if ([[Config instance] debugEnabled]) {
+                    LOG(@"Setting subType to TABLET_POINT");
+                }
+                subType = NX_SUBTYPE_TABLET_POINT;
+            }
+
             bzero(&eventData, sizeof(NXEventData));
             eventData.mouse.click = is_down_event ? clickStateValue : 0;
             eventData.mouse.pressure = is_down_event ? 255 : 0;
             eventData.mouse.eventNum = eventNumber;
             eventData.mouse.buttonNumber = event->otherButton;
-            eventData.mouse.subType = NX_SUBTYPE_TABLET_POINT;
+            eventData.mouse.subType = subType;
 
             if ([[Config instance] debugEnabled]) {
                 LOG(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
