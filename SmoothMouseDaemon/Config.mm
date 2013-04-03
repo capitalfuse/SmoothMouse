@@ -15,6 +15,7 @@
 @synthesize debugEnabled;
 @synthesize memoryLoggingEnabled;
 @synthesize timingsEnabled;
+@synthesize sendAuxEventsEnabled;
 
 +(Config *) instance
 {
@@ -33,6 +34,7 @@
     debugEnabled = NO;
     memoryLoggingEnabled = NO;
     timingsEnabled = NO;
+    sendAuxEventsEnabled = NO;
     return self;
 }
 
@@ -53,6 +55,11 @@
         if ([argument isEqualToString: @"--timings"]) {
             [self setTimingsEnabled:  YES];
             NSLog(@"Timing logging enabled");
+        }
+
+        if ([argument isEqualToString: @"--aux"]) {
+            [self setSendAuxEventsEnabled:  YES];
+            NSLog(@"Sending AUX events enabled");
         }
     }
 

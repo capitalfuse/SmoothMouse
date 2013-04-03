@@ -18,6 +18,7 @@
     BOOL debugEnabled;
     BOOL memoryLoggingEnabled;
     BOOL timingsEnabled;
+    BOOL sendAuxEventsEnabled;
 }
 
 @property BOOL mouseEnabled;
@@ -30,6 +31,7 @@
 @property BOOL debugEnabled;
 @property BOOL memoryLoggingEnabled;
 @property BOOL timingsEnabled;
+@property BOOL sendAuxEventsEnabled;
 
 +(Config *) instance;
 -(id) init;
