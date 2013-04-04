@@ -39,6 +39,13 @@ BOOL can_coalesce(driver_move_event_t *e1, driver_move_event_t *e2)
         e1->otherButton == e2->otherButton) {
         return YES;
     } else {
+        LOG(@"Can't Coalesce, t1: %d, t2: %d, b1: %d, b2: %d, ob1: %d, ob2: %d",
+            e1->type,
+            e2->type,
+            e1->buttons,
+            e2->buttons,
+            e1->otherButton,
+            e2->otherButton);
         return NO;
     }
 }
@@ -49,10 +56,8 @@ BOOL driver_post_event(driver_event_t *event) {
         driver_event_t back = event_queue.back();
         if (can_coalesce(&event->move, &(back.move))) {
             event_queue.pop_back();
-            back.move.pos = event->move.pos;
             event->move.deltaX += back.move.deltaX;
             event->move.deltaY += back.move.deltaY;
-            event_queue.push_back(back);
             ++numCoalescedEvents;
         }
     }
@@ -306,14 +311,17 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
                                  0,
                                  options);
 
+            e2 = GET_TIME();
+
             if ([[Config instance] debugEnabled]) {
-                LOG(@"eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d",
+                LOG(@"posted move event: eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d, time: %f",
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,
                     (int)newPoint.x,
                     (int)newPoint.y,
                     (int)eventData.mouseMove.dx,
-                    (int)eventData.mouseMove.dy);
+                    (int)eventData.mouseMove.dy,
+                    e2-e1);
             }
 
             break;
@@ -324,7 +332,9 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
             exit(0);
         }
     }
-    
+
+    [sMouseSupervisor pushMouseEvent: event->deltaX: event->deltaY];
+
     e2 = GET_TIME();
 
     return YES;
@@ -410,7 +420,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             }
 
             // on clicks, refresh own mouse position
-            mouse_refresh();
+            mouse_refresh(REFRESH_REASON_BUTTON_CLICK);
 
             IOGPoint newPoint = { (SInt16) event->pos.x, (SInt16) event->pos.y };
 
@@ -453,7 +463,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             eventData.mouse.subType = subType;
 
             if ([[Config instance] debugEnabled]) {
-                LOG(@"eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
+                LOG(@"posted button event: eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,
                     (int)newPoint.x,

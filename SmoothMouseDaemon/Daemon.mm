@@ -249,7 +249,7 @@ error:
 {
     BOOL match = [sMouseSupervisor popMouseEvent:(int) [event deltaX]: (int) [event deltaY]];
     if (!match) {
-        mouse_refresh();
+        mouse_refresh(REFRESH_REASON_POSITION_TAMPERING);
         if ([[Config instance] debugEnabled]) {
             NSLog(@"Another application altered mouse location");
         }
@@ -372,7 +372,7 @@ static void *KernelEventThread(void *instance)
             mouse_event_t *mouse_event = (mouse_event_t *) buf;
             if (!error) {
                 mhs = GET_TIME();
-                mouse_handle(mouse_event);
+                mouse_process_kext_event(mouse_event);
                 mhe = GET_TIME();
             } else {
                 LOG(@"IODataQueueDequeue() failed");
@@ -380,7 +380,7 @@ static void *KernelEventThread(void *instance)
             }
             end = GET_TIME();
             if ([[Config instance] timingsEnabled]) {
-                LOG(@"outer: %f, inner: %f, post event: %f, (mouse_handle): %f, seqnum: %llu, data entries handled: %d, coalesced: %d", outerend-outerstart, end-start, e2-e1, mhe-mhs, mouse_event->seqnum, numPackets, numCoalescedEvents);
+                LOG(@"timings: outer: %f, inner: %f, process mouse event: %f, seqnum: %llu, data entries handled: %d, coalesced: %d", outerend-outerstart, end-start, mhe-mhs, mouse_event->seqnum, numPackets, numCoalescedEvents);
             }
         }
 

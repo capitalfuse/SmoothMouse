@@ -29,10 +29,21 @@ static double lastClickTime = 0;
 static double doubleClickSpeed;
 static uint64_t lastSequenceNumber = 0;
 static int needs_refresh = 0;
+static RefreshReason refresh_reason = REFRESH_REASON_UNKNOWN;
 
 // NOTE: since we support 32-bit architectures we need to protect assignment
 //       to doubleClickSpeed.
 static pthread_mutex_t clickSpeedMutex = PTHREAD_MUTEX_INITIALIZER;
+
+static const char *get_refresh_reason_string(RefreshReason reason) {
+    switch (reason) {
+        case REFRESH_REASON_SEQUENCE_NUMBER_INVALID: return "REFRESH_REASON_SEQUENCE_NUMBER_INVALID";
+        case REFRESH_REASON_POSITION_TAMPERING: return "REFRESH_REASON_POSITION_TAMPERING";
+        case REFRESH_REASON_BUTTON_CLICK: return "REFRESH_REASON_BUTTON_CLICK";
+        case REFRESH_REASON_UNKNOWN: "REFRESH_REASON_UNKNOWN";
+        default: return "?";
+    }
+}
 
 static double timestamp()
 {
@@ -216,7 +227,7 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
     }
 
     if ([[Config instance] debugEnabled]) {
-        LOG(@"move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03df, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
+        LOG(@"processed move event: move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03df, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
             dx,
             dy,
             (int)newPos.x,
@@ -235,8 +246,6 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
             eventType,
             otherButton);
     }
-
-    [sMouseSupervisor pushMouseEvent: deltaX: deltaY];
 
     driver_event_t event;
     event.id = DRIVER_EVENT_ID_MOVE;
@@ -305,7 +314,7 @@ static void mouse_handle_buttons(int buttons) {
             }
 
             if ([[Config instance] debugEnabled]) {
-                LOG(@"buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d, buttonIndex(654LMR): %d, nclicks: %d",
+                LOG(@"processed button event: buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d, buttonIndex(654LMR): %d, nclicks: %d",
                     BUTTON_DOWN(buttons, LEFT_BUTTON),
                     BUTTON_DOWN(buttons, MIDDLE_BUTTON),
                     BUTTON_DOWN(buttons, RIGHT_BUTTON),
@@ -332,13 +341,18 @@ static void mouse_handle_buttons(int buttons) {
     }
 }
 
-void check_needs_refresh(mouse_event_t *event) {
+void check_sequence_number(mouse_event_t *event) {
     int seqNumOk = (event->seqnum == (lastSequenceNumber + 1));
+    if (!seqNumOk) {
+        mouse_refresh(REFRESH_REASON_SEQUENCE_NUMBER_INVALID);
+    }
+}
 
-    if (needs_refresh || !seqNumOk) {
+void check_needs_refresh(mouse_event_t *event) {
+    if (needs_refresh) {
         if ([[Config instance] debugEnabled]) {
-            LOG(@"Cursor position dirty, need to fetch fresh (needs_refresh: %d, seqNumOk: %d)",
-                needs_refresh, seqNumOk);
+            LOG(@"Need to refresh mouse location (%s)",
+                get_refresh_reason_string(refresh_reason));
         }
 
         refresh_mouse_location();
@@ -347,7 +361,9 @@ void check_needs_refresh(mouse_event_t *event) {
     }
 }
 
-void mouse_handle(mouse_event_t *event) {
+void mouse_process_kext_event(mouse_event_t *event) {
+
+    check_sequence_number(event);
 
     check_needs_refresh(event);
 
@@ -386,8 +402,9 @@ void mouse_handle(mouse_event_t *event) {
     lastPos = currentPos;
 }
 
-void mouse_refresh() {
+void mouse_refresh(RefreshReason reason) {
     needs_refresh = 1;
+    refresh_reason = reason;
 }
 
 BOOL mouse_init() {

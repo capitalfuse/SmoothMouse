@@ -17,6 +17,13 @@
 #define BUTTON_UP(curbuttons, button)                           (((button) & curbuttons) == 0)
 #define BUTTON_STATE_CHANGED(curbuttons, lastbuttons, button)   ((lastButtons & (button)) != (curbuttons & (button)))
 
+typedef enum RefreshReason_s {
+    REFRESH_REASON_UNKNOWN,
+    REFRESH_REASON_SEQUENCE_NUMBER_INVALID,
+    REFRESH_REASON_POSITION_TAMPERING,
+    REFRESH_REASON_BUTTON_CLICK
+} RefreshReason;
+
 typedef enum AccelerationCurve_s {
     ACCELERATION_CURVE_LINEAR   = 0,
     ACCELERATION_CURVE_WINDOWS  = 1,
@@ -25,6 +32,6 @@ typedef enum AccelerationCurve_s {
 
 BOOL mouse_init();
 BOOL mouse_cleanup();
-void mouse_handle(mouse_event_t *event);
-void mouse_refresh();
+void mouse_process_kext_event(mouse_event_t *event);
+void mouse_refresh(RefreshReason reason);
 void mouse_update_clicktime();

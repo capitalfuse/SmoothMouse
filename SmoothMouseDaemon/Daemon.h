@@ -5,8 +5,6 @@
 #import "MouseSupervisor.h"
 #import "SystemMouseAcceleration.h"
 
-extern MouseSupervisor *sMouseSupervisor;
-
 @interface Daemon : NSObject {
 @private
     SystemMouseAcceleration *accel;
