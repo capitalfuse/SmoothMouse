@@ -13,6 +13,7 @@
 			buildPhases = (
 				03DB2105162179A600CF4299 /* ShellScript */,
 				03E6F2551699EF6800FBDBD6 /* ShellScript */,
+				031671481710A0D800360C01 /* ShellScript */,
 			);
 			dependencies = (
 				03FCEC5216BFE4DB00F35E4A /* PBXTargetDependency */,
@@ -519,6 +520,19 @@
 /* End PBXRezBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		031671481710A0D800360C01 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -o errexit\nset -o nounset\n\nINFO_PLIST=\"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\"\nLAST_TAG=$(git tag|sort -r|head -1)\nCOMMITS_SINCE_LAST_TAG=$(git rev-list $LAST_TAG..HEAD|wc|grep -o \"\\d\\+\"|head -1)\nCFBUNDLESHORTVERSIONSTRING=$LAST_TAG\nCFBUNDLEVERSION=$(git tag|wc|grep -o \"\\d\\+\"|head -1)\nif [[ $COMMITS_SINCE_LAST_TAG -ne \"0\" ]]; then\n  CFBUNDLESHORTVERSIONSTRING=\"$CFBUNDLESHORTVERSIONSTRING (+$COMMITS_SINCE_LAST_TAG)\"\nfi\nif git diff-index --quiet HEAD --; then\n  echo \"Tree not dirty\";\nelse\n  echo \"Tree dirty\";\n  CFBUNDLESHORTVERSIONSTRING=\"$CFBUNDLESHORTVERSIONSTRING *\"\nfi\nCFBUNDLESHORTVERSIONSTRING=\"'$CFBUNDLESHORTVERSIONSTRING'\"\n\ndefaults write $INFO_PLIST CFBundleVersion ${CFBUNDLEVERSION}\ndefaults write $INFO_PLIST CFBundleShortVersionString \"${CFBUNDLESHORTVERSIONSTRING}\"\n\necho \"INFO_PLIST: ${INFO_PLIST}\"\necho \"LAST_TAG: ${LAST_TAG}\"\necho \"COMMITS_SINCE_LAST_TAG: ${COMMITS_SINCE_LAST_TAG}\"\necho \"CFBUNDLEVERSION: ${CFBUNDLEVERSION}\"\necho \"CFBUNDLESHORTVERSIONSTRING: ${CFBUNDLESHORTVERSIONSTRING}\"\n";
+		};
 		03DB2105162179A600CF4299 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
