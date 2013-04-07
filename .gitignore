@@ -2,6 +2,7 @@
 DerivedData/
 build/
 xcuserdata
+kext/
 *.kext
 *.pkg
 *.zip

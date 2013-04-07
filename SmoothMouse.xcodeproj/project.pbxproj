@@ -14,6 +14,8 @@
 				03DB2105162179A600CF4299 /* ShellScript */,
 				03E6F2551699EF6800FBDBD6 /* ShellScript */,
 				031671481710A0D800360C01 /* ShellScript */,
+				0316714A17115BBD00360C01 /* ShellScript */,
+				0316714B17115C6D00360C01 /* ShellScript */,
 			);
 			dependencies = (
 				03FCEC5216BFE4DB00F35E4A /* PBXTargetDependency */,
@@ -531,7 +533,33 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -o errexit\nset -o nounset\n\nINFO_PLIST=\"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\"\nLAST_TAG=$(git tag|sort -r|head -1)\nCOMMITS_SINCE_LAST_TAG=$(git rev-list $LAST_TAG..HEAD|wc|grep -o \"\\d\\+\"|head -1)\nCFBUNDLESHORTVERSIONSTRING=$LAST_TAG\nCFBUNDLEVERSION=$(git tag|wc|grep -o \"\\d\\+\"|head -1)\nif [[ $COMMITS_SINCE_LAST_TAG -ne \"0\" ]]; then\n  CFBUNDLESHORTVERSIONSTRING=\"$CFBUNDLESHORTVERSIONSTRING (+$COMMITS_SINCE_LAST_TAG)\"\nfi\nif git diff-index --quiet HEAD --; then\n  echo \"Tree not dirty\";\nelse\n  echo \"Tree dirty\";\n  CFBUNDLESHORTVERSIONSTRING=\"$CFBUNDLESHORTVERSIONSTRING *\"\nfi\nCFBUNDLESHORTVERSIONSTRING=\"'$CFBUNDLESHORTVERSIONSTRING'\"\n\ndefaults write $INFO_PLIST CFBundleVersion ${CFBUNDLEVERSION}\ndefaults write $INFO_PLIST CFBundleShortVersionString \"${CFBUNDLESHORTVERSIONSTRING}\"\n\necho \"INFO_PLIST: ${INFO_PLIST}\"\necho \"LAST_TAG: ${LAST_TAG}\"\necho \"COMMITS_SINCE_LAST_TAG: ${COMMITS_SINCE_LAST_TAG}\"\necho \"CFBUNDLEVERSION: ${CFBUNDLEVERSION}\"\necho \"CFBUNDLESHORTVERSIONSTRING: ${CFBUNDLESHORTVERSIONSTRING}\"\n";
+			shellScript = "# THIS SCRIPT DOES ALL THE VERSIONING MAGIC\nset -o errexit\nset -o nounset\n\nINFO_PLIST=\"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\"\nLAST_TAG=$(git tag|sort -r|head -1)\nCOMMITS_SINCE_LAST_TAG=$(git rev-list $LAST_TAG..HEAD|wc|grep -o \"\\d\\+\"|head -1)\nCFBUNDLESHORTVERSIONSTRING=$LAST_TAG\nCFBUNDLEVERSION=$(git tag|wc|grep -o \"\\d\\+\"|head -1)\nif [[ $COMMITS_SINCE_LAST_TAG -ne \"0\" ]]; then\n  CFBUNDLESHORTVERSIONSTRING=\"$CFBUNDLESHORTVERSIONSTRING (+$COMMITS_SINCE_LAST_TAG)\"\nfi\nif git diff-index --quiet HEAD --; then\n  echo \"Tree not dirty\";\nelse\n  echo \"Tree dirty\";\n  CFBUNDLESHORTVERSIONSTRING=\"$CFBUNDLESHORTVERSIONSTRING *\"\nfi\nCFBUNDLESHORTVERSIONSTRING=\"'$CFBUNDLESHORTVERSIONSTRING'\"\n\ndefaults write $INFO_PLIST CFBundleVersion ${CFBUNDLEVERSION}\ndefaults write $INFO_PLIST CFBundleShortVersionString \"${CFBUNDLESHORTVERSIONSTRING}\"\nplutil -convert xml1 $INFO_PLIST\n\necho \"INFO_PLIST: ${INFO_PLIST}\"\necho \"LAST_TAG: ${LAST_TAG}\"\necho \"COMMITS_SINCE_LAST_TAG: ${COMMITS_SINCE_LAST_TAG}\"\necho \"CFBUNDLEVERSION: ${CFBUNDLEVERSION}\"\necho \"CFBUNDLESHORTVERSIONSTRING: ${CFBUNDLESHORTVERSIONSTRING}\"\n";
+		};
+		0316714A17115BBD00360C01 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# THIS SCRIPT COPIES THE PREFPANE TO THE INSTALLER ROOT\nset -o errexit\nset -o nounset\nPREFPANE_NEW=\"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane\"\nPREFPANE_OLD=\"Installer/Root/SmoothMouse.prefPane\"\nif [ -d \"$PREFPANE_OLD\" ]; then\n rm -r \"$PREFPANE_OLD\"\nfi\ncp -R \"$PREFPANE_NEW\" Installer/Root/\n";
+		};
+		0316714B17115C6D00360C01 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# THIS SCRIPT RUNS THE PACKAGING SCRIPT\nset -o errexit\nset -o nounset\ncd Installer\n./package.sh\n";
 		};
 		03DB2105162179A600CF4299 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -544,7 +572,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "rm -rf \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app\"\nrm -rf \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseDaemon.app\"\nmv \"${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\"\nmv \"${BUILT_PRODUCTS_DIR}/SmoothMouseDaemon.app\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\"\nchmod ug+x \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh\"";
+			shellScript = "# THIS SCRIPT MERGES ALL COMPONENTS (DAEMON, UPDATER, PREFPANE) INTO THE PREFPANE\nrm -rf \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app\"\nrm -rf \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseDaemon.app\"\nmv \"${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\"\nmv \"${BUILT_PRODUCTS_DIR}/SmoothMouseDaemon.app\" \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/\"\nchmod ug+x \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh\"";
 		};
 		03E6F2551699EF6800FBDBD6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -557,7 +585,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SHORT_COMMIT_ID=`git log --pretty=format:'%h' -n 1`\nDATE=`date \"+%Y-%m-%d\"`\nSHORT_VERSION=$(defaults read \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info\" CFBundleVersion)\nCOMPLETE_VERSION=\"$SHORT_VERSION $DATE $SHORT_COMMIT_ID\"\ndefaults write \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\" CFCompleteBundleVersion \"$COMPLETE_VERSION\"\nchmod 755 \"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\"";
+			shellScript = "# THIS SCRIPT ADDS COMMIT ID TO PLIST\nset -o errexit\nset -o nounset\nPLIST=\"${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Info.plist\"\nCOMMIT_ID=`git log --pretty=format:'%h' -n 1`\ndefaults write \"${PLIST}\" COMMIT_ID \"$COMMIT_ID\"\nplutil -convert xml1 \"${PLIST}\"\nchmod 755 \"${PLIST}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
