@@ -3,7 +3,7 @@
 
 #import "MouseSupervisor.h"
 
-#include "kextdaemon.h"
+#include "KextProtocol.h"
 
 #define LEFT_BUTTON     4
 #define RIGHT_BUTTON    1

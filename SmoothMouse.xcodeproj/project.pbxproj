@@ -111,6 +111,7 @@
 /* Begin PBXFileReference section */
 		031386A71628B36000A04755 /* UrlLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UrlLabel.h; sourceTree = "<group>"; };
 		031386A81628B36000A04755 /* UrlLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UrlLabel.m; sourceTree = "<group>"; };
+		0316714C1711AA5400360C01 /* KextProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KextProtocol.h; sourceTree = "<group>"; };
 		03193FE316BFAC41008FE899 /* SmoothMouseDaemon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmoothMouseDaemon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		03193FE816BFAC41008FE899 /* SmoothMouseDaemon-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SmoothMouseDaemon-Info.plist"; sourceTree = "<group>"; };
 		03193FEA16BFAC41008FE899 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -179,7 +180,6 @@
 		ED0E122714D5495F008704EC /* SmoothMousePrefPane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SmoothMousePrefPane.h; sourceTree = "<group>"; };
 		ED0E122914D5495F008704EC /* SmoothMousePrefPane.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SmoothMousePrefPane.m; sourceTree = "<group>"; };
 		ED0E123914D5496F008704EC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		ED0E124E14D54A96008704EC /* kextdaemon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kextdaemon.h; sourceTree = SOURCE_ROOT; };
 		ED0E124F14D54A96008704EC /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
 		ED13219914D6713200D07CC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = SmoothMousePrefPane/en.lproj/SmoothMousePrefPane.xib; sourceTree = SOURCE_ROOT; };
 		ED13219B14D6721800D07CC3 /* SmoothMousePrefPane.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = SmoothMousePrefPane.icns; sourceTree = "<group>"; };
@@ -245,6 +245,7 @@
 				03193FE716BFAC41008FE899 /* Supporting Files */,
 				03193FFC16BFB510008FE899 /* SystemMouseAcceleration.h */,
 				03193FFD16BFB510008FE899 /* SystemMouseAcceleration.mm */,
+				0316714C1711AA5400360C01 /* KextProtocol.h */,
 			);
 			path = SmoothMouseDaemon;
 			sourceTree = "<group>";
@@ -301,7 +302,6 @@
 				036E3EF01637066600887DCE /* Security.framework */,
 				03DB20191620BF3B00CF4299 /* SmoothMouse.prefPane */,
 				ED0E124F14D54A96008704EC /* constants.h */,
-				ED0E124E14D54A96008704EC /* kextdaemon.h */,
 				ED0E122014D5495F008704EC /* SmoothMousePrefPane */,
 				03DB20C21620CB5900CF4299 /* SmoothMouseUpdater */,
 				03193FE616BFAC41008FE899 /* SmoothMouseDaemon */,

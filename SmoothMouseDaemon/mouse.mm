@@ -40,7 +40,7 @@ static const char *get_refresh_reason_string(RefreshReason reason) {
         case REFRESH_REASON_SEQUENCE_NUMBER_INVALID: return "REFRESH_REASON_SEQUENCE_NUMBER_INVALID";
         case REFRESH_REASON_POSITION_TAMPERING: return "REFRESH_REASON_POSITION_TAMPERING";
         case REFRESH_REASON_BUTTON_CLICK: return "REFRESH_REASON_BUTTON_CLICK";
-        case REFRESH_REASON_UNKNOWN: "REFRESH_REASON_UNKNOWN";
+        case REFRESH_REASON_UNKNOWN: return "REFRESH_REASON_UNKNOWN";
         default: return "?";
     }
 }

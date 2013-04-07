@@ -11,7 +11,6 @@
 
 #import "Daemon.h"
 #import "driver.h"
-#import "kextdaemon.h"
 #import "constants.h"
 #import "debug.h"
 #import "mouse.h"

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "kextdaemon.h"
+#include "KextProtocol.h"
 #import "Config.h"
 #include <mach/mach_time.h>
 
