@@ -15,6 +15,7 @@
 				03E6F2551699EF6800FBDBD6 /* ShellScript */,
 				031671481710A0D800360C01 /* ShellScript */,
 				0316714A17115BBD00360C01 /* ShellScript */,
+				0316714E1711B44700360C01 /* ShellScript */,
 				0316714B17115C6D00360C01 /* ShellScript */,
 			);
 			dependencies = (
@@ -560,6 +561,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# THIS SCRIPT RUNS THE PACKAGING SCRIPT\nset -o errexit\nset -o nounset\ncd Installer\n./package.sh\n";
+		};
+		0316714E1711B44700360C01 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# THIS SCRIPT COPIES VERSION PROPERIES TO KEXT\nset -o errexit\nset -o nounset\nKEXT_PLIST=\"${PROJECT_DIR}/Installer/Root/SmoothMouse.kext/Contents/Info.plist\"\nPREFPANE_PLIST=\"${PROJECT_DIR}/Installer/Root/SmoothMouse.prefPane/Contents/Info.plist\"\nCFBUNDLEVERSION=$(defaults read \"$PREFPANE_PLIST\" CFBundleVersion)\nCFBUNDLESHORTVERSIONSTRING=$(defaults read \"$PREFPANE_PLIST\" CFBundleShortVersionString)\ndefaults write \"$KEXT_PLIST\" CFBundleVersion \"$CFBUNDLEVERSION\"\ndefaults write \"$KEXT_PLIST\" CFBundleShortVersionString \"$CFBUNDLESHORTVERSIONSTRING\"\necho \"Copied CFBundleVersion $CFBUNDLEVERSION to kext\"\necho \"Copied CFBundleShortVersionString $CFBUNDLESHORTVERSIONSTRING to kext\"\n\n";
 		};
 		03DB2105162179A600CF4299 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
