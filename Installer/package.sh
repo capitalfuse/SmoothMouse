@@ -11,7 +11,7 @@ WELCOME="Resources/Welcome.rtf"
 
 mkdir -p "Components"
 
-VERSION=$(defaults read "$(pwd)/Root/SmoothMouse.prefPane/Contents/Info" CFBundleVersion)
+VERSION=$(defaults read "$(pwd)/Root/SmoothMouse.prefPane/Contents/Info" CFBundleShortVersionString)
 
 # Patch Welcome.rtf to include version number
 if [ -f $WELCOME ]
