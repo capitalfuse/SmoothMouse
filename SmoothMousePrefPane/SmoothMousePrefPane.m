@@ -77,29 +77,23 @@
 
 -(void)toggleVersionString {
     static int toggle = 0;
-    NSString *version;
-    int whichVersionToShow = toggle % 3;
+    int whichVersionToShow = toggle % 2;
+    NSBundle *prefBundle = [NSBundle bundleForClass:[self class]];
+    NSBundle *kextBundle = [NSBundle bundleWithPath:KEXT_BUNDLE];
+    NSString *version = [[prefBundle infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     if (whichVersionToShow == 0) { // official version
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        version = [[bundle infoDictionary] objectForKey:@"CFBundleVersion"];
-    } else if (whichVersionToShow == 1) { // prefpane complete version
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-        version = [[bundle infoDictionary] objectForKey:@"CFCompleteBundleVersion"];
+        /* nothing to do */
+    } else if (whichVersionToShow == 1) { // detailed version information
+        NSString *prefCommit = [[prefBundle infoDictionary] objectForKey:@"COMMIT_ID"];;
+        NSString *kextCommit = [[kextBundle infoDictionary] objectForKey:@"COMMIT_ID"];;
         if (version) {
-            version = [version stringByAppendingString:@" (prefpane)"];
-        } else {
-            version = @"(CFCompleteBundleVersion not found)";
+            version = [version stringByAppendingString:@" "];
+            version = [version stringByAppendingString:prefCommit];
+            version = [version stringByAppendingString:@" "];
+            version = [version stringByAppendingString:kextCommit];
+            version = [version stringByAppendingString:@" (copied to clipboard)"];
+            [self writeStringToClipboard: version];
         }
-        [self writeStringToClipboard: version];
-    } else { // kext complete version
-        NSBundle *bundle = [NSBundle bundleWithPath:KEXT_BUNDLE];
-        version = [[bundle infoDictionary] objectForKey:@"CFCompleteBundleVersion"];
-        if (version) {
-            version = [version stringByAppendingString:@" (kext)"];
-        } else {
-            version = @"(CFCompleteBundleVersion not found)";
-        }
-        [self writeStringToClipboard: version];
     }
     [bundleVersion setStringValue:version];
     ++toggle;
