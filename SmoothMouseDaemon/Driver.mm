@@ -39,13 +39,15 @@ BOOL can_coalesce(driver_move_event_t *e1, driver_move_event_t *e2)
         e1->otherButton == e2->otherButton) {
         return YES;
     } else {
-        LOG(@"Can't Coalesce, t1: %d, t2: %d, b1: %d, b2: %d, ob1: %d, ob2: %d",
-            e1->type,
-            e2->type,
-            e1->buttons,
-            e2->buttons,
-            e1->otherButton,
-            e2->otherButton);
+        if ([[Config instance] debugEnabled]) {
+            LOG(@"Can't Coalesce, t1: %d, t2: %d, b1: %d, b2: %d, ob1: %d, ob2: %d",
+                e1->type,
+                e2->type,
+                e1->buttons,
+                e2->buttons,
+                e1->otherButton,
+                e2->otherButton);
+        }
         return NO;
     }
 }
