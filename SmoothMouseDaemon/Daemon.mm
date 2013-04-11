@@ -26,10 +26,18 @@ NSMutableArray* logs = [[NSMutableArray alloc] init];
 
 MouseSupervisor *sMouseSupervisor;
 
+static int terminating_smoothmouse = 0;
+
 static void *KernelEventThread(void *instance);
 
 void trap_signals(int sig)
 {
+    if (terminating_smoothmouse) {
+        NSLog(@"already terminating");
+        return;
+    } else {
+        terminating_smoothmouse = 1;
+    }
     NSLog(@"trapped signal: %d", sig);
     [[Daemon instance] destroy];
     if ([[Config instance] debugEnabled]) {
@@ -136,7 +144,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 -(BOOL) connectToDriver
 {
     @synchronized(self) {
-        if (!connected) {
+        if (!connected && !terminating_smoothmouse) {
             kern_return_t error;
 
             service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));

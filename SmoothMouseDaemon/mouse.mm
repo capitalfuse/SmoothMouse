@@ -342,8 +342,13 @@ static void mouse_handle_buttons(int buttons) {
 }
 
 void check_sequence_number(mouse_event_t *event) {
-    int seqNumOk = (event->seqnum == (lastSequenceNumber + 1));
+    uint64_t seqnumShouldBe = (lastSequenceNumber + 1);
+    int seqNumOk = (event->seqnum == seqnumShouldBe);
     if (!seqNumOk) {
+        LOG(@"seqnum was %llu but should be %llu (%llu lost events)",
+            event->seqnum,
+            seqnumShouldBe,
+            (event->seqnum - seqnumShouldBe));
         mouse_refresh(REFRESH_REASON_SEQUENCE_NUMBER_INVALID);
     }
 }
