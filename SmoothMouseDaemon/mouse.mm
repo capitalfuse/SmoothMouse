@@ -297,7 +297,7 @@ static void mouse_handle_buttons(int buttons) {
                 CGFloat distanceMovedSinceLastClick = get_distance(lastClickPos, currentPos);
                 double now = timestamp();
 
-                int theDoubleClickSpeed;
+                double theDoubleClickSpeed;
                 pthread_mutex_lock(&clickSpeedMutex);
                 theDoubleClickSpeed = doubleClickSpeed;
                 pthread_mutex_unlock(&clickSpeedMutex);
