@@ -259,6 +259,10 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
     driver_post_event((driver_event_t *)&event);
 
     currentPos = newPos;
+
+    if ([[Config instance] overlayEnabled]) {
+        [[Daemon instance] redrawOverlay];
+    }
 }
 
 static void mouse_handle_buttons(int buttons) {
@@ -441,3 +445,8 @@ BOOL mouse_cleanup() {
 
     return driver_cleanup();
 }
+
+CGPoint mouse_get_current_pos() {
+    return currentPos;
+}
+

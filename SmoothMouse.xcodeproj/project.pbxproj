@@ -43,6 +43,8 @@
 		0319400916BFB612008FE899 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0319400816BFB612008FE899 /* IOKit.framework */; };
 		0319400F16BFB637008FE899 /* OSXFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400B16BFB637008FE899 /* OSXFunction.cpp */; };
 		0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400D16BFB637008FE899 /* WindowsFunction.cpp */; };
+		031F7843171AA0CF00752C43 /* OverlayWindow.mm in Sources */ = {isa = PBXBuildFile; fileRef = 031F7842171AA0CF00752C43 /* OverlayWindow.mm */; };
+		031F7846171AD33700752C43 /* OverlayView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 031F7845171AD33700752C43 /* OverlayView.mm */; };
 		033CB660170771D000D6B1DC /* driver.mm in Sources */ = {isa = PBXBuildFile; fileRef = 033CB65F170771D000D6B1DC /* driver.mm */; };
 		0341D0C0170CA67000D24E08 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0341D0BF170CA67000D24E08 /* Carbon.framework */; };
 		034215B41631F2BA0047E370 /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03D020D41631F22A00CD04C1 /* uninstall.sh */; };
@@ -134,6 +136,10 @@
 		0319400C16BFB637008FE899 /* OSXFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OSXFunction.hpp; sourceTree = "<group>"; };
 		0319400D16BFB637008FE899 /* WindowsFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WindowsFunction.cpp; sourceTree = "<group>"; };
 		0319400E16BFB637008FE899 /* WindowsFunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WindowsFunction.hpp; sourceTree = "<group>"; };
+		031F7841171AA0CF00752C43 /* OverlayWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayWindow.h; sourceTree = "<group>"; };
+		031F7842171AA0CF00752C43 /* OverlayWindow.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OverlayWindow.mm; sourceTree = "<group>"; };
+		031F7844171AD33700752C43 /* OverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayView.h; sourceTree = "<group>"; };
+		031F7845171AD33700752C43 /* OverlayView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OverlayView.mm; sourceTree = "<group>"; };
 		033CB65F170771D000D6B1DC /* driver.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = driver.mm; sourceTree = "<group>"; };
 		033CB6611707720400D6B1DC /* driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = driver.h; sourceTree = "<group>"; };
 		0341D0BF170CA67000D24E08 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Carbon.framework; sourceTree = DEVELOPER_DIR; };
@@ -247,6 +253,10 @@
 				03193FFC16BFB510008FE899 /* SystemMouseAcceleration.h */,
 				03193FFD16BFB510008FE899 /* SystemMouseAcceleration.mm */,
 				0316714C1711AA5400360C01 /* KextProtocol.h */,
+				031F7841171AA0CF00752C43 /* OverlayWindow.h */,
+				031F7842171AA0CF00752C43 /* OverlayWindow.mm */,
+				031F7844171AD33700752C43 /* OverlayView.h */,
+				031F7845171AD33700752C43 /* OverlayView.mm */,
 			);
 			path = SmoothMouseDaemon;
 			sourceTree = "<group>";
@@ -621,6 +631,8 @@
 				033CB660170771D000D6B1DC /* driver.mm in Sources */,
 				03758F0017089405003E066D /* mach_timebase_util.mm in Sources */,
 				03A3401B1709CF0300B4A1D8 /* Config.mm in Sources */,
+				031F7843171AA0CF00752C43 /* OverlayWindow.mm in Sources */,
+				031F7846171AD33700752C43 /* OverlayView.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

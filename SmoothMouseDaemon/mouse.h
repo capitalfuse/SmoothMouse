@@ -35,3 +35,4 @@ BOOL mouse_cleanup();
 void mouse_process_kext_event(mouse_event_t *event);
 void mouse_refresh(RefreshReason reason);
 void mouse_update_clicktime();
+CGPoint mouse_get_current_pos();

@@ -17,6 +17,7 @@
 #import "SystemMouseAcceleration.h"
 #import "Prio.h"
 #import "Config.h"
+#import "OverlayWindow.h"
 
 #define KEXT_CONNECT_RETRIES (3)
 #define SUPERVISOR_SLEEP_TIME_USEC (500000)
@@ -92,16 +93,16 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     connected = NO;
     globalMouseMonitor = NULL;
 
-//    if (!is_debug) {
+    if (![[Config instance] debugEnabled]) {
         if (![[Config instance] mouseEnabled] && ![[Config instance] trackpadEnabled]) {
             NSLog(@"neither mouse nor trackpad is enabled");
             [self dealloc];
             return nil;
         }
-//    } else {
-//        mouse_enabled = 1;
-//        trackpad_enabled = 1;
-//    }
+    } else {
+        [[Config instance] setMouseEnabled:YES];
+        [[Config instance] setTrackpadEnabled:YES];
+    }
 
 #if 0
     for (int i = 0; i != 31; ++i) {
@@ -131,6 +132,10 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     NSLog(@"Driver: %s (%d)", get_driver_string([config driver]), [config driver]);
 
     [self hookAppFrontChanged];
+
+    if ([config overlayEnabled]) {
+        overlay = [[OverlayWindow alloc] init];
+    }
 
     return self;
 }
@@ -212,14 +217,60 @@ error:
 -(BOOL) hookGlobalMouseEvents
 {
     [NSEvent setMouseCoalescingEnabled:FALSE];
-    globalMouseMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:(NSMouseMovedMask | NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask)
+    globalMouseMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:(NSMouseMovedMask | NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask | NSLeftMouseDownMask | NSLeftMouseUpMask)
                                            handler:^(NSEvent *event) {
-                                               [self handleGlobalMouseMovedEvent:event];
+                                               [self handleGlobalMouseEvent:event];
                                            }];
 
     NSLog(@"Registered global mouse event listener");
 
     return YES;
+}
+
+-(BOOL) unhookGlobalMouseEvents
+{
+    if (globalMouseMonitor != NULL) {
+        [NSEvent removeMonitor:globalMouseMonitor];
+        globalMouseMonitor = NULL;
+    }
+
+    //NSLog(@"Removed mouse monitor");
+
+    return YES;
+}
+
+-(void) redrawOverlay {
+    [overlay redrawView];
+}
+
+-(void) handleGlobalMouseEvent:(NSEvent *) event
+{
+    NSEventType type = [event type];
+
+    if (type == NSMouseMoved) {
+        BOOL match = [sMouseSupervisor popMouseEvent:(int) [event deltaX]: (int) [event deltaY]];
+        if (!match) {
+            mouse_refresh(REFRESH_REASON_POSITION_TAMPERING);
+            if ([[Config instance] debugEnabled]) {
+                LOG(@"Another application altered mouse location");
+            }
+        } else {
+            //NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
+            //      match,
+            //      [sMouseSupervisor numItems],
+            //      [event deltaX],
+            //      [event deltaY]
+            //      );
+        }
+    } else if (type == NSLeftMouseDown) {
+        if ([[Config instance] debugEnabled]) {
+            LOG(@"Left mouse pressed");
+        }
+    } else if (type == NSLeftMouseUp) {
+        if ([[Config instance] debugEnabled]) {
+            LOG(@"Left mouse released");
+        }
+    }
 }
 
 - (void) hookAppFrontChanged
@@ -238,36 +289,6 @@ error:
         LOG(@"Active App Bundle Id: %@", appBundleId);
     }
     [[Config instance] setActiveAppBundleId: appBundleId];
-}
-
--(BOOL) unhookGlobalMouseEvents
-{
-    if (globalMouseMonitor != NULL) {
-        [NSEvent removeMonitor:globalMouseMonitor];
-        globalMouseMonitor = NULL;
-    }
-
-    //NSLog(@"Removed mouse monitor");
-
-    return YES;
-}
-
--(void) handleGlobalMouseMovedEvent:(NSEvent *) event
-{
-    BOOL match = [sMouseSupervisor popMouseEvent:(int) [event deltaX]: (int) [event deltaY]];
-    if (!match) {
-        mouse_refresh(REFRESH_REASON_POSITION_TAMPERING);
-        if ([[Config instance] debugEnabled]) {
-            NSLog(@"Another application altered mouse location");
-        }
-    } else {
-        //NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
-        //      match,
-        //      [sMouseSupervisor numItems],
-        //      [event deltaX],
-        //      [event deltaY]
-        //      );
-    }
 }
 
 -(BOOL) configureDriver

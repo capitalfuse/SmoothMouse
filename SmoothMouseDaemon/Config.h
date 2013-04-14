@@ -20,6 +20,7 @@
     BOOL timingsEnabled;
     BOOL sendAuxEventsEnabled;
     NSString *activeAppBundleId;
+    BOOL overlayEnabled;
 }
 
 @property BOOL mouseEnabled;
@@ -34,6 +35,7 @@
 @property BOOL timingsEnabled;
 @property BOOL sendAuxEventsEnabled;
 @property (copy) NSString* activeAppBundleId;
+@property BOOL overlayEnabled;
 
 +(Config *) instance;
 -(id) init;

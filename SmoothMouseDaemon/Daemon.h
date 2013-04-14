@@ -4,9 +4,11 @@
 
 #import "MouseSupervisor.h"
 #import "SystemMouseAcceleration.h"
+#import "OverlayWindow.h"
 
 @interface Daemon : NSObject {
 @private
+    OverlayWindow *overlay;
     SystemMouseAcceleration *accel;
     id globalMouseMonitor;
     BOOL connected;
@@ -28,12 +30,13 @@
 -(id) init;
 +(id) instance;
 -(void) destroy;
--(void) handleGlobalMouseMovedEvent:(NSEvent *) event;
+-(void) handleGlobalMouseEvent:(NSEvent *) event;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;
 -(BOOL) configureDriver;
 -(BOOL) disconnectFromKext;
 -(BOOL) isActive;
+-(void) redrawOverlay;
 
 @end
 

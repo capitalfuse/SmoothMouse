@@ -17,6 +17,7 @@
 @synthesize timingsEnabled;
 @synthesize sendAuxEventsEnabled;
 @synthesize activeAppBundleId;
+@synthesize overlayEnabled;
 
 +(Config *) instance
 {
@@ -36,6 +37,7 @@
     memoryLoggingEnabled = NO;
     timingsEnabled = NO;
     sendAuxEventsEnabled = NO;
+    overlayEnabled = NO;
     return self;
 }
 
@@ -54,13 +56,18 @@
         }
 
         if ([argument isEqualToString: @"--timings"]) {
-            [self setTimingsEnabled:  YES];
+            [self setTimingsEnabled: YES];
             NSLog(@"Timing logging enabled");
         }
 
         if ([argument isEqualToString: @"--aux"]) {
-            [self setSendAuxEventsEnabled:  YES];
+            [self setSendAuxEventsEnabled: YES];
             NSLog(@"Sending AUX events enabled");
+        }
+
+        if ([argument isEqualToString: @"--overlay"]) {
+            [self setOverlayEnabled: YES];
+            NSLog(@"Overlay enabled (EXPERIMENTAL!)");
         }
     }
 
