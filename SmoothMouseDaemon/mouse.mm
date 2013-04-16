@@ -28,6 +28,7 @@ static CGPoint lastClickPos;
 static double lastClickTime = 0;
 static double doubleClickSpeed;
 static uint64_t lastSequenceNumber = 0;
+int totalNumberOfLostEvents = 0;
 static int needs_refresh = 0;
 static RefreshReason refresh_reason = REFRESH_REASON_UNKNOWN;
 
@@ -346,13 +347,18 @@ static void mouse_handle_buttons(int buttons) {
 }
 
 void check_sequence_number(mouse_event_t *event) {
-    uint64_t seqnumShouldBe = (lastSequenceNumber + 1);
-    int seqNumOk = (event->seqnum == seqnumShouldBe);
+    uint64_t seqnumExpected = (lastSequenceNumber + 1);
+    int seqNumOk = (event->seqnum == seqnumExpected);
+    uint64_t lostEvents = (event->seqnum - seqnumExpected);
+    if (lastSequenceNumber == 0) {
+        lostEvents = 0;
+    }
+    totalNumberOfLostEvents += lostEvents;
     if (!seqNumOk) {
-        LOG(@"seqnum was %llu but should be %llu (%llu lost events)",
+        LOG(@"seqnum: %llu, expected: %llu (%llu lost events)",
             event->seqnum,
-            seqnumShouldBe,
-            (event->seqnum - seqnumShouldBe));
+            seqnumExpected,
+            lostEvents);
         mouse_refresh(REFRESH_REASON_SEQUENCE_NUMBER_INVALID);
     }
 }
@@ -420,6 +426,9 @@ BOOL mouse_init() {
     mouse_update_clicktime();
 
     currentPos = deltaPosFloat = deltaPosInt = get_current_mouse_pos();
+
+    lastSequenceNumber = 0;
+    totalNumberOfLostEvents = 0;
 
     return driver_init();
 }

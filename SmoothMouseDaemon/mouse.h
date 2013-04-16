@@ -17,6 +17,8 @@
 #define BUTTON_UP(curbuttons, button)                           (((button) & curbuttons) == 0)
 #define BUTTON_STATE_CHANGED(curbuttons, lastbuttons, button)   ((lastButtons & (button)) != (curbuttons & (button)))
 
+extern int totalNumberOfLostEvents;
+
 typedef enum RefreshReason_s {
     REFRESH_REASON_UNKNOWN,
     REFRESH_REASON_SEQUENCE_NUMBER_INVALID,

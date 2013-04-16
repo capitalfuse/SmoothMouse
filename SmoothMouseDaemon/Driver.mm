@@ -249,7 +249,7 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
         driver_to_use = DRIVER_QUARTZ;
     }
 
-    [sMouseSupervisor pushMouseEvent: event->deltaX: event->deltaY];
+    [sMouseSupervisor pushMoveEvent: event->deltaX: event->deltaY];
 
     e1 = GET_TIME();
     switch (driver_to_use) {
@@ -380,6 +380,10 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
         default:
             NSLog(@"INTERNAL ERROR: illegal eventType: %d", event->type);
             exit(0);
+    }
+
+    if (event->type == kCGEventLeftMouseDown) {
+        [sMouseSupervisor pushClickEvent];
     }
 
     e1 = GET_TIME();

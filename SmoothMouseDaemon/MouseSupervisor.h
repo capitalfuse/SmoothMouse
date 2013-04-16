@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MouseSupervisorEvent : NSObject {
+@interface MouseMoveEvent : NSObject {
     float x;
     float y;
 }
@@ -9,13 +9,20 @@
 @end
 
 @interface MouseSupervisor : NSObject {
-    NSMutableArray *events;
+    NSMutableArray *moveEvents;
+    int clickEvents;
+    int clickEventsZeroLevel;
 }
 
 - (id)init;
-- (void) pushMouseEvent: (int) deltaX : (int) deltaY;
-- (BOOL) popMouseEvent: (int) deltaX : (int) deltaY;
-- (int) numItems;
+- (void) pushMoveEvent: (int) deltaX : (int) deltaY;
+- (BOOL) popMoveEvent: (int) deltaX : (int) deltaY;
+- (void) pushClickEvent;
+- (void) popClickEvent;
+- (int) numMoveEvents;
+- (BOOL) hasClickEvents;
+- (int) numClickEvents;
+- (void) resetClickEvents;
 
 @end
 

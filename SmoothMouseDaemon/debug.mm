@@ -2,6 +2,7 @@
 #include "debug.h"
 
 #import "Config.h"
+#import "Mouse.h"
 
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -53,6 +54,10 @@ void debug_end() {
     if ([logs count] > 0) {
         NSLog(@"Dumping complete");
     }
+
+    NSLog(@"Number of lost kext events: %d", totalNumberOfLostEvents);
+
+    NSLog(@"Number of lost clicks: %d", [sMouseSupervisor numClickEvents]);
 
     NSLog(@"Summary: Average Hz: %.2f, Maximum Hz: %d", (sumHz / (float)numHz), maxHz);
 }

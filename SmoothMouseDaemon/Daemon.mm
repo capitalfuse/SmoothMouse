@@ -248,7 +248,7 @@ error:
     NSEventType type = [event type];
 
     if (type == NSMouseMoved) {
-        BOOL match = [sMouseSupervisor popMouseEvent:(int) [event deltaX]: (int) [event deltaY]];
+        BOOL match = [sMouseSupervisor popMoveEvent:(int) [event deltaX]: (int) [event deltaY]];
         if (!match) {
             mouse_refresh(REFRESH_REASON_POSITION_TAMPERING);
             if ([[Config instance] debugEnabled]) {
@@ -264,11 +264,11 @@ error:
         }
     } else if (type == NSLeftMouseDown) {
         if ([[Config instance] debugEnabled]) {
-            LOG(@"Left mouse pressed");
-        }
-    } else if (type == NSLeftMouseUp) {
-        if ([[Config instance] debugEnabled]) {
-            LOG(@"Left mouse released");
+            [sMouseSupervisor popClickEvent];
+            if ([sMouseSupervisor hasClickEvents]) {
+                LOG(@"WARNING: click event probably lost");
+                [sMouseSupervisor resetClickEvents];
+            }
         }
     }
 }
