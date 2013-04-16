@@ -13,7 +13,7 @@ extern BOOL is_dumping;
 #define LOG(format, ...) \
     if (!is_dumping) { \
         if([[Config instance] memoryLoggingEnabled]) { \
-            NSString *s = [NSString stringWithFormat:@"%s:%d " format, __FILE__, __LINE__, ##__VA_ARGS__]; \
+            NSString *s = [NSString stringWithFormat: format, ##__VA_ARGS__]; \
             if (s != nil) { \
                 @synchronized(logs) { \
                     [logs addObject: s]; \
