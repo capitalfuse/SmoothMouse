@@ -263,14 +263,40 @@ error:
             //      );
         }
     } else if (type == NSLeftMouseDown) {
+        //LOG(@"LEFT MOUSE CLICK (ClickCount: %ld)", (long)[event clickCount]);
         if ([[Config instance] debugEnabled]) {
             [sMouseSupervisor popClickEvent];
             if ([sMouseSupervisor hasClickEvents]) {
                 LOG(@"WARNING: click event probably lost");
+                if ([[Config instance] sayEnabled]) {
+                    [self say:@"There was one lost mouse click"];
+                }
                 [sMouseSupervisor resetClickEvents];
             }
         }
+    } else if (type == NSLeftMouseDown) {
+        //LOG(@"LEFT MOUSE RELEASE");
     }
+}
+
+-(void) say:(NSString *)message {
+    NSTask *task;
+    task = [[NSTask alloc] init];
+    [task setLaunchPath: @"/usr/bin/say"];
+
+    NSArray *arguments;
+    arguments = [NSArray arrayWithObjects: message, nil];
+    [task setArguments: arguments];
+
+    NSPipe *pipe;
+    pipe = [NSPipe pipe];
+    [task setStandardOutput: pipe];
+
+    NSFileHandle *file;
+    file = [pipe fileHandleForReading];
+
+    [task launch];
+    [task release];
 }
 
 - (void) hookAppFrontChanged

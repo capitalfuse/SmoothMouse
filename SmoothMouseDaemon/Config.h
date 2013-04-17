@@ -21,6 +21,7 @@
     BOOL sendAuxEventsEnabled;
     NSString *activeAppBundleId;
     BOOL overlayEnabled;
+    BOOL sayEnabled;
 }
 
 @property BOOL mouseEnabled;
@@ -36,6 +37,7 @@
 @property BOOL sendAuxEventsEnabled;
 @property (copy) NSString* activeAppBundleId;
 @property BOOL overlayEnabled;
+@property BOOL sayEnabled;
 
 +(Config *) instance;
 -(id) init;

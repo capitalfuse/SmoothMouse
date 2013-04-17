@@ -18,6 +18,7 @@
 @synthesize sendAuxEventsEnabled;
 @synthesize activeAppBundleId;
 @synthesize overlayEnabled;
+@synthesize sayEnabled;
 
 +(Config *) instance
 {
@@ -68,6 +69,11 @@
         if ([argument isEqualToString: @"--overlay"]) {
             [self setOverlayEnabled: YES];
             NSLog(@"Overlay enabled (EXPERIMENTAL!)");
+        }
+
+        if ([argument isEqualToString: @"--say"]) {
+            [self setSayEnabled: YES];
+            NSLog(@"Say enabled (EXPERIMENTAL!)");
         }
     }
 
