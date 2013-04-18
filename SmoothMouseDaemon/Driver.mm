@@ -245,9 +245,13 @@ BOOL driver_cleanup() {
 BOOL driver_handle_move_event(driver_move_event_t *event) {
     int driver_to_use = [[Config instance] driver];
 
+    // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
+    //       through quartz
     if (driver_to_use == DRIVER_IOHID && event->type == kCGEventOtherMouseDragged) {
         driver_to_use = DRIVER_QUARTZ;
     }
+
+    const char *driverString = driver_get_driver_string(driver_to_use);
 
     [sMouseSupervisor pushMoveEvent: event->deltaX: event->deltaY];
 
@@ -259,6 +263,16 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
                 NSLog(@"Failed to post mouse event");
                 exit(0);
             }
+
+            e2 = GET_TIME();
+
+            if ([[Config instance] debugEnabled]) {
+                LOG(@"%s:MOVE: pos.x: %d, pos.y: %d, time: %f",
+                    driverString,
+                    (int)event->pos.x,
+                    (int)event->pos.y,
+                    (e2-e1));
+            }
             break;
         }
         case DRIVER_QUARTZ:
@@ -268,16 +282,19 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
             CGEventSetIntegerValueField(evt, kCGMouseEventDeltaY, event->deltaY);
             CGEventPost(kCGSessionEventTap, evt);
             CFRelease(evt);
+
             e2 = GET_TIME();
+
             if ([[Config instance] debugEnabled]) {
-                LOG(@"posted move event: eventType: %s(%d), pos.x: %d, pos.y: %d, dx: %d, dy: %d, time: %f",
+                LOG(@"%s:MOVE: eventType: %s(%d), pos.x: %d, pos.y: %d, dx: %d, dy: %d, time: %f",
+                    driverString,
                     driver_quartz_event_type_to_string(event->type),
                     (int)event->type,
                     (int)event->pos.x,
                     (int)event->pos.y,
                     (int)event->deltaX,
                     (int)event->deltaY,
-                    e2-e1);
+                    (e2-e1));
             }
             break;
         }
@@ -329,14 +346,15 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
             e2 = GET_TIME();
 
             if ([[Config instance] debugEnabled]) {
-                LOG(@"posted move event: eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d, time: %f",
+                LOG(@"%s:MOVE: eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d, time: %f",
+                    driverString,
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,
                     (int)newPoint.x,
                     (int)newPoint.y,
                     (int)eventData.mouseMove.dx,
                     (int)eventData.mouseMove.dy,
-                    e2-e1);
+                    (e2-e1));
             }
 
             break;
@@ -364,6 +382,8 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
         (event->type == kCGEventOtherMouseDown || event->type == kCGEventOtherMouseUp)) {
         driver_to_use = DRIVER_QUARTZ;
     }
+
+    const char *driverString = driver_get_driver_string(driver_to_use);
 
     int clickStateValue;
     switch(event->type) {
@@ -394,6 +414,17 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
                 NSLog(@"Failed to post mouse event");
                 exit(0);
             }
+
+            e2 = GET_TIME();
+
+            if ([[Config instance] debugEnabled]) {
+                LOG(@"%s:BUTTON: pos.x: %d, pos.y: %d, time: %f",
+                    driverString,
+                    (int)event->pos.x,
+                    (int)event->pos.y,
+                    (e2-e1));
+            }
+
             break;
         }
         case DRIVER_QUARTZ:
@@ -402,13 +433,18 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             CGEventSetIntegerValueField(evt, kCGMouseEventClickState, clickStateValue);
             CGEventPost(kCGSessionEventTap, evt);
             CFRelease(evt);
+
+            e2 = GET_TIME();
+
             if ([[Config instance] debugEnabled]) {
-                LOG(@"posted button event: eventType: %s(%d), pos: %dx%d, csv: %d",
+                LOG(@"%s:BUTTON: eventType: %s(%d), pos: %dx%d, csv: %d, time: %f",
+                    driverString,
                     driver_quartz_event_type_to_string(event->type),
                     (int)event->type,
                     (int)event->pos.x,
                     (int)event->pos.y,
-                    clickStateValue);
+                    clickStateValue,
+                    (e2-e1));
             }
             break;
         }
@@ -455,7 +491,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             if ([[Config instance] sendAuxEventsEnabled] ||
                 [activeAppBundleId isEqualToString:@"com.twitter.twitter-mac"]) {
                 if ([[Config instance] debugEnabled]) {
-                    LOG(@"Sending AUX mouse button event");
+                    LOG(@"%s:BUTTON: Sending AUX mouse button event", driverString);
                 }
                 bzero(&eventData, sizeof(NXEventData));
                 eventData.compound.misc.L[0] = 1;
@@ -499,8 +535,11 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
                 NSLog(@"failed to post button event");
             }
 
+            e2 = GET_TIME();
+
             if ([[Config instance] debugEnabled]) {
-                LOG(@"posted button event: eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
+                LOG(@"%s:BUTTON: eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d, time: %f",
+                    driverString,
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,
                     (int)newPoint.x,
@@ -509,7 +548,8 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
                     (int)eventData.mouse.click,
                     (int)eventData.mouse.pressure,
                     (int)eventData.mouse.eventNum,
-                    (int)eventData.mouse.buttonNumber);
+                    (int)eventData.mouse.buttonNumber,
+                    (e2-e1));
             }
 
             break;
@@ -520,9 +560,18 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             exit(0);
         }
     }
-    
+
     e2 = GET_TIME();
 
     return YES;
+}
+
+const char *driver_get_driver_string(int driver) {
+    switch (driver) {
+        case DRIVER_QUARTZ_OLD: return "QUARTZ_OLD";
+        case DRIVER_QUARTZ: return "QUARTZ";
+        case DRIVER_IOHID: return "IOHID";
+        default: return "?";
+    }
 }
 

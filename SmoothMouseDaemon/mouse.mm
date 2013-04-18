@@ -359,6 +359,16 @@ void check_sequence_number(mouse_event_t *event) {
             event->seqnum,
             seqnumExpected,
             lostEvents);
+        if (lostEvents != 0) {
+            NSString *stringToSay;
+            if (lostEvents == 1) {
+                stringToSay = [NSString stringWithFormat:@"Lost 1 kernel event"];
+            } else {
+                stringToSay = [NSString stringWithFormat:@"Lost %d kernel events", (int)lostEvents];
+            }
+            [[Daemon instance] say: stringToSay];
+            [stringToSay release];
+        }
         mouse_refresh(REFRESH_REASON_SEQUENCE_NUMBER_INVALID);
     }
 }

@@ -37,6 +37,7 @@
 -(BOOL) disconnectFromKext;
 -(BOOL) isActive;
 -(void) redrawOverlay;
+-(void) say:(NSString *)message;
 
 @end
 

@@ -46,5 +46,7 @@ BOOL driver_cleanup();
 BOOL driver_post_event(driver_event_t *event);
 const char *driver_quartz_event_type_to_string(CGEventType type);
 const char *driver_iohid_event_type_to_string(int type);
+const char *driver_get_driver_string(int driver);
+
 
 

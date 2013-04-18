@@ -55,15 +55,6 @@ static OSStatus AppFrontSwitchedHandler(EventHandlerCallRef inHandlerCallRef, Ev
     return 0;
 }
 
-const char *get_driver_string(int mouse_driver) {
-    switch (mouse_driver) {
-        case DRIVER_QUARTZ_OLD: return "QUARTZ_OLD";
-        case DRIVER_QUARTZ: return "QUARTZ";
-        case DRIVER_IOHID: return "IOHID";
-        default: return "?";
-    }
-}
-
 const char *get_acceleration_string(AccelerationCurve curve) {
     switch (curve) {
         case ACCELERATION_CURVE_LINEAR: return "LINEAR";
@@ -95,13 +86,16 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
     if (![[Config instance] debugEnabled]) {
         if (![[Config instance] mouseEnabled] && ![[Config instance] trackpadEnabled]) {
-            NSLog(@"neither mouse nor trackpad is enabled");
+            NSLog(@"No devices enabled");
             [self dealloc];
             return nil;
         }
-    } else {
-        [[Config instance] setMouseEnabled:YES];
-        [[Config instance] setTrackpadEnabled:YES];
+    } else { // debug enabled
+        if (![[Config instance] mouseEnabled] && ![[Config instance] trackpadEnabled]) {
+            NSLog(@"No devices enabled in debug mode, enabling all devices");
+            [[Config instance] setMouseEnabled:YES];
+            [[Config instance] setTrackpadEnabled:YES];
+        }
     }
 
 #if 0
@@ -129,7 +123,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
           [config trackpadVelocity],
           get_acceleration_string([config trackpadCurve]));
 
-    NSLog(@"Driver: %s (%d)", get_driver_string([config driver]), [config driver]);
+    NSLog(@"Driver: %s (%d)", driver_get_driver_string([config driver]), [config driver]);
 
     [self hookAppFrontChanged];
 
@@ -434,7 +428,7 @@ static void *KernelEventThread(void *instance)
             }
             end = GET_TIME();
             if ([[Config instance] timingsEnabled]) {
-                LOG(@"timings: outer: %f, inner: %f, process mouse event: %f, seqnum: %llu, data entries handled: %d, coalesced: %d", outerend-outerstart, end-start, mhe-mhs, mouse_event->seqnum, numPackets, numCoalescedEvents);
+                LOG(@"timings: outer: %f, inner: %f, process mouse event: %f, seqnum: %llu, burst: %d, coalesced: %d", outerend-outerstart, end-start, mhe-mhs, mouse_event->seqnum, numPackets, numCoalescedEvents);
             }
         }
 
