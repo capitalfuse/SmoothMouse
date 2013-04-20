@@ -19,6 +19,7 @@
 @synthesize activeAppBundleId;
 @synthesize overlayEnabled;
 @synthesize sayEnabled;
+@synthesize latencyEnabled;
 
 +(Config *) instance
 {
@@ -39,6 +40,8 @@
     timingsEnabled = NO;
     sendAuxEventsEnabled = NO;
     overlayEnabled = NO;
+    sayEnabled = NO;
+    latencyEnabled = NO;
     return self;
 }
 
@@ -74,6 +77,11 @@
         if ([argument isEqualToString: @"--say"]) {
             [self setSayEnabled: YES];
             NSLog(@"Say enabled (EXPERIMENTAL!)");
+        }
+
+        if ([argument isEqualToString: @"--latency"]) {
+            [self setLatencyEnabled: YES];
+            NSLog(@"Latency measuring enabled (EXPERIMENTAL!)");
         }
     }
 

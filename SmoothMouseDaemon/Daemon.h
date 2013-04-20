@@ -5,9 +5,13 @@
 #import "MouseSupervisor.h"
 #import "SystemMouseAcceleration.h"
 #import "OverlayWindow.h"
+#import "MouseEventListener.h"
+#import "InterruptListener.h"
 
 @interface Daemon : NSObject {
 @private
+    InterruptListener *interruptListener;
+    MouseEventListener *mouseEventListener;
     OverlayWindow *overlay;
     SystemMouseAcceleration *accel;
     id globalMouseMonitor;
@@ -30,7 +34,6 @@
 -(id) init;
 +(id) instance;
 -(void) destroy;
--(void) handleGlobalMouseEvent:(NSEvent *) event;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;
 -(BOOL) configureDriver;

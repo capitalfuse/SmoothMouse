@@ -138,7 +138,7 @@ void mouse_update_clicktime() {
     //NSLog(@"clicktime updated: %f", clickTime);
 }
 
-static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, AccelerationCurve curve, int currentButtons) {
+static void mouse_handle_move(mouse_event_t *event, double velocity, AccelerationCurve curve) {
     CGPoint newPos;
 
     float calcdx;
@@ -159,20 +159,20 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
         }
         int newdx;
         int newdy;
-        win->apply(dx, dy, &newdx, &newdy);
+        win->apply(event->dx, event->dy, &newdx, &newdy);
         calcdx = (float) newdx;
         calcdy = (float) newdy;
     } else if (curve == ACCELERATION_CURVE_OSX) {
         float speed = velocity;
-        if (deviceType == kDeviceTypeTrackpad && osx_trackpad == NULL) {
+        if (event->device_type == kDeviceTypeTrackpad && osx_trackpad == NULL) {
             osx_trackpad = new OSXFunction("touchpad", speed);
-        } else if (deviceType == kDeviceTypeMouse && osx_mouse == NULL) {
+        } else if (event->device_type == kDeviceTypeMouse && osx_mouse == NULL) {
             osx_mouse = new OSXFunction("mouse", speed);
         }
         int newdx;
         int newdy;
         OSXFunction *osx = NULL;
-        switch (deviceType) {
+        switch (event->device_type) {
             case kDeviceTypeTrackpad:
                 osx = osx_trackpad;
                 break;
@@ -180,16 +180,16 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
                 osx = osx_mouse;
                 break;
             default:
-                NSLog(@"invalid deviceType: %d", deviceType);
+                NSLog(@"invalid deviceType: %d", event->device_type);
                 exit(0);
         }
-        osx->apply(dx, dy, &newdx, &newdy);
+        osx->apply(event->dx, event->dy, &newdx, &newdy);
         calcdx = (float) newdx;
         calcdy = (float) newdy;
     }
     else {
-        calcdx = (velocity * dx);
-        calcdy = (velocity * dy);
+        calcdx = (velocity * event->dx);
+        calcdy = (velocity * event->dy);
     }
 
     deltaPosFloat.x += calcdx;
@@ -207,57 +207,60 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
     CGEventType eventType = kCGEventMouseMoved;
     CGMouseButton otherButton = 0;
 
-    if (BUTTON_DOWN(currentButtons, LEFT_BUTTON)) {
+    if (BUTTON_DOWN(event->buttons, LEFT_BUTTON)) {
         eventType = kCGEventLeftMouseDragged;
         otherButton = kCGMouseButtonLeft;
-    } else if (BUTTON_DOWN(currentButtons, RIGHT_BUTTON)) {
+    } else if (BUTTON_DOWN(event->buttons, RIGHT_BUTTON)) {
         eventType = kCGEventRightMouseDragged;
         otherButton = kCGMouseButtonRight;
-    } else if (BUTTON_DOWN(currentButtons, MIDDLE_BUTTON)) {
+    } else if (BUTTON_DOWN(event->buttons, MIDDLE_BUTTON)) {
         eventType = kCGEventOtherMouseDragged;
         otherButton = kCGMouseButtonCenter;
-    } else if (BUTTON_DOWN(currentButtons, BUTTON4)) {
+    } else if (BUTTON_DOWN(event->buttons, BUTTON4)) {
         eventType = kCGEventOtherMouseDragged;
         otherButton = 3;
-    } else if (BUTTON_DOWN(currentButtons, BUTTON5)) {
+    } else if (BUTTON_DOWN(event->buttons, BUTTON5)) {
         eventType = kCGEventOtherMouseDragged;
         otherButton = 4;
-    } else if (BUTTON_DOWN(currentButtons, BUTTON6)) {
+    } else if (BUTTON_DOWN(event->buttons, BUTTON6)) {
         eventType = kCGEventOtherMouseDragged;
         otherButton = 5;
     }
 
     if ([[Config instance] debugEnabled]) {
         LOG(@"processed move event: move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03df, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
-            dx,
-            dy,
+            event->dx,
+            event->dy,
             (int)newPos.x,
             (int)newPos.y,
             deltaX,
             deltaY,
             (int)deltaPosInt.x,
             (int)deltaPosInt.y,
-            BUTTON_DOWN(currentButtons, LEFT_BUTTON),
-            BUTTON_DOWN(currentButtons, MIDDLE_BUTTON),
-            BUTTON_DOWN(currentButtons, RIGHT_BUTTON),
-            BUTTON_DOWN(currentButtons, BUTTON4),
-            BUTTON_DOWN(currentButtons, BUTTON5),
-            BUTTON_DOWN(currentButtons, BUTTON6),
+            BUTTON_DOWN(event->buttons, LEFT_BUTTON),
+            BUTTON_DOWN(event->buttons, MIDDLE_BUTTON),
+            BUTTON_DOWN(event->buttons, RIGHT_BUTTON),
+            BUTTON_DOWN(event->buttons, BUTTON4),
+            BUTTON_DOWN(event->buttons, BUTTON5),
+            BUTTON_DOWN(event->buttons, BUTTON6),
             driver_quartz_event_type_to_string(eventType),
             eventType,
             otherButton);
     }
 
-    driver_event_t event;
-    event.id = DRIVER_EVENT_ID_MOVE;
-    event.seqnum = lastSequenceNumber + 1; // TODO
-    event.move.pos = newPos;
-    event.move.type = eventType;
-    event.move.deltaX = deltaX;
-    event.move.deltaY = deltaY;
-    event.move.buttons = currentButtons;
-    event.move.otherButton = otherButton;
-    driver_post_event((driver_event_t *)&event);
+//    if (!(deltaX == 0 && deltaY == 0)) {
+        driver_event_t driverEvent;
+        driverEvent.id = DRIVER_EVENT_ID_MOVE;
+        driverEvent.kextSeqnum = event->seqnum;
+        driverEvent.kextTimestamp = event->timestamp;
+        driverEvent.move.pos = newPos;
+        driverEvent.move.type = eventType;
+        driverEvent.move.deltaX = deltaX;
+        driverEvent.move.deltaY = deltaY;
+        driverEvent.move.buttons = event->buttons;
+        driverEvent.move.otherButton = otherButton;
+        driver_post_event((driver_event_t *)&driverEvent);
+//    }
 
     currentPos = newPos;
 
@@ -266,7 +269,15 @@ static void mouse_handle_move(int deviceType, int dx, int dy, double velocity, A
     }
 }
 
-static void mouse_handle_buttons(int buttons) {
+static void mouse_handle_buttons(mouse_event_t *event) {
+
+    int buttons;
+
+    if (event != NULL) {
+        buttons = event->buttons;
+    } else {
+        buttons = 0; // all release, we're terminating
+    }
 
     CGEventType eventType = kCGEventNull;
 
@@ -333,15 +344,16 @@ static void mouse_handle_buttons(int buttons) {
                     nclicks);
             }
 
-            driver_event_t event;
-            event.id = DRIVER_EVENT_ID_BUTTON;
-            event.seqnum = lastSequenceNumber + 1; // TODO
-            event.button.pos = currentPos;
-            event.button.type = eventType;
-            event.button.buttons = buttons;
-            event.button.otherButton = otherButton;
-            event.button.nclicks = nclicks;
-            driver_post_event((driver_event_t *)&event);
+            driver_event_t driverEvent;
+            driverEvent.id = DRIVER_EVENT_ID_BUTTON;
+            driverEvent.kextSeqnum = event->seqnum;
+            driverEvent.kextTimestamp = event->timestamp;
+            driverEvent.button.pos = currentPos;
+            driverEvent.button.type = eventType;
+            driverEvent.button.buttons = buttons;
+            driverEvent.button.otherButton = otherButton;
+            driverEvent.button.nclicks = nclicks;
+            driver_post_event((driver_event_t *)&driverEvent);
         }
     }
 }
@@ -359,7 +371,7 @@ void check_sequence_number(mouse_event_t *event) {
             event->seqnum,
             seqnumExpected,
             lostEvents);
-        if (lostEvents != 0) {
+        if (lostEvents != 0 && [[Config instance] sayEnabled]) {
             NSString *stringToSay;
             if (lostEvents == 1) {
                 stringToSay = [NSString stringWithFormat:@"Lost 1 kernel event"];
@@ -393,7 +405,7 @@ void mouse_process_kext_event(mouse_event_t *event) {
     check_needs_refresh(event);
 
     if (event->buttons != lastButtons) {
-        mouse_handle_buttons(event->buttons);
+        mouse_handle_buttons(event);
     }
 
     check_needs_refresh(event);
@@ -415,7 +427,7 @@ void mouse_process_kext_event(mouse_event_t *event) {
                 exit(0);
         }
 
-        mouse_handle_move(event->device_type, event->dx, event->dy, velocity, curve, event->buttons);
+        mouse_handle_move(event, velocity, curve);
     }
 
     if ([[Config instance] debugEnabled]) {

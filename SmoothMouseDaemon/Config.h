@@ -22,6 +22,7 @@
     NSString *activeAppBundleId;
     BOOL overlayEnabled;
     BOOL sayEnabled;
+    BOOL latencyEnabled;
 }
 
 @property BOOL mouseEnabled;
@@ -38,6 +39,7 @@
 @property (copy) NSString* activeAppBundleId;
 @property BOOL overlayEnabled;
 @property BOOL sayEnabled;
+@property BOOL latencyEnabled;
 
 +(Config *) instance;
 -(id) init;

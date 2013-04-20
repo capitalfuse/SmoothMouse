@@ -45,6 +45,9 @@
 		0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400D16BFB637008FE899 /* WindowsFunction.cpp */; };
 		031F7843171AA0CF00752C43 /* OverlayWindow.mm in Sources */ = {isa = PBXBuildFile; fileRef = 031F7842171AA0CF00752C43 /* OverlayWindow.mm */; };
 		031F7846171AD33700752C43 /* OverlayView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 031F7845171AD33700752C43 /* OverlayView.mm */; };
+		03319D6F1722E7BC00668B93 /* InterruptListener.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03319D6E1722E7BB00668B93 /* InterruptListener.mm */; };
+		03319D73172307FE00668B93 /* MouseEventListener.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03319D72172307FE00668B93 /* MouseEventListener.mm */; };
+		033933C11724214F0052C43D /* DriverEventLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = 033933C01724214F0052C43D /* DriverEventLog.mm */; };
 		033CB660170771D000D6B1DC /* driver.mm in Sources */ = {isa = PBXBuildFile; fileRef = 033CB65F170771D000D6B1DC /* driver.mm */; };
 		0341D0C0170CA67000D24E08 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0341D0BF170CA67000D24E08 /* Carbon.framework */; };
 		034215B41631F2BA0047E370 /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03D020D41631F22A00CD04C1 /* uninstall.sh */; };
@@ -140,6 +143,12 @@
 		031F7842171AA0CF00752C43 /* OverlayWindow.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OverlayWindow.mm; sourceTree = "<group>"; };
 		031F7844171AD33700752C43 /* OverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayView.h; sourceTree = "<group>"; };
 		031F7845171AD33700752C43 /* OverlayView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OverlayView.mm; sourceTree = "<group>"; };
+		03319D6E1722E7BB00668B93 /* InterruptListener.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = InterruptListener.mm; sourceTree = "<group>"; };
+		03319D701722E7D300668B93 /* InterruptListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InterruptListener.h; sourceTree = "<group>"; };
+		03319D71172307FE00668B93 /* MouseEventListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseEventListener.h; sourceTree = "<group>"; };
+		03319D72172307FE00668B93 /* MouseEventListener.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MouseEventListener.mm; sourceTree = "<group>"; };
+		033933BF1724214F0052C43D /* DriverEventLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DriverEventLog.h; sourceTree = "<group>"; };
+		033933C01724214F0052C43D /* DriverEventLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DriverEventLog.mm; sourceTree = "<group>"; };
 		033CB65F170771D000D6B1DC /* driver.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = driver.mm; sourceTree = "<group>"; };
 		033CB6611707720400D6B1DC /* driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = driver.h; sourceTree = "<group>"; };
 		0341D0BF170CA67000D24E08 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Carbon.framework; sourceTree = DEVELOPER_DIR; };
@@ -239,24 +248,30 @@
 				0319400016BFB510008FE899 /* debug.mm */,
 				033CB6611707720400D6B1DC /* driver.h */,
 				033CB65F170771D000D6B1DC /* driver.mm */,
+				033933BF1724214F0052C43D /* DriverEventLog.h */,
+				033933C01724214F0052C43D /* DriverEventLog.mm */,
+				03319D701722E7D300668B93 /* InterruptListener.h */,
+				03319D6E1722E7BB00668B93 /* InterruptListener.mm */,
+				0316714C1711AA5400360C01 /* KextProtocol.h */,
 				0319400A16BFB637008FE899 /* libpointing */,
 				03758EFE170893BD003E066D /* mach_timebase_util.h */,
 				03758EFF17089405003E066D /* mach_timebase_util.mm */,
 				03193FEC16BFAC41008FE899 /* main.m */,
 				0319400116BFB510008FE899 /* mouse.h */,
 				0319400216BFB510008FE899 /* mouse.mm */,
+				03319D71172307FE00668B93 /* MouseEventListener.h */,
+				03319D72172307FE00668B93 /* MouseEventListener.mm */,
 				035222EF16C0492E00DBE092 /* MouseSupervisor.h */,
 				035222F016C0492E00DBE092 /* MouseSupervisor.m */,
+				031F7844171AD33700752C43 /* OverlayView.h */,
+				031F7845171AD33700752C43 /* OverlayView.mm */,
+				031F7841171AA0CF00752C43 /* OverlayWindow.h */,
+				031F7842171AA0CF00752C43 /* OverlayWindow.mm */,
 				03628252170481BF00C2E371 /* Prio.h */,
 				03628253170481F000C2E371 /* Prio.mm */,
 				03193FE716BFAC41008FE899 /* Supporting Files */,
 				03193FFC16BFB510008FE899 /* SystemMouseAcceleration.h */,
 				03193FFD16BFB510008FE899 /* SystemMouseAcceleration.mm */,
-				0316714C1711AA5400360C01 /* KextProtocol.h */,
-				031F7841171AA0CF00752C43 /* OverlayWindow.h */,
-				031F7842171AA0CF00752C43 /* OverlayWindow.mm */,
-				031F7844171AD33700752C43 /* OverlayView.h */,
-				031F7845171AD33700752C43 /* OverlayView.mm */,
 			);
 			path = SmoothMouseDaemon;
 			sourceTree = "<group>";
@@ -633,6 +648,9 @@
 				03A3401B1709CF0300B4A1D8 /* Config.mm in Sources */,
 				031F7843171AA0CF00752C43 /* OverlayWindow.mm in Sources */,
 				031F7846171AD33700752C43 /* OverlayView.mm in Sources */,
+				03319D6F1722E7BC00668B93 /* InterruptListener.mm in Sources */,
+				03319D73172307FE00668B93 /* MouseEventListener.mm in Sources */,
+				033933C11724214F0052C43D /* DriverEventLog.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -34,7 +34,8 @@ typedef struct {
 
 typedef struct {
     driver_event_id_t id;
-    uint64_t seqnum;
+    uint64_t kextTimestamp;
+    uint64_t kextSeqnum;
     union {
         driver_move_event_t move;
         driver_button_event_t button;

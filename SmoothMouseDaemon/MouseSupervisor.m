@@ -1,7 +1,10 @@
 
 #import "MouseSupervisor.h"
+#import "debug.h"
 
 #include <pthread.h>
+
+MouseSupervisor *sMouseSupervisor;
 
 @implementation MouseSupervisor
 
@@ -16,20 +19,20 @@
     return self;
 }
 
-- (void) pushMoveEvent: (int) deltaX :(int) deltaY {
+- (void) pushMoveEvent: (int) deltaX : (int) deltaY {
     @synchronized(self) {
         NSNumber *n1 = [NSNumber numberWithInt:deltaY];
         NSNumber *n2 = [NSNumber numberWithInt:deltaX];
         [moveEvents insertObject:n1 atIndex:0];
         [moveEvents insertObject:n2 atIndex:0];
-        //NSLog(@"Pushed %d, %d", deltaX, deltaY);
+        //LOG(@"SUPERVISOR: Pushed %d, %d", deltaX, deltaY);
     }
 }
 
 - (BOOL) popMoveEvent: (int) deltaX :(int)deltaY {
     int storedDeltaSumX = 0;
     int storedDeltaSumY = 0;
-    //NSLog(@"searching for %d %d", deltaX, deltaY);
+    //LOG(@"SUPERVISOR: Searching for %d %d", deltaX, deltaY);
     @synchronized(self) {
         while ([moveEvents count] > 0) {
             NSNumber *storedDeltaY = [moveEvents lastObject];
@@ -47,8 +50,10 @@
                 //NSLog(@"Equal!");
                 return YES;
             } else {
-                //NSLog(@"not equal %d != %d, %d != %d",
-                //      deltaX, storedDeltaSumX, deltaY, storedDeltaSumY);
+                // either means that another app generated an event
+                // or that mouse coalescing is enabled
+                LOG(@"WARNING: Tampering detected or coalescing enabled (%d != %d, %d != %d)",
+                      deltaX, storedDeltaSumX, deltaY, storedDeltaSumY);
             }
         }
         //NSLog(@"no more");

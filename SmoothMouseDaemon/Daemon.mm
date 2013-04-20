@@ -18,14 +18,14 @@
 #import "Prio.h"
 #import "Config.h"
 #import "OverlayWindow.h"
+#import "InterruptListener.h"
+#import "DriverEventLog.h"
 
 #define KEXT_CONNECT_RETRIES (3)
 #define SUPERVISOR_SLEEP_TIME_USEC (500000)
 
 double start, end, e1, e2, mhs, mhe, outerstart, outerend, outersum = 0, outernum = 0;
 NSMutableArray* logs = [[NSMutableArray alloc] init];
-
-MouseSupervisor *sMouseSupervisor;
 
 static int terminating_smoothmouse = 0;
 
@@ -90,13 +90,9 @@ const char *get_acceleration_string(AccelerationCurve curve) {
             [self dealloc];
             return nil;
         }
-    } else { // debug enabled
-        if (![[Config instance] mouseEnabled] && ![[Config instance] trackpadEnabled]) {
-            NSLog(@"No devices enabled in debug mode, enabling all devices");
-            [[Config instance] setMouseEnabled:YES];
-            [[Config instance] setTrackpadEnabled:YES];
-        }
     }
+
+    
 
 #if 0
     for (int i = 0; i != 31; ++i) {
@@ -110,6 +106,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
     accel = [[SystemMouseAcceleration alloc] init];
     sMouseSupervisor = [[MouseSupervisor alloc] init];
+    sDriverEventLog = [[DriverEventLog alloc] init];
 
     Config *config = [Config instance];
 
@@ -130,6 +127,12 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     if ([config overlayEnabled]) {
         overlay = [[OverlayWindow alloc] init];
     }
+
+    if ([config latencyEnabled]) {
+        interruptListener = [[InterruptListener alloc] init];
+    }
+
+    mouseEventListener = [[MouseEventListener alloc] init];
 
     return self;
 }
@@ -197,7 +200,11 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
             [accel reset];
 
-            [self hookGlobalMouseEvents];
+            if ([[Config instance] latencyEnabled]) {
+                [interruptListener start];
+            }
+
+            [mouseEventListener start];
 
             connected = YES;
         }
@@ -208,69 +215,8 @@ error:
     }
 }
 
--(BOOL) hookGlobalMouseEvents
-{
-    [NSEvent setMouseCoalescingEnabled:FALSE];
-    globalMouseMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:(NSMouseMovedMask | NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask | NSLeftMouseDownMask | NSLeftMouseUpMask)
-                                           handler:^(NSEvent *event) {
-                                               [self handleGlobalMouseEvent:event];
-                                           }];
-
-    NSLog(@"Registered global mouse event listener");
-
-    return YES;
-}
-
--(BOOL) unhookGlobalMouseEvents
-{
-    if (globalMouseMonitor != NULL) {
-        [NSEvent removeMonitor:globalMouseMonitor];
-        globalMouseMonitor = NULL;
-    }
-
-    //NSLog(@"Removed mouse monitor");
-
-    return YES;
-}
-
 -(void) redrawOverlay {
     [overlay redrawView];
-}
-
--(void) handleGlobalMouseEvent:(NSEvent *) event
-{
-    NSEventType type = [event type];
-
-    if (type == NSMouseMoved) {
-        BOOL match = [sMouseSupervisor popMoveEvent:(int) [event deltaX]: (int) [event deltaY]];
-        if (!match) {
-            mouse_refresh(REFRESH_REASON_POSITION_TAMPERING);
-            if ([[Config instance] debugEnabled]) {
-                LOG(@"Another application altered mouse location");
-            }
-        } else {
-            //NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
-            //      match,
-            //      [sMouseSupervisor numItems],
-            //      [event deltaX],
-            //      [event deltaY]
-            //      );
-        }
-    } else if (type == NSLeftMouseDown) {
-        //LOG(@"LEFT MOUSE CLICK (ClickCount: %ld)", (long)[event clickCount]);
-        if ([[Config instance] debugEnabled]) {
-            [sMouseSupervisor popClickEvent];
-            if ([sMouseSupervisor hasClickEvents]) {
-                LOG(@"WARNING: click event probably lost");
-                if ([[Config instance] sayEnabled]) {
-                    [self say:@"There was one lost mouse click"];
-                }
-                [sMouseSupervisor resetClickEvents];
-            }
-        }
-    } else if (type == NSLeftMouseDown) {
-        //LOG(@"LEFT MOUSE RELEASE");
-    }
 }
 
 -(void) say:(NSString *)message {
@@ -373,7 +319,11 @@ error:
                 IOServiceClose(connect);
             }
 
-            [self unhookGlobalMouseEvents];
+            if ([[Config instance] latencyEnabled]) {
+                [interruptListener stop];
+            }
+
+            [mouseEventListener stop];
             
             NSLog(@"Disconnected from KEXT");
         }
@@ -418,6 +368,7 @@ static void *KernelEventThread(void *instance)
             counter++;
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
             mouse_event_t *mouse_event = (mouse_event_t *) buf;
+            //LOG(@"Got event from kernel with timestamp: %llu", mouse_event->timestamp);
             if (!error) {
                 mhs = GET_TIME();
                 mouse_process_kext_event(mouse_event);

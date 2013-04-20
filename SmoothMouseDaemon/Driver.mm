@@ -6,6 +6,8 @@
 #include <IOKit/hidsystem/event_status_driver.h>
 #include <IOKit/hidsystem/IOHIDShared.h>
 
+#import "DriverEventLog.h"
+
 #include <list>
 
 #include "prio.h"
@@ -120,6 +122,7 @@ static void *DriverEventThread(void *instance)
         event = event_queue.front();
         event_queue.pop_front();
         pthread_mutex_unlock(&mutex);
+        [sDriverEventLog add:&event];
         switch(event.id) {
             case DRIVER_EVENT_ID_MOVE:
                 //LOG(@"DRIVER_EVENT_ID_MOVE");
@@ -131,6 +134,9 @@ static void *DriverEventThread(void *instance)
                 break;
             case DRIVER_EVENT_ID_TERMINATE:
                 //LOG(@"DRIVER_EVENT_ID_TERMINATE");
+                break;
+            default:
+                //LOG(@"UNKNOWN DRIVER EVENT (%d)", event.id);
                 break;
         }
     }
