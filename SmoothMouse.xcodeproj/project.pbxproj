@@ -570,7 +570,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# THIS SCRIPT RUNS THE PACKAGING SCRIPT\nset -o errexit\nset -o nounset\ncd Installer\n./package.sh\n";
+			shellScript = "# THIS SCRIPT RUNS THE PACKAGING SCRIPT\nset -o errexit\nset -o nounset\ncd Installer\n./package.py\n";
 		};
 		0316714E1711B44700360C01 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;

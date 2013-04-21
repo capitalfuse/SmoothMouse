@@ -1,4 +1,21 @@
 #!/bin/sh
-sudo -u $USER launchctl stop "com.cyberic.smoothmouse"
+# Match SmoothMouse and new SmoothMouseDaemon, but don't match the installer itself
+DAEMON_PROCESS="Contents/MacOS/SmoothMouse"
+DAEMON_LAUNCHAGENT="$HOME/Library/LaunchAgents/com.cyberic.smoothmouse.plist"
+
+DAEMON=$(/bin/ps -A | /usr/bin/grep -i "$DAEMON_PROCESS" | /usr/bin/grep -v grep | /usr/bin/awk '{print $1}')
+if [ -n "$DAEMON" ]; then
+	echo "Trying to unload the daemon using launchctl"
+	sudo -u $USER launchctl unload "$DAEMON_LAUNCHAGENT"
+	
+	DAEMON=$(ps -A | grep -i "$DAEMON_PROCESS" | grep -v grep | awk '{print $1}')
+	if [ -n "$DAEMON" ]; then
+		echo "Trying to unload the daemon using kill -9 (attempt #2)"
+		sudo kill -9 "$DAEMON"
+	fi
+else
+	echo "Daemon not loaded, no need to unload"
+fi
+
 sudo -u $USER osascript "preinstall.scpt"
 exit 0

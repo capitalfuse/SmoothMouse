@@ -1,6 +1,19 @@
 #!/bin/sh
-sudo -u $USER find ~/Library/Caches -iname "*cyberic.SmoothMouse*" -exec rm -rf {} \;
-sudo -u $USER launchctl start "com.cyberic.smoothmouse"
-sudo -u $USER osascript "postinstall.scpt"
+DAEMON_LOCATION="/Library/PreferencePanes/SmoothMouse.prefPane/Contents/SmoothMouseDaemon.app/Contents/MacOS/SmoothMouseDaemon"
+DAEMON_LAUNCHAGENT="$HOME/Library/LaunchAgents/com.cyberic.smoothmouse.plist"
+
+sudo find "$HOME/Library/Caches" -iname "*cyberic.smoothmouse*" -exec rm -rf {} \;
 sudo ln -sf "/Library/PreferencePanes/SmoothMouse.prefPane/Contents/SmoothMouseDaemon.app/Contents/MacOS/SmoothMouseDaemon" "/usr/bin/smoothmouse"
+
+if [ -f "$DAEMON_LAUNCHAGENT" ]; then
+	echo "Updating the launch agent and starting the daemon"
+	sudo -u $USER defaults write "$DAEMON_LAUNCHAGENT" Program -string "$DAEMON_LOCATION"
+	sudo -u $USER plutil -convert xml1 "$DAEMON_LAUNCHAGENT"
+	sudo -u $USER launchctl load "$DAEMON_LAUNCHAGENT"
+else
+	echo "Launch agent does not exist, no need to update"
+fi
+
+sudo -u $USER osascript "postinstall.scpt"
+
 exit 0

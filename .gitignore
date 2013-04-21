@@ -2,9 +2,9 @@
 DerivedData/
 build/
 xcuserdata
-kext/
+/kext/
 *.kext
 *.pkg
 *.zip
+*.pyc
 Installer/Root/
-Installer/Components/

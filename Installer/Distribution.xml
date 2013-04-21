@@ -26,17 +26,48 @@
     <installation-check script="installationCheck()" />
 	
 	<script><![CDATA[
-
 var minOSVersion = '10.6.8';
-var productName = 'SmoothMouse';
-var supportURL = 'smoothmouse.com/support';
-		
+
 var incompatibleSoftware = [
 	['/System/Library/Extensions/SteerMouse.kext', 'SteerMouse'],
-	['/System/Library/Extensions/USBOverdrive.kext', 'USB Overdrive']
+	['/System/Library/Extensions/USBOverdrive.kext', 'USB Overdrive'],
+	['/System/Library/Extensions/ControllerMate.kext', 'ControllerMate'],
+	['/System/Library/Extensions/LogitechUSBHIDevices.kext', 'Logitech Control Center'],
+	['/System/Library/Extensions/LogitechUnifying.kext', 'Logitech Control Center'],
+	['/System/Library/Extensions/LogitechUSBHIDevices.kext', 'Logitech Control Center'],
+	['/System/Library/Extensions/MicrosoftMouse.kext', 'Microsoft IntelliPoint'],
+	['/System/Library/Extensions/KensingtonMouseDriver.kext', 'Kensington MouseWorks'],
 ]
 
+// From http://stackoverflow.com/a/4673436/412240
+if (!String.prototype.format) {
+	String.prototype.format = function() {
+		var args = arguments;
+		return this.replace(/{(\d+)}/g, function(match, number) { 
+			return typeof args[number] != 'undefined'
+				? args[number]
+				: match
+			;
+		});
+	};
+}
+
+function detectIncompatibleKR4MB() {
+	var minVersion = '8.0.55';
+	var message = 'The application KeyRemap4MacBook that is installed on your computer needs to be updated to work with SmoothMouse. (The minimum required version of KeyRemap4MacBook is {0}).\n\nPlease visit the following URL for more information:\nhttp://smoothmouse.com/other/kr4mb/\n';
+
+	var plist = system.files.plistAtPath('/Applications/KeyRemap4MacBook.app/Contents/Info.plist');
+	
+	if (plist && plist.CFBundleVersion && (system.compareVersions(plist.CFBundleVersion, minVersion) == -1)) {
+		return {message: message.format(minVersion), type: 'Fatal'};
+    }
+
+	return false;
+}
+
 function detectIncompatibleSoftware() {
+	var message = 'The following application{0} installed on your computer may prevent proper operation of SmoothMouse:\n\n{1}\n\nIt is highly recommended that you uninstall {2} application{0} before proceeding with the installation. In case you must keep {2} application{0}, please disable {3} mouse and trackpad acceleration functionality.\n\nIf you think this message is a mistake, please contact support at smoothmouse.com/support';
+	
 	var detected = new Array();
 
 	for (var i = 0, arrayLength = incompatibleSoftware.length; i < arrayLength; i++) {
@@ -45,17 +76,19 @@ function detectIncompatibleSoftware() {
 		}
 	}
 	
-	if (detected.length > 0) {
-		return {message: 'The following software installed on your computer is incompatible with ' + productName + ':\n\n' + detected.join(', ') + "\n\nPlease uninstall it before proceeding with the installation. If you think this is a mistake, please contact support at " + supportURL};
+	if (detected.length == 1) {
+		return {message: message.format('', detected.join(', '), 'this', 'its')};
+	} else if (detected.length > 1) {
+		return {message: message.format('s', detected.join(', '), 'these', 'their')};
 	}
 	
 	return false;
 }
 
 function installationCheck() {
-	var checkIncompatibleSoftware = detectIncompatibleSoftware();
+	var checkIncompatibleSoftware = detectIncompatibleKR4MB() || detectIncompatibleSoftware();
 	if (checkIncompatibleSoftware) {
-		my.result.type = 'Fatal';
+		my.result.type = checkIncompatibleSoftware.type || 'Warn';
 		my.result.title = 'Problem detected';
 		my.result.message = checkIncompatibleSoftware.message;
 		return false;
