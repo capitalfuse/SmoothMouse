@@ -5,6 +5,7 @@
 #import "MouseSupervisor.h"
 #import "InterruptListener.h"
 #import "DriverEventLog.h"
+#import "Daemon.h"
 
 //#include <CarbonEvents.h>
 
@@ -110,21 +111,21 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
             //      [event deltaY]
             //      );
         }
-    } /*else if (type == NSLeftMouseDown) {
+    } else if (type == kCGEventLeftMouseDown) {
         //LOG(@"LEFT MOUSE CLICK (ClickCount: %ld)", (long)[event clickCount]);
         if ([[Config instance] debugEnabled]) {
             [sMouseSupervisor popClickEvent];
             if ([sMouseSupervisor hasClickEvents]) {
                 LOG(@"WARNING: click event probably lost");
                 if ([[Config instance] sayEnabled]) {
-                    [self say:@"There was one lost mouse click"];
+                    [[Daemon instance] say:@"There was one lost mouse click"];
                 }
                 [sMouseSupervisor resetClickEvents];
             }
         }
     } else if (type == NSLeftMouseDown) {
         //LOG(@"LEFT MOUSE RELEASE");
-    } */
+    }
 
     return event;
 }
