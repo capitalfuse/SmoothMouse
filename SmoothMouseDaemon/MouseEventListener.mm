@@ -34,6 +34,8 @@ CGEventRef
 myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
                   CGEventRef event, void *refcon)
 {
+    int64_t deltaX = CGEventGetIntegerValueField(event, kCGMouseEventDeltaX);
+    int64_t deltaY = CGEventGetIntegerValueField(event, kCGMouseEventDeltaY);
 
     if ([[Config instance] latencyEnabled]) {
         static mach_timebase_info_data_t machTimebaseInfo;
@@ -50,7 +52,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
         ok = [sInterruptListener get:&timestampInterrupt];
 
         if (!ok) {
-            LOG(@"NO TIMESTAMP FROM INTERRUPT");
+            NSLog(@"No timestamp from interrupt (event injected?)");
             exit(1);
         }
 
@@ -70,15 +72,14 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
         float latencyInterrupt = (timestampNow - timestampInterrupt) / 1000000.0;
         float latencyKext      = (timestampNow - timestampKext) / 1000000.0;
 
-        LOG(@"Application received mouse event: %s (%d), tsInterrupt: %llu, tsKext: %llu, tsNow: %llu, lat from int: %f ms, lat from kext: %f ms",
+        LOG(@"Application received mouse event: %s (%d), dx: %d, dy: %d, lat int: %f ms, lat kext: %f ms, int events: %d",
             cg_event_type_to_string(type),
             type,
-            timestampInterrupt,
-            timestampKext,
-            timestampNow,
+            (int)deltaX,
+            (int)deltaY,
             (latencyInterrupt),
-            (timestampKext == 0 ? 0 : latencyKext)
-            );
+            (timestampKext == 0 ? 0 : latencyKext),
+            [sInterruptListener numEvents]);
     }
 
     if (IsMouseCoalescingEnabled()) {
@@ -93,14 +94,13 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 
         //CGPoint location = CGEventGetLocation(event);
 
-        int64_t deltaX = CGEventGetIntegerValueField(event, kCGMouseEventDeltaX);
-        int64_t deltaY = CGEventGetIntegerValueField(event, kCGMouseEventDeltaY);
-
         BOOL match = [sMouseSupervisor popMoveEvent:(int) deltaX: (int) deltaY];
         if (!match) {
             mouse_refresh(REFRESH_REASON_POSITION_TAMPERING);
             if ([[Config instance] debugEnabled]) {
-                LOG(@"Another application altered mouse location");
+                if ([[Config instance] mouseEnabled] || [[Config instance] trackpadEnabled]) {
+                    LOG(@"Mouse location tampering detected");
+                }
             }
         } else {
             //NSLog(@"MATCH: %d, queue size: %d, delta x: %f, delta y: %f",
@@ -131,7 +131,9 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 
 static void *MouseEventListenerThread(void *instance)
 {
-    LOG(@"MouseEventListenerThread: Start");
+    //LOG(@"MouseEventListenerThread: Start");
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     SetMouseCoalescingEnabled(false, NULL);
 
@@ -177,13 +179,23 @@ static void *MouseEventListenerThread(void *instance)
 
     while (self->running && [self->runLoop runMode:NSDefaultRunLoopMode beforeDate:date]);
 
-    LOG(@"MouseEventListenerThread: End");
+    CFRunLoopRemoveSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
+
+    CGEventTapEnable(eventTap, false);
+
+    CFRelease(eventTap);
+
+    CFRelease(runLoopSource);
+
+    [pool drain];
+
+    //LOG(@"MouseEventListenerThread: End");
 
     return NULL;
 }
 
 -(void) start {
-    LOG(@"MouseEventListener::start");
+    //LOG(@"MouseEventListener::start");
     running = 1;
     int err = pthread_create(&threadId, NULL, &MouseEventListenerThread, self);
     if (err != 0) {
@@ -193,7 +205,7 @@ static void *MouseEventListenerThread(void *instance)
 }
 
 -(void) stop {
-    LOG(@"MouseEventListener::stop");
+    //LOG(@"MouseEventListener::stop");
     running = 0;
 
     [runLoop performSelector: @selector(stopThread:) target:self argument:nil order:0 modes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
@@ -211,7 +223,7 @@ static void *MouseEventListenerThread(void *instance)
 }
 
 -(void) stopThread: (id) argument {
-    LOG(@"MouseEventListener::stopThread");
+    //LOG(@"MouseEventListener::stopThread");
     CFRunLoopStop([[NSRunLoop currentRunLoop] getCFRunLoop]);
 }
 @end

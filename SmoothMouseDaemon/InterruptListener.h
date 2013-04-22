@@ -16,6 +16,7 @@
 -(void) stop;
 -(BOOL) get:(uint64_t *) timestamp;
 -(void) put:(uint64_t) timestamp;
+-(int) numEvents;
 @end
 
 extern InterruptListener *sInterruptListener;

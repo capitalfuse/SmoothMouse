@@ -346,8 +346,13 @@ static void mouse_handle_buttons(mouse_event_t *event) {
 
             driver_event_t driverEvent;
             driverEvent.id = DRIVER_EVENT_ID_BUTTON;
-            driverEvent.kextSeqnum = event->seqnum;
-            driverEvent.kextTimestamp = event->timestamp;
+            if (event != NULL) {
+                driverEvent.kextSeqnum = event->seqnum;
+                driverEvent.kextTimestamp = event->timestamp;
+            } else {
+                driverEvent.kextSeqnum = 0;
+                driverEvent.kextTimestamp = 0;
+            }
             driverEvent.button.pos = currentPos;
             driverEvent.button.type = eventType;
             driverEvent.button.buttons = buttons;

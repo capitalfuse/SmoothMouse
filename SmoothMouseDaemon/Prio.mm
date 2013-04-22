@@ -30,7 +30,7 @@
         return NO;
     }
 
-    NSLog(@"Thread '%@': Priority set to highest (%u)", threadName, sp.sched_priority);
+    //NSLog(@"Thread '%@': Priority set to highest (%u)", threadName, sp.sched_priority);
 
     return YES;
 }
@@ -59,12 +59,12 @@
 
 #undef MS_TO_NANOS
 
-    NSLog(@"Thread '%@': Time constraint policy set (period: %u, computation: %u, constraint: %u (all in mach timebase), preemtible: %u)",
+    /*NSLog(@"Thread '%@': Time constraint policy set (period: %u, computation: %u, constraint: %u (all in mach timebase), preemtible: %u)",
           threadName,
           ttcpolicy.period,
           ttcpolicy.computation,
           ttcpolicy.constraint,
-          ttcpolicy.preemptible);
+          ttcpolicy.preemptible); */
 
     thread_port_t thread_port = pthread_mach_thread_np(pthread_self());
 

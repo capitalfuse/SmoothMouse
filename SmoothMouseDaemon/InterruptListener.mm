@@ -77,7 +77,9 @@ InterruptListener *sInterruptListener;
 
 static void *InterruptListenerThread(void *instance)
 {
-    LOG(@"InterruptListenerThread: Start");
+    //LOG(@"InterruptListenerThread: Start");
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     InterruptListener *self = (InterruptListener *) instance;
     sInterruptListener = self;
@@ -92,13 +94,15 @@ static void *InterruptListenerThread(void *instance)
 
     while (self->running && [self->runLoop runMode:NSDefaultRunLoopMode beforeDate:date]);
 
-    LOG(@"InterruptListenerThread: End");
+    [pool drain];
+
+    //LOG(@"InterruptListenerThread: End");
 
     return NULL;
 }
 
 -(void) start {
-    LOG(@"InterruptListener::start");
+    //LOG(@"InterruptListener::start");
     running = 1;
     int err = pthread_create(&threadId, NULL, &InterruptListenerThread, self);
     if (err != 0) {
@@ -108,7 +112,7 @@ static void *InterruptListenerThread(void *instance)
 }
 
 -(void) stop {
-    LOG(@"InterruptListener::stop");
+    //LOG(@"InterruptListener::stop");
     running = 0;
 
     [runLoop performSelector: @selector(stopThread:) target:self argument:nil order:0 modes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
@@ -125,7 +129,7 @@ static void *InterruptListenerThread(void *instance)
 }
 
 -(void) stopThread: (id) argument {
-    LOG(@"InterruptListener::stopThread");
+    //LOG(@"InterruptListener::stopThread");
     CFRunLoopStop([[NSRunLoop currentRunLoop] getCFRunLoop]);
 }
 
@@ -145,6 +149,12 @@ static void *InterruptListenerThread(void *instance)
         events.pop_front();
         //LOG(@"INTERRUPT: POPPED TIMESTAMP %llu (%d items left)", *timestamp, (int)events.size());
         return YES;
+    }
+}
+
+-(int) numEvents {
+    @synchronized(self) {
+        return (int)events.size();
     }
 }
 
@@ -233,11 +243,11 @@ void init_device (void *refCon, io_iterator_t iterator) {
 
             hidDataRef->hidDeviceInterface = hidDeviceInterface;
 
-            result = (*(hidDeviceInterface))->open
+            (void) (*(hidDeviceInterface))->open
 			(hidDataRef->hidDeviceInterface, 0);
-            result = (*(hidDeviceInterface))->createAsyncEventSource
+            (void) (*(hidDeviceInterface))->createAsyncEventSource
 			(hidDataRef->hidDeviceInterface, &hidDataRef->eventSource);
-            result = (*(hidDeviceInterface))->setInterruptReportHandlerCallback
+            (void) (*(hidDeviceInterface))->setInterruptReportHandlerCallback
 			(hidDataRef->hidDeviceInterface, hidDataRef->buffer,
 			 sizeof(hidDataRef->buffer), &interrupt_callback, NULL,
 			 hidDataRef);
@@ -259,7 +269,8 @@ void init_device (void *refCon, io_iterator_t iterator) {
         }
 
         if (hidDataRef) {
-            free ( hidDataRef );
+            free (hidDataRef);
+            hidDataRef = NULL;
 		}
 
 	HIDDEVICEADDED_CLEANUP:
@@ -272,30 +283,30 @@ void init_device (void *refCon, io_iterator_t iterator) {
 
 void device_release (void *refCon, io_service_t service, natural_t messageType,
 					 void *messageArgument) {
-    kern_return_t kr;
+    //kern_return_t kr;
     HIDDataRef hidDataRef = (HIDDataRef) refCon;
 
     if ((hidDataRef != NULL) && (messageType == kIOMessageServiceIsTerminated)) {
         if (hidDataRef->hidQueueInterface != NULL) {
-            kr = (*(hidDataRef->hidQueueInterface))->stop
+            (void) (*(hidDataRef->hidQueueInterface))->stop
 			((hidDataRef->hidQueueInterface));
-            kr = (*(hidDataRef->hidQueueInterface))->dispose
+            (void) (*(hidDataRef->hidQueueInterface))->dispose
 			((hidDataRef->hidQueueInterface));
-            kr = (*(hidDataRef->hidQueueInterface))->Release
+            (void) (*(hidDataRef->hidQueueInterface))->Release
 			(hidDataRef->hidQueueInterface);
             hidDataRef->hidQueueInterface = NULL;
         }
 
         if (hidDataRef->hidDeviceInterface != NULL) {
-            kr = (*(hidDataRef->hidDeviceInterface))->close
+            (void) (*(hidDataRef->hidDeviceInterface))->close
 			(hidDataRef->hidDeviceInterface);
-            kr = (*(hidDataRef->hidDeviceInterface))->Release
+            (void) (*(hidDataRef->hidDeviceInterface))->Release
 			(hidDataRef->hidDeviceInterface);
             hidDataRef->hidDeviceInterface = NULL;
         }
 
         if (hidDataRef->notification) {
-            kr = IOObjectRelease(hidDataRef->notification);
+            (void) IOObjectRelease(hidDataRef->notification);
             hidDataRef->notification = 0;
         }
     }

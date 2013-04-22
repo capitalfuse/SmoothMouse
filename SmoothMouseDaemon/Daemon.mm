@@ -232,9 +232,6 @@ error:
     pipe = [NSPipe pipe];
     [task setStandardOutput: pipe];
 
-    NSFileHandle *file;
-    file = [pipe fileHandleForReading];
-
     [task launch];
     [task release];
 }
