@@ -37,6 +37,8 @@ void debug_end() {
 
     if ([logs count] > 0) {
         NSLog(@"Dumping log");
+    } else {
+        NSLog(@"No logs to dump");
     }
 
     for (NSString *log in logs) {

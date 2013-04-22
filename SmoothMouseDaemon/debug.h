@@ -9,7 +9,7 @@ extern double start, end, e1, e2, outerstart, outerend, outersum, outernum;
 extern NSMutableArray* logs;
 extern BOOL is_dumping;
 
-#define GET_TIME() (mach_absolute_time() / 1000.0);
+#define GET_TIME() (mach_absolute_time()/1000.0);
 #define LOG(format, ...) \
     if (!is_dumping) { \
         if([[Config instance] memoryLoggingEnabled]) { \

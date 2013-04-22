@@ -351,7 +351,7 @@ static void *KernelEventThread(void *instance)
         return NULL;
     }
 
-    [Prio setRealtimePrio: @"KernelEventThread"];
+    [Prio setRealtimePrio: @"KernelEventThread" withComputation:20000 withConstraint:50000];
 
     (void) mouse_init();
 

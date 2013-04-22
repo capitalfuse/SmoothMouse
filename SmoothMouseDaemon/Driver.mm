@@ -111,7 +111,7 @@ static void *DriverEventThread(void *instance)
 
     //LOG(@"DriverEventThread: Start");
 
-    [Prio setRealtimePrio: @"DriverEventThread"];
+    [Prio setRealtimePrio: @"DriverEventThread" withComputation:200000 withConstraint:300000];
 
     while(keep_running) {
         driver_event_t event;
@@ -119,6 +119,7 @@ static void *DriverEventThread(void *instance)
         while(event_queue.empty()) {
             pthread_cond_wait(&data_available, &mutex);
         }
+        double start = GET_TIME();
         event = event_queue.front();
         event_queue.pop_front();
         pthread_mutex_unlock(&mutex);
@@ -138,6 +139,10 @@ static void *DriverEventThread(void *instance)
             default:
                 //LOG(@"UNKNOWN DRIVER EVENT (%d)", event.id);
                 break;
+        }
+        double end = GET_TIME();
+        if ([[Config instance] timingsEnabled]) {
+            LOG(@"driver timings: total time time in mach time units: %f", (end-start));
         }
     }
 

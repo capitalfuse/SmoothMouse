@@ -86,7 +86,7 @@ static void *InterruptListenerThread(void *instance)
 
     self->runLoop = [NSRunLoop currentRunLoop];
 
-    [Prio setRealtimePrio:@"InterruptThread"];
+    [Prio setRealtimePrio:@"InterruptThread" withComputation:3000 withConstraint: 10000];
 
     find_device();
 
@@ -315,6 +315,7 @@ void device_release (void *refCon, io_service_t service, natural_t messageType,
 void interrupt_callback (void *target, IOReturn result, void *refcon,
 						 void *sender, uint32_t bufferSize) {
     HIDDataRef hidDataRef = (HIDDataRef) refcon;
+    double start = GET_TIME();
 #if 0
 	char hw_x, hw_y; /* hardware coordinates received from mouse */
     CGEventRef event;
@@ -364,4 +365,8 @@ void interrupt_callback (void *target, IOReturn result, void *refcon,
 #endif
 
     first_interrupt = 0;
+    double end = GET_TIME();
+    if ([[Config instance] timingsEnabled]) {
+        LOG(@"interrupt timings: total time time in mach time units: %f", (end-start));
+    }
 }

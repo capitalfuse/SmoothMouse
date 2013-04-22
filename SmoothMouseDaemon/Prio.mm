@@ -8,11 +8,17 @@
 
 @implementation Prio
 
-+(BOOL) setRealtimePrio: (NSString *) threadName
++(BOOL) setRealtimePrio: (NSString *)threadName withComputation:(int)computation withConstraint:(int)constraint;
 {
+    if (computation < 50000) {
+        computation = 50000;
+    }
+    if (constraint < computation) {
+        constraint = computation;
+    }
     BOOL ok = [self setHighPrioPthread: threadName];
     if (ok) {
-        ok = [self setRealtimePrioMach: threadName];
+        ok = [self setRealtimePrioMach: threadName withComputation:computation withConstraint:constraint];
     }
     return ok;
 }
@@ -30,12 +36,12 @@
         return NO;
     }
 
-    //NSLog(@"Thread '%@': Priority set to highest (%u)", threadName, sp.sched_priority);
+    NSLog(@"Thread '%@': Priority set to highest (%u)", threadName, sp.sched_priority);
 
     return YES;
 }
 
-+(BOOL) setRealtimePrioMach: (NSString *) threadName
++(BOOL) setRealtimePrioMach: (NSString *)threadName withComputation:(int)computation withConstraint:(int)constraint
 {
     mach_timebase_info_data_t info;
     kern_return_t kret = mach_timebase_info(&info);
@@ -53,18 +59,18 @@
     struct thread_time_constraint_policy ttcpolicy;
     // 500hz mouse = 2ms
     ttcpolicy.period        = (uint32_t) convert_from_nanos_to_mach_timebase(MS_TO_NANOS(2), &info);
-    ttcpolicy.computation   = (uint32_t) convert_from_nanos_to_mach_timebase(50000, &info);
-    ttcpolicy.constraint    = (uint32_t) convert_from_nanos_to_mach_timebase(200000, &info);
+    ttcpolicy.computation   = (uint32_t) computation;
+    ttcpolicy.constraint    = (uint32_t) constraint;
     ttcpolicy.preemptible   = 1;
 
 #undef MS_TO_NANOS
 
-    /*NSLog(@"Thread '%@': Time constraint policy set (period: %u, computation: %u, constraint: %u (all in mach timebase), preemtible: %u)",
+    NSLog(@"Thread '%@': Time constraint policy set (period: %u, computation: %u, constraint: %u (all in mach timebase), preemtible: %u)",
           threadName,
           ttcpolicy.period,
           ttcpolicy.computation,
           ttcpolicy.constraint,
-          ttcpolicy.preemptible); */
+          ttcpolicy.preemptible);
 
     thread_port_t thread_port = pthread_mach_thread_np(pthread_self());
 
@@ -73,7 +79,7 @@
                              THREAD_TIME_CONSTRAINT_POLICY_COUNT);
 
     if (kret != KERN_SUCCESS) {
-        NSLog(@"call to thread_policy_set failed: %d", kret);
+        NSLog(@"call to thread_policy_set failed: %d (computation: %d, constraint: %d)", kret, (int) computation, (int) constraint);
         return NO;
     }
 
