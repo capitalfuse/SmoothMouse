@@ -57,26 +57,28 @@ defaults write "$PREFPANE_PLIST" CFBundleVersion "$CFBUNDLEVERSION"
 defaults write "$PREFPANE_PLIST" CFBundleShortVersionString "$CFBUNDLESHORTVERSIONSTRING"
 finalize_plist "$PREFPANE_PLIST"
 
+# Copy the prefpane into the installer root
+echo "Copying the prefpane into the installer root"
+BUILT_PREFPANE="${BUILT_PRODUCTS_DIR}/${PREFPANE}"
+ROOT_PREFPANE="${INSTALLER_ROOT}/${PREFPANE}"
+if [ -d "$ROOT_PREFPANE" ]; then
+	echo "Deleting existing prefpane"
+	rm -r "$ROOT_PREFPANE"
+fi
+cp -R "$BUILT_PREFPANE" "$INSTALLER_ROOT"
+
 if [ $CONFIGURATION == "Release" ]; then
-	# Copy the prefpane into the installer root
-	echo "Copying the prefpane into the installer root"
-	BUILT_PREFPANE="${BUILT_PRODUCTS_DIR}/${PREFPANE}"
-	ROOT_PREFPANE="${INSTALLER_ROOT}/${PREFPANE}"
-	if [ -d "$ROOT_PREFPANE" ]; then
-		echo "Deleting existing prefpane"
-		rm -r "$ROOT_PREFPANE"
-	fi
-	cp -R "$BUILT_PREFPANE" "$INSTALLER_ROOT"
-	
-	if [ -f "$KEXT_PLIST" ]; then
-		# Copy version strings to the kext
-		echo "Copying CFBundleVersion ${CFBUNDLEVERSION} to the kext"
-		echo "Copying CFBundleShortVersionString ${CFBUNDLESHORTVERSIONSTRING} to the kext"
-		defaults write "$KEXT_PLIST" CFBundleVersion "$CFBUNDLEVERSION"
-		defaults write "$KEXT_PLIST" CFBundleShortVersionString "$CFBUNDLESHORTVERSIONSTRING"
-		finalize_plist "$KEXT_PLIST"
-	
-		echo "Invoking the installer build script"
-		$INSTALLER_ROOT/../package.py
-	fi
+	xcodebuild -project "Kext/SmoothMouseKext.xcodeproj"
+fi
+
+if [ -f "$KEXT_PLIST" ]; then
+	# Copy version strings to the kext
+	echo "Copying CFBundleVersion ${CFBUNDLEVERSION} to the kext"
+	echo "Copying CFBundleShortVersionString ${CFBUNDLESHORTVERSIONSTRING} to the kext"
+	defaults write "$KEXT_PLIST" CFBundleVersion "$CFBUNDLEVERSION"
+	defaults write "$KEXT_PLIST" CFBundleShortVersionString "$CFBUNDLESHORTVERSIONSTRING"
+	finalize_plist "$KEXT_PLIST"
+
+	echo "Invoking the installer build script"
+	$INSTALLER_ROOT/../package.py
 fi
