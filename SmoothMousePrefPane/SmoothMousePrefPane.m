@@ -84,8 +84,8 @@
     if (whichVersionToShow == 0) { // official version
         /* nothing to do */
     } else if (whichVersionToShow == 1) { // detailed version information
-        NSString *prefCommit = [[prefBundle infoDictionary] objectForKey:@"COMMIT_ID"];;
-        NSString *kextCommit = [[kextBundle infoDictionary] objectForKey:@"COMMIT_ID"];;
+        NSString *prefCommit = [[prefBundle infoDictionary] objectForKey:@"SMCommitID"];;
+        NSString *kextCommit = [[kextBundle infoDictionary] objectForKey:@"SMCommitID"];;
         if (version) {
             version = [version stringByAppendingString:@" "];
             version = [version stringByAppendingString:prefCommit];
