@@ -28,11 +28,9 @@ parser.add_argument('--key', '-k', help='Private key necessary to produce a DSA 
 args = parser.parse_args()
 
 # Format version string
-try:
-	short_version = '.'.join(PACKAGE_VERSION[:-1])
-	human_version = short_version + ' (%s)' % PACKAGE_VERSION[-1]
-except TypeError:
-	short_version = human_version = PACKAGE_VERSION
+short_version = human_version = '.'.join(PACKAGE_VERSION[:3])
+if len(PACKAGE_VERSION) > 3:
+	human_version += ' (%s)' % PACKAGE_VERSION[3]
 
 # Create a temporary directory for our dirty deeds
 temp_dir = tempfile.mkdtemp()

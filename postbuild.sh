@@ -80,5 +80,5 @@ if [ -f "$KEXT_PLIST" ]; then
 	finalize_plist "$KEXT_PLIST"
 
 	echo "Invoking the installer build script"
-	$INSTALLER_ROOT/../package.py
+	"${INSTALLER_ROOT}/../package.py"
 fi
