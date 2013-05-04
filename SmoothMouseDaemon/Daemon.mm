@@ -47,6 +47,10 @@ void trap_signals(int sig)
     [NSApp terminate:nil];
 }
 
+void trap_sigusr(int sig) {
+    [[Daemon instance] dumpState];
+}
+
 // more information about getting notified when fron app changes:
 // http://stackoverflow.com/questions/763002/getting-notified-when-the-current-application-changes-in-cocoa
 static OSStatus AppFrontSwitchedHandler(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData)
@@ -83,6 +87,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
     connected = NO;
     globalMouseMonitor = NULL;
+    eventsSinceStart = 0;
 
     if (![[Config instance] debugEnabled]) {
         if (![[Config instance] mouseEnabled] && ![[Config instance] trackpadEnabled]) {
@@ -103,6 +108,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     signal(SIGINT, trap_signals);
     signal(SIGKILL, trap_signals);
     signal(SIGTERM, trap_signals);
+    signal(SIGUSR1, trap_sigusr);
 
     accel = [[SystemMouseAcceleration alloc] init];
     sMouseSupervisor = [[MouseSupervisor alloc] init];
@@ -369,6 +375,7 @@ static void *KernelEventThread(void *instance)
             if (!error) {
                 mhs = GET_TIME();
                 mouse_process_kext_event(mouse_event);
+                self->eventsSinceStart++;
                 mhe = GET_TIME();
             } else {
                 LOG(@"IODataQueueDequeue() failed");
@@ -401,6 +408,7 @@ static void *KernelEventThread(void *instance)
 
 -(void) mainLoop
 {
+    startTime = time(NULL);
     int retries_left = KEXT_CONNECT_RETRIES;
     while(1) {
         BOOL active = [self isActive];
@@ -414,8 +422,11 @@ static void *KernelEventThread(void *instance)
                 retries_left--;
             } else {
                 retries_left = KEXT_CONNECT_RETRIES;
-                [accel reset];
-                mouse_update_clicktime();
+                // TODO: refactor this (read: what a fucking mess this has become)
+                if (!terminating_smoothmouse) {
+                    [accel reset];
+                    mouse_update_clicktime();
+                }
             }
         } else {
             NSLog(@"calling disconnectFromKext from mainloop");
@@ -438,6 +449,18 @@ static void *KernelEventThread(void *instance)
         }
     }
     return active;
+}
+
+-(void) dumpState {
+    NSLog(@"=== DAEMON STATE ===");
+    NSLog(@"Uptime seconds: %d", (int) (time(NULL) - startTime));
+    NSLog(@"Connected: %d", connected);
+    NSLog(@"Mouse enabled: %d", [[Config instance] mouseEnabled]);
+    NSLog(@"Trackpad enabled: %d", [[Config instance] trackpadEnabled]);
+    NSLog(@"Kernel events since start: %llu", eventsSinceStart);
+    NSLog(@"Number of lost kext events: %d", totalNumberOfLostEvents);
+    NSLog(@"Number of lost clicks: %d", [sMouseSupervisor numClickEvents]);
+    NSLog(@"===");
 }
 
 @end

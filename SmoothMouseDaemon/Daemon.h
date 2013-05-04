@@ -18,10 +18,12 @@
     BOOL connected;
     pthread_t mouseEventThreadID;
     io_service_t service;
-	io_connect_t connect;
-	IODataQueueMemory *queueMappedMemory;
-	mach_port_t	recvPort;
-	uint32_t dataSize;
+    io_connect_t connect;
+    IODataQueueMemory *queueMappedMemory;
+    mach_port_t	recvPort;
+    uint32_t dataSize;
+    uint64_t eventsSinceStart;
+    time_t startTime;
 #if !__LP64__ || defined(IOCONNECT_MAPMEMORY_10_6)
     vm_address_t address;
     vm_size_t size;
@@ -41,6 +43,7 @@
 -(BOOL) isActive;
 -(void) redrawOverlay;
 -(void) say:(NSString *)message;
+-(void) dumpState;
 
 @end
 
