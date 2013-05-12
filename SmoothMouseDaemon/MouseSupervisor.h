@@ -1,15 +1,10 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MouseMoveEvent : NSObject {
-    float x;
-    float y;
-}
-
-@end
+#include <queue>
 
 @interface MouseSupervisor : NSObject {
-    NSMutableArray *moveEvents;
+    std::queue<int> moveEvents;
     int clickEvents;
     int clickEventsZeroLevel;
 }

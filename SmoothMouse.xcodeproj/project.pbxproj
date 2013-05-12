@@ -46,7 +46,7 @@
 		033CB660170771D000D6B1DC /* driver.mm in Sources */ = {isa = PBXBuildFile; fileRef = 033CB65F170771D000D6B1DC /* driver.mm */; };
 		0341D0C0170CA67000D24E08 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0341D0BF170CA67000D24E08 /* Carbon.framework */; };
 		034215B41631F2BA0047E370 /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03D020D41631F22A00CD04C1 /* uninstall.sh */; };
-		035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.m */; };
+		035222F116C0492E00DBE092 /* MouseSupervisor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.mm */; };
 		03628254170481F000C2E371 /* Prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* Prio.mm */; };
 		036E3EF11637066600887DCE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 036E3EF01637066600887DCE /* Security.framework */; };
 		03758F0017089405003E066D /* mach_timebase_util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03758EFF17089405003E066D /* mach_timebase_util.mm */; };
@@ -148,7 +148,7 @@
 		033CB6611707720400D6B1DC /* driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = driver.h; sourceTree = "<group>"; };
 		0341D0BF170CA67000D24E08 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Carbon.framework; sourceTree = DEVELOPER_DIR; };
 		035222EF16C0492E00DBE092 /* MouseSupervisor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseSupervisor.h; sourceTree = "<group>"; };
-		035222F016C0492E00DBE092 /* MouseSupervisor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MouseSupervisor.m; sourceTree = "<group>"; };
+		035222F016C0492E00DBE092 /* MouseSupervisor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MouseSupervisor.mm; sourceTree = "<group>"; };
 		03628252170481BF00C2E371 /* Prio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Prio.h; sourceTree = "<group>"; };
 		03628253170481F000C2E371 /* Prio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Prio.mm; sourceTree = "<group>"; };
 		036E3EF01637066600887DCE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
@@ -257,7 +257,7 @@
 				03319D71172307FE00668B93 /* MouseEventListener.h */,
 				03319D72172307FE00668B93 /* MouseEventListener.mm */,
 				035222EF16C0492E00DBE092 /* MouseSupervisor.h */,
-				035222F016C0492E00DBE092 /* MouseSupervisor.m */,
+				035222F016C0492E00DBE092 /* MouseSupervisor.mm */,
 				031F7844171AD33700752C43 /* OverlayView.h */,
 				031F7845171AD33700752C43 /* OverlayView.mm */,
 				031F7841171AA0CF00752C43 /* OverlayWindow.h */,
@@ -571,7 +571,7 @@
 				0319400616BFB510008FE899 /* mouse.mm in Sources */,
 				0319400F16BFB637008FE899 /* OSXFunction.cpp in Sources */,
 				0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */,
-				035222F116C0492E00DBE092 /* MouseSupervisor.m in Sources */,
+				035222F116C0492E00DBE092 /* MouseSupervisor.mm in Sources */,
 				03628254170481F000C2E371 /* Prio.mm in Sources */,
 				033CB660170771D000D6B1DC /* driver.mm in Sources */,
 				03758F0017089405003E066D /* mach_timebase_util.mm in Sources */,

@@ -25,7 +25,6 @@
 #define SUPERVISOR_SLEEP_TIME_USEC (500000)
 
 double start, end, e1, e2, mhs, mhe, outerstart, outerend, outersum = 0, outernum = 0;
-NSMutableArray* logs = [[NSMutableArray alloc] init];
 
 static int terminating_smoothmouse = 0;
 
@@ -347,8 +346,6 @@ static void *KernelEventThread(void *instance)
 
     //NSLog(@"KernelEventThread: Start");
 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
     kern_return_t error;
 
     char *buf = (char *)malloc(self->dataSize);
@@ -391,8 +388,6 @@ static void *KernelEventThread(void *instance)
             outernum += 1;
             outersum += (outerend-outerstart);
         }
-
-        [pool drain];
 
         outerstart = GET_TIME();
     }

@@ -17,14 +17,14 @@
 int numCoalescedEvents;
 
 static CGEventSourceRef eventSource = NULL;
-io_connect_t iohid_connect = MACH_PORT_NULL;
-pthread_t driverEventThreadID;
+static io_connect_t iohid_connect = MACH_PORT_NULL;
+static pthread_t driverEventThreadID;
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t data_available = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t data_available = PTHREAD_COND_INITIALIZER;
 
-std::list<driver_event_t> event_queue;
-BOOL keep_running;
+static std::list<driver_event_t> event_queue;
+static BOOL keep_running;
 
 static void *DriverEventThread(void *instance);
 static BOOL driver_handle_button_event(driver_button_event_t *event);
@@ -107,8 +107,6 @@ const char *driver_iohid_event_type_to_string(int type) {
 
 static void *DriverEventThread(void *instance)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
     //LOG(@"DriverEventThread: Start");
 
     [Prio setRealtimePrio: @"DriverEventThread" withComputation:200000 withConstraint:300000];
@@ -123,7 +121,11 @@ static void *DriverEventThread(void *instance)
         event = event_queue.front();
         event_queue.pop_front();
         pthread_mutex_unlock(&mutex);
-        [sDriverEventLog add:&event];
+
+        if ([[Config instance] latencyEnabled]) {
+            [sDriverEventLog add:&event];
+        }
+
         switch(event.id) {
             case DRIVER_EVENT_ID_MOVE:
                 //LOG(@"DRIVER_EVENT_ID_MOVE");
@@ -145,7 +147,6 @@ static void *DriverEventThread(void *instance)
             LOG(@"driver timings: total time time in mach time units: %f", (end-start));
         }
 
-        [pool drain];
     }
 
     //NSLog(@"DriverEventThread: End");

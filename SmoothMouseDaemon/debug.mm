@@ -13,6 +13,9 @@ static int maxHz = -1;
 static int numHz = 0;
 static int sumHz = 0;
 
+std::vector<void *> logs;
+pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 void debug_register_event(mouse_event_t *event) {
     static long long lastTimestamp = 0;
 
@@ -35,25 +38,28 @@ void debug_register_event(mouse_event_t *event) {
 void debug_end() {
     is_dumping = 1;
 
-    if ([logs count] > 0) {
+    if (!logs.empty()) {
         NSLog(@"Dumping log");
     } else {
         NSLog(@"No logs to dump");
     }
 
-    for (NSString *log in logs) {
+    std::vector<void *>::iterator it;
+    for (it = logs.begin(); it != logs.end(); it++) {
+        NSString *log = (NSString *)*it;
         if (log == nil) {
             NSLog(@"log nil, should never happen");
             exit(1);
         }
         NSLog(@"%@", log);
+        [log release];
     }
 
     if ([[Config instance] timingsEnabled]) {
         NSLog(@"outer average: %f", (outersum / outernum));
     }
 
-    if ([logs count] > 0) {
+    if (!logs.empty()) {
         NSLog(@"Dumping complete");
     }
 
