@@ -32,9 +32,8 @@ int totalNumberOfLostEvents = 0;
 static int needs_refresh = 0;
 static RefreshReason refresh_reason = REFRESH_REASON_UNKNOWN;
 
-// NOTE: since we support 32-bit architectures we need to protect assignment
-//       to doubleClickSpeed.
-static pthread_mutex_t clickSpeedMutex = PTHREAD_MUTEX_INITIALIZER;
+static int doubleClickSpeedUpdated = 0;
+static double newDoubleClickSpeed;
 
 static const char *get_refresh_reason_string(RefreshReason reason) {
     switch (reason) {
@@ -130,12 +129,18 @@ static void refresh_mouse_location() {
 }
 
 void mouse_update_clicktime() {
-    pthread_mutex_lock(&clickSpeedMutex);
-    NXEventHandle handle = NXOpenEventStatus();
-	doubleClickSpeed = NXClickTime(handle);
-    NXCloseEventStatus(handle);
-    pthread_mutex_unlock(&clickSpeedMutex);
-    //NSLog(@"clicktime updated: %f", clickTime);
+    // only update once every sec (TODO: prettier)
+    // this operation is pretty costly
+    static int counter = 0;
+    if ((counter++) % 2 == 0) {
+        NXEventHandle handle = NXOpenEventStatus();
+        newDoubleClickSpeed = NXClickTime(handle);
+        NXCloseEventStatus(handle);
+        if (newDoubleClickSpeed != doubleClickSpeed) {
+            doubleClickSpeedUpdated = 1;
+        }
+        //NSLog(@"current system double click speed: %f", newDoubleClickSpeed);
+    }
 }
 
 static void mouse_handle_move(mouse_event_t *event, double velocity, AccelerationCurve curve) {
@@ -313,12 +318,13 @@ static void mouse_handle_buttons(mouse_event_t *event) {
                 CGFloat distanceMovedSinceLastClick = get_distance(lastClickPos, currentPos);
                 double now = timestamp();
 
-                double theDoubleClickSpeed;
-                pthread_mutex_lock(&clickSpeedMutex);
-                theDoubleClickSpeed = doubleClickSpeed;
-                pthread_mutex_unlock(&clickSpeedMutex);
+                if (doubleClickSpeedUpdated) {
+                    doubleClickSpeed = newDoubleClickSpeed;
+                    doubleClickSpeedUpdated = 0;
+                    //NSLog(@"Double click speed updated to %f", doubleClickSpeed);
+                }
 
-                if (now - lastClickTime <= theDoubleClickSpeed &&
+                if (now - lastClickTime <= doubleClickSpeed &&
                     distanceMovedSinceLastClick <= maxDistanceAllowed) {
                     lastClickTime = timestamp();
                     nclicks++;
