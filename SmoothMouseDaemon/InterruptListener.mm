@@ -90,9 +90,7 @@ static void *InterruptListenerThread(void *instance)
 
     find_device();
 
-    NSDate *date = [NSDate distantFuture];
-
-    while (self->running && [self->runLoop runMode:NSDefaultRunLoopMode beforeDate:date]);
+    CFRunLoopRun();
 
     [pool drain];
 
@@ -103,17 +101,14 @@ static void *InterruptListenerThread(void *instance)
 
 -(void) start {
     //LOG(@"InterruptListener::start");
-    running = 1;
     int err = pthread_create(&threadId, NULL, &InterruptListenerThread, self);
     if (err != 0) {
         NSLog(@"Failed to start InterruptListenerThread");
-        running = 0;
     }
 }
 
 -(void) stop {
     //LOG(@"InterruptListener::stop");
-    running = 0;
 
     [runLoop performSelector: @selector(stopThread:) target:self argument:nil order:0 modes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
 

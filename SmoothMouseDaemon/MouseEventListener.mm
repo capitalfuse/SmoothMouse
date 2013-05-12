@@ -176,9 +176,7 @@ static void *MouseEventListenerThread(void *instance)
 
     self->runLoop = [NSRunLoop currentRunLoop];
 
-    NSDate *date = [NSDate distantFuture];
-
-    while (self->running && [self->runLoop runMode:NSDefaultRunLoopMode beforeDate:date]);
+    CFRunLoopRun();
 
     CFRunLoopRemoveSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
 
@@ -197,17 +195,14 @@ static void *MouseEventListenerThread(void *instance)
 
 -(void) start {
     //LOG(@"MouseEventListener::start");
-    running = 1;
     int err = pthread_create(&threadId, NULL, &MouseEventListenerThread, self);
     if (err != 0) {
         NSLog(@"Failed to start MouseEventListenerThread");
-        running = 0;
     }
 }
 
 -(void) stop {
     //LOG(@"MouseEventListener::stop");
-    running = 0;
 
     [runLoop performSelector: @selector(stopThread:) target:self argument:nil order:0 modes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
 
@@ -220,7 +215,6 @@ static void *MouseEventListenerThread(void *instance)
     if (rv != 0) {
         NSLog(@"Failed to wait for MouseEventListenerThread");
     }
-
 }
 
 -(void) stopThread: (id) argument {

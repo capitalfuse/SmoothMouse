@@ -9,7 +9,6 @@
 @private
     pthread_t threadId;
     NSRunLoop *runLoop;
-    BOOL running;
     std::list<uint64_t> events;
 }
 -(void) start;

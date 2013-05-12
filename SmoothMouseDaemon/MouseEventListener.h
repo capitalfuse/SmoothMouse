@@ -8,7 +8,6 @@
 @private
     pthread_t threadId;
     NSRunLoop *runLoop;
-    BOOL running;
 }
 -(void) start;
 -(void) stop;
