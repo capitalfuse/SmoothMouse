@@ -392,14 +392,14 @@ static void *KernelEventThread(void *instance)
             outersum += (outerend-outerstart);
         }
 
+        [pool drain];
+
         outerstart = GET_TIME();
     }
 
     (void) mouse_cleanup();
 
     free(buf);
-
-    [pool drain];
 
     //NSLog(@"KernelEventThread: End");
 

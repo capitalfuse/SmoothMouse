@@ -36,7 +36,8 @@
 -(IBAction)pressCheckForUpdates:(id) sender;
 -(IBAction)pressEnableDisableAutomaticallyCheckForUpdates:(id) sender;
 -(IBAction)pressReportBug:(id) sender;
--(IBAction)pressUninstall:(id) sender;  
+-(IBAction)pressDiagnose:(id) sender;
+-(IBAction)pressUninstall:(id) sender;
 
 -(NSString *)findLocationOfPrefPane;
 -(NSString *)findLocationOfPrefPaneFile:(NSString *)file;

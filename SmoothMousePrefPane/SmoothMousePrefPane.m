@@ -143,6 +143,10 @@
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
 }
 
+-(IBAction)pressDiagnose:(id) sender {
+    // TODO
+}
+
 -(IBAction)pressUninstall:(id) sender {
     NSAlert *alert = [[NSAlert alloc] init];
     [alert setMessageText:@"Are you sure you want to uninstall SmoothMouse?"];

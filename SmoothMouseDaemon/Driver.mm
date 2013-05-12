@@ -144,11 +144,11 @@ static void *DriverEventThread(void *instance)
         if ([[Config instance] timingsEnabled]) {
             LOG(@"driver timings: total time time in mach time units: %f", (end-start));
         }
+
+        [pool drain];
     }
 
     //NSLog(@"DriverEventThread: End");
-
-    [pool drain];
 
     return NULL;
 }
