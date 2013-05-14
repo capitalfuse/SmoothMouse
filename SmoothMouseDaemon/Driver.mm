@@ -500,21 +500,18 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             NXEventData eventData;
             kern_return_t result;
 
-            if ([[Config instance] sendAuxEventsEnabled] ||
-                [activeAppBundleId isEqualToString:@"com.twitter.twitter-mac"]) {
-                if ([[Config instance] debugEnabled]) {
-                    LOG(@"%s:BUTTON: Sending AUX mouse button event", driverString);
-                }
-                bzero(&eventData, sizeof(NXEventData));
-                eventData.compound.misc.L[0] = 1;
-                eventData.compound.misc.L[1] = is_down_event;
-                eventData.compound.subType = NX_SUBTYPE_AUX_MOUSE_BUTTONS;
+            if ([[Config instance] debugEnabled]) {
+                LOG(@"%s:BUTTON: Sending AUX mouse button event", driverString);
+            }
+            bzero(&eventData, sizeof(NXEventData));
+            eventData.compound.misc.L[0] = 1;
+            eventData.compound.misc.L[1] = is_down_event;
+            eventData.compound.subType = NX_SUBTYPE_AUX_MOUSE_BUTTONS;
 
-                result = IOHIDPostEvent(iohid_connect, NX_SYSDEFINED, newPoint, &eventData, kNXEventDataVersion, 0, 0);
+            result = IOHIDPostEvent(iohid_connect, NX_SYSDEFINED, newPoint, &eventData, kNXEventDataVersion, 0, 0);
 
-                if (result != KERN_SUCCESS) {
-                    NSLog(@"failed to post aux button event");
-                }
+            if (result != KERN_SUCCESS) {
+                NSLog(@"failed to post aux button event");
             }
 
             static int eventNumber = 0;
