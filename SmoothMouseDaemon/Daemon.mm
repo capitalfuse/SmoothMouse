@@ -209,8 +209,6 @@ const char *get_acceleration_string(AccelerationCurve curve) {
                 [interruptListener start];
             }
 
-            [mouseEventListener start];
-
             connected = YES;
         }
 
@@ -257,6 +255,16 @@ error:
         LOG(@"Active App Bundle Id: %@", appBundleId);
     }
     [[Config instance] setActiveAppBundleId: appBundleId];
+    [self handleAppChanged];
+}
+
+-(void) handleAppChanged {
+    NSString *activeAppBundleId = [[Config instance] activeAppBundleId];
+    if ([activeAppBundleId isEqualToString:@"com.ableton.live"]) {
+        [mouseEventListener start];
+    } else {
+        [mouseEventListener stop];
+    }
 }
 
 -(BOOL) configureDriver

@@ -83,11 +83,6 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
             [sInterruptListener numEvents]);
     }
 
-    if (IsMouseCoalescingEnabled()) {
-        LOG(@"ERROR: Mouse coalescing is enabled");
-        exit(1);
-    }
-
     if (type == kCGEventMouseMoved ||
         type == kCGEventLeftMouseDragged ||
         type == kCGEventRightMouseDragged ||
@@ -136,7 +131,7 @@ static void *MouseEventListenerThread(void *instance)
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    SetMouseCoalescingEnabled(false, NULL);
+    SetMouseCoalescingEnabled(true, NULL);
 
     MouseEventListener *self = (MouseEventListener *) instance;
 
@@ -204,21 +199,15 @@ static void *MouseEventListenerThread(void *instance)
 -(void) stop {
     //LOG(@"MouseEventListener::stop");
 
-    [runLoop performSelector: @selector(stopThread:) target:self argument:nil order:0 modes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
+    if (runLoop != nil) {
+        CFRunLoopStop([runLoop getCFRunLoop]);
 
-    // need to wake up after posting a selector to the runloop:
-    // http://www.cocoabuilder.com/archive/cocoa/228634-nsrunloop-performselector-needs-cfrunloopwakeup.html
-    CFRunLoopRef crf = [runLoop getCFRunLoop];
-    CFRunLoopWakeUp(crf);
-
-    int rv = pthread_join(threadId, NULL);
-    if (rv != 0) {
-        NSLog(@"Failed to wait for MouseEventListenerThread");
+        int rv = pthread_join(threadId, NULL);
+        if (rv != 0) {
+            NSLog(@"Failed to wait for MouseEventListenerThread");
+        }
+        runLoop = nil;
     }
 }
 
--(void) stopThread: (id) argument {
-    //LOG(@"MouseEventListener::stopThread");
-    CFRunLoopStop([[NSRunLoop currentRunLoop] getCFRunLoop]);
-}
 @end

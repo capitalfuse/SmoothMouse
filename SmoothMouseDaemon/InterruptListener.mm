@@ -110,22 +110,15 @@ static void *InterruptListenerThread(void *instance)
 -(void) stop {
     //LOG(@"InterruptListener::stop");
 
-    [runLoop performSelector: @selector(stopThread:) target:self argument:nil order:0 modes:[NSArray arrayWithObject:NSDefaultRunLoopMode]];
+    if (runLoop != nil) {
+        CFRunLoopStop([runLoop getCFRunLoop]);
 
-    // need to wake up after posting a selector to the runloop:
-    // http://www.cocoabuilder.com/archive/cocoa/228634-nsrunloop-performselector-needs-cfrunloopwakeup.html
-    CFRunLoopRef crf = [runLoop getCFRunLoop];
-    CFRunLoopWakeUp(crf);
-
-    int rv = pthread_join(threadId, NULL);
-    if (rv != 0) {
-        NSLog(@"Failed to wait for InterruptListenerThread");
+        int rv = pthread_join(threadId, NULL);
+        if (rv != 0) {
+            NSLog(@"Failed to wait for MouseEventListenerThread");
+        }
+        runLoop = nil;
     }
-}
-
--(void) stopThread: (id) argument {
-    //LOG(@"InterruptListener::stopThread");
-    CFRunLoopStop([[NSRunLoop currentRunLoop] getCFRunLoop]);
 }
 
 -(void) put:(uint64_t) timestamp {
