@@ -25,6 +25,7 @@ COMPONENTS = (
 parser = argparse.ArgumentParser()
 parser.add_argument('--certificate', '-c', help='Certificate to sign the product archive with')
 parser.add_argument('--key', '-k', help='Private key necessary to produce a DSA signature for Sparkle')
+parser.add_argument('--reveal', action='store_true', help='Reveal the product archive in Finder upon completion')
 args = parser.parse_args()
 
 # Format version string
@@ -94,3 +95,12 @@ if args.key:
 	
 # Delete the temporary directory
 shutil.rmtree(temp_dir)
+
+if args.reveal:
+	osascript = '''
+		tell application "Finder"
+	 		activate
+			reveal POSIX file "%s"
+		end tell
+		''' % os.path.abspath(final_archive_path)
+	check_output("osascript -e '%s'" % osascript, shell=True)
