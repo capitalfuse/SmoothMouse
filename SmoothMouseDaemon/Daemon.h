@@ -41,6 +41,7 @@
 -(BOOL) configureDriver;
 -(BOOL) disconnectFromKext;
 -(BOOL) isActive;
+-(BOOL) isMouseEventListenerActive;
 -(void) redrawOverlay;
 -(void) say:(NSString *)message;
 -(void) dumpState;

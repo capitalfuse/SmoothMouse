@@ -66,6 +66,14 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     return NO;
 }
 
+- (void) clearMoveEvents {
+    pthread_mutex_lock(&mutex);
+    while (!moveEvents.empty()) {
+        moveEvents.pop();
+    }
+    pthread_mutex_unlock(&mutex);
+}
+
 - (void) pushClickEvent {
     pthread_mutex_lock(&mutex);
     clickEvents++;

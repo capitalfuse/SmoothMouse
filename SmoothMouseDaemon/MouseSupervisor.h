@@ -12,6 +12,7 @@
 - (id)init;
 - (void) pushMoveEvent: (int) deltaX : (int) deltaY;
 - (BOOL) popMoveEvent: (int) deltaX : (int) deltaY;
+- (void) clearMoveEvents;
 - (void) pushClickEvent;
 - (void) popClickEvent;
 - (int) numMoveEvents;

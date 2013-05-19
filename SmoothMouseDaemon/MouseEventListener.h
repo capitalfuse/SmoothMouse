@@ -7,8 +7,10 @@
 @interface MouseEventListener : NSObject {
 @private
     pthread_t threadId;
+    bool running;
     NSRunLoop *runLoop;
 }
 -(void) start;
 -(void) stop;
+-(bool) isRunning;
 @end

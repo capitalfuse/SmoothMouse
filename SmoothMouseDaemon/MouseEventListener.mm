@@ -171,7 +171,11 @@ static void *MouseEventListenerThread(void *instance)
 
     self->runLoop = [NSRunLoop currentRunLoop];
 
+    self->running = true;
+
     CFRunLoopRun();
+
+    self->running = false;
 
     CFRunLoopRemoveSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
 
@@ -208,6 +212,10 @@ static void *MouseEventListenerThread(void *instance)
         }
         runLoop = nil;
     }
+}
+
+-(bool) isRunning {
+    return running;
 }
 
 @end

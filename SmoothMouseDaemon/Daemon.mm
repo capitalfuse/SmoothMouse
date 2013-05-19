@@ -261,6 +261,7 @@ error:
 -(void) handleAppChanged {
     NSString *activeAppBundleId = [[Config instance] activeAppBundleId];
     if ([activeAppBundleId isEqualToString:@"com.ableton.live"]) {
+        [sMouseSupervisor clearMoveEvents];
         [mouseEventListener start];
     } else {
         [mouseEventListener stop];
@@ -452,6 +453,10 @@ static void *KernelEventThread(void *instance)
         }
     }
     return active;
+}
+
+-(BOOL) isMouseEventListenerActive {
+    return [mouseEventListener isRunning];
 }
 
 -(void) dumpState {

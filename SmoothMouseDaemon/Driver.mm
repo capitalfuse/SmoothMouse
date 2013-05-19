@@ -6,6 +6,7 @@
 #include <IOKit/hidsystem/event_status_driver.h>
 #include <IOKit/hidsystem/IOHIDShared.h>
 
+#import "Daemon.h"
 #import "DriverEventLog.h"
 
 #include <list>
@@ -265,7 +266,9 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
 
     const char *driverString = driver_get_driver_string(driver_to_use);
 
-    [sMouseSupervisor pushMoveEvent: event->deltaX: event->deltaY];
+    if ([[Daemon instance] isMouseEventListenerActive]) {
+        [sMouseSupervisor pushMoveEvent: event->deltaX: event->deltaY];
+    }
 
     e1 = GET_TIME();
     switch (driver_to_use) {
