@@ -96,11 +96,6 @@ if [ -f "$KEXT_PLIST" ]; then
 	# Build an installer
 	if [ $CONFIGURATION == "Release" ]; then
 		echo "Invoking the installer build script"
-		if [ -n "${SM_CERTIFICATE_IDENTITY-}" ]; then
-			echo "SM_CERTIFICATE_IDENTITY: ${SM_CERTIFICATE_IDENTITY}"
-			"${INSTALLER_ROOT}/../package.py" -c "$SM_CERTIFICATE_IDENTITY" --reveal
-		else
-			"${INSTALLER_ROOT}/../package.py" --reveal
-		fi
+		"${INSTALLER_ROOT}/../package.py" --reveal
 	fi
 fi

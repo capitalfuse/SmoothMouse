@@ -1,4 +1,4 @@
-import os, sys, fileinput, logging
+import os, sys, re, fileinput, logging
 from subprocess import check_output
 
 logging.basicConfig(
@@ -21,6 +21,9 @@ def prepare_options(*args):
 			
 def log_success():
 	logging.info('Success' + "\n")
+	
+def contains_digits(string):
+    return bool(re.compile('\d').search(string))
 
 # Reading plists
 # -----------------------------------------------------------------------
@@ -34,7 +37,12 @@ def defaults_read(filename, property):
 		raise IOError('File not found')
 
 def read_version(filename, property='CFBundleVersion'):	
-	return defaults_read(filename, property).strip().split('.')
+	version = defaults_read(filename, property).strip()
+	
+	if contains_digits(version):
+		return version.split('.')
+	else:
+		raise Exception('%s contains no numbers; looks like an error' % property)
 	
 # File manipulation
 # -----------------------------------------------------------------------
@@ -103,7 +111,7 @@ def productsign(certificate_name, input_product_path, output_product_path):
 	
 def archive(source, destination):
 	logging.info('Creating a ZIP archive from ' + source)
-	check_output(['zip', '-r', destination, source])
+	check_output(['zip', '-FSr', destination, source])
 	
 	# Test existence of the archive
 	check_file_existence(destination, log_success)

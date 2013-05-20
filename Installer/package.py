@@ -78,9 +78,10 @@ productbuild(
 )
 
 # Sign the product archive with the Apple Developer ID
-if args.certificate:
+certificate = args.certificate or os.getenv('SM_CERTIFICATE_IDENTITY')
+if certificate:
 	final_product_path = PACKAGE_NAME + '.pkg'
-	productsign('Developer ID Installer: ' + args.certificate, temp_product_path, final_product_path)
+	productsign('Developer ID Installer: ' + certificate, temp_product_path, final_product_path)
 else:
 	final_product_path = PACKAGE_NAME + ' (unsigned).pkg'
 	shutil.copy(temp_product_path, final_product_path)
