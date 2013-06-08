@@ -10,6 +10,7 @@
 
 @interface Daemon : NSObject {
 @private
+    NSRunLoop *runLoop;
     InterruptListener *interruptListener;
     MouseEventListener *mouseEventListener;
     OverlayWindow *overlay;

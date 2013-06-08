@@ -125,19 +125,12 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
     return event;
 }
 
-static void *MouseEventListenerThread(void *instance)
-{
-    //LOG(@"MouseEventListenerThread: Start");
-
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+-(void) start:(NSRunLoop *)runLoop {
+    //LOG(@"MouseEventListener::start");
 
     SetMouseCoalescingEnabled(true, NULL);
 
-    MouseEventListener *self = (MouseEventListener *) instance;
-
-    CFMachPortRef      eventTap;
-    CGEventMask        eventMask;
-    CFRunLoopSourceRef runLoopSource;
+    CGEventMask eventMask;
 
     // Create an event tap. We are interested in mouse movements.
     eventMask  = 0;
@@ -152,65 +145,34 @@ static void *MouseEventListenerThread(void *instance)
     eventMask |= CGEventMaskBit(kCGEventOtherMouseDown);
     eventMask |= CGEventMaskBit(kCGEventOtherMouseUp);
 
-    eventTap = CGEventTapCreate(
-                                kCGSessionEventTap, kCGHeadInsertEventTap,
-                                0, eventMask, myCGEventCallback, NULL);
+    eventTap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, 0, eventMask, myCGEventCallback, NULL);
     if (!eventTap) {
         fprintf(stderr, "failed to create event tap\n");
         exit(1);
     }
 
-    // Create a run loop source.
     runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
 
-    // Add to the current run loop.
-    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
+    CFRunLoopAddSource([runLoop getCFRunLoop], runLoopSource, kCFRunLoopCommonModes);
 
-    // Enable the event tap.
     CGEventTapEnable(eventTap, true);
 
-    self->runLoop = [NSRunLoop currentRunLoop];
-
-    self->running = true;
-
-    CFRunLoopRun();
-
-    self->running = false;
-
-    CFRunLoopRemoveSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
-
-    CGEventTapEnable(eventTap, false);
-
-    CFRelease(eventTap);
-
-    CFRelease(runLoopSource);
-
-    [pool drain];
-
-    //LOG(@"MouseEventListenerThread: End");
-
-    return NULL;
+    running = true;
 }
 
--(void) start {
-    //LOG(@"MouseEventListener::start");
-    int err = pthread_create(&threadId, NULL, &MouseEventListenerThread, self);
-    if (err != 0) {
-        NSLog(@"Failed to start MouseEventListenerThread");
-    }
-}
-
--(void) stop {
+-(void) stop:(NSRunLoop *)runLoop {
     //LOG(@"MouseEventListener::stop");
 
-    if (runLoop != nil) {
-        CFRunLoopStop([runLoop getCFRunLoop]);
+    if (running) {
+        running = false;
 
-        int rv = pthread_join(threadId, NULL);
-        if (rv != 0) {
-            NSLog(@"Failed to wait for MouseEventListenerThread");
-        }
-        runLoop = nil;
+        CGEventTapEnable(eventTap, false);
+
+        CFRunLoopRemoveSource([runLoop getCFRunLoop], runLoopSource, kCFRunLoopCommonModes);
+
+        CFRelease(runLoopSource);
+
+        CFRelease(eventTap);
     }
 }
 

@@ -87,6 +87,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     connected = NO;
     globalMouseMonitor = NULL;
     eventsSinceStart = 0;
+    runLoop = [NSRunLoop currentRunLoop];
 
     if (![[Config instance] debugEnabled]) {
         if (![[Config instance] mouseEnabled] && ![[Config instance] trackpadEnabled]) {
@@ -262,9 +263,9 @@ error:
     NSString *activeAppBundleId = [[Config instance] activeAppBundleId];
     if ([activeAppBundleId isEqualToString:@"com.ableton.live"]) {
         [sMouseSupervisor clearMoveEvents];
-        [mouseEventListener start];
+        [mouseEventListener start:runLoop];
     } else {
-        [mouseEventListener stop];
+        [mouseEventListener stop:runLoop];
     }
 }
 
@@ -334,7 +335,7 @@ error:
                 [interruptListener stop];
             }
 
-            [mouseEventListener stop];
+            [mouseEventListener stop:runLoop];
             
             NSLog(@"Disconnected from KEXT");
         }

@@ -6,11 +6,11 @@
 
 @interface MouseEventListener : NSObject {
 @private
-    pthread_t threadId;
     bool running;
-    NSRunLoop *runLoop;
+    CFMachPortRef eventTap;
+    CFRunLoopSourceRef runLoopSource;
 }
--(void) start;
--(void) stop;
+-(void) start:(NSRunLoop *)runLoop;
+-(void) stop:(NSRunLoop *)runLoop;
 -(bool) isRunning;
 @end
