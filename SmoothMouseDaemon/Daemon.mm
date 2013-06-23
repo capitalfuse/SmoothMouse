@@ -434,7 +434,7 @@ static void *KernelEventThread(void *instance)
                 }
             }
         } else {
-            NSLog(@"calling disconnectFromKext from mainloop");
+            //NSLog(@"calling disconnectFromKext from mainloop");
             [self disconnectFromKext];
         }
         usleep(SUPERVISOR_SLEEP_TIME_USEC);
