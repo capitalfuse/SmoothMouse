@@ -114,6 +114,12 @@
 
     NSLog(@"found %@", file);
 
+    excludedApps = [dict objectForKey:SETTINGS_EXCLUDED_APPS];
+    if (excludedApps) {
+        excludedApps = [excludedApps copy];
+    }
+    NSLog(@"excludedApps = %@", excludedApps);
+
     NSNumber *value;
 
     value = [dict valueForKey:SETTINGS_MOUSE_ENABLED];
@@ -155,6 +161,30 @@
     [self setTrackpadCurve: [self getAccelerationCurveFromDict:dict withKey:SETTINGS_TRACKPAD_ACCELERATION_CURVE]];
 
     return YES;
+}
+
+-(BOOL) activeAppIsExcluded {
+    if (activeAppBundleId) {
+        if ([[Config instance] appIsExcluded:activeAppBundleId]) {
+            //NSLog(@"smoothmouse should not be enabled in current app");
+            return YES;
+        }
+    }
+    return NO;
+}
+
+-(BOOL) appIsExcluded:(NSString *)app {
+    // TODO: cache this value for (modesy) performace gain
+    if (excludedApps) {
+        for (NSString *excludedApp in excludedApps) {
+            if ([excludedApp isEqualToString:app]) {
+                //NSLog(@"%@ is excluded", app);
+                return YES;
+            }
+        }
+    }
+    //NSLog(@"%@ is NOT excluded", app);
+    return NO;
 }
 
 @end

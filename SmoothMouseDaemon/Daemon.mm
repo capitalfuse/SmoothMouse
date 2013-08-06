@@ -443,6 +443,7 @@ static void *KernelEventThread(void *instance)
 
 -(BOOL) isActive {
     BOOL active = NO;
+    // check if we are logged in
     CFDictionaryRef sessionDict = CGSessionCopyCurrentDictionary();
     if (sessionDict) {
         const void *loggedIn = CFDictionaryGetValue(sessionDict, kCGSessionOnConsoleKey);
@@ -451,6 +452,12 @@ static void *KernelEventThread(void *instance)
             active = NO;
         } else {
             active = YES;
+        }
+    }
+    // yes we are logged in, check if we want smoothmouse to be enabled in the current app
+    if (active) {
+        if ([[Config instance] activeAppIsExcluded]) {
+            active = NO;
         }
     }
     return active;

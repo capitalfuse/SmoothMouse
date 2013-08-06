@@ -23,6 +23,8 @@
     BOOL overlayEnabled;
     BOOL sayEnabled;
     BOOL latencyEnabled;
+
+    NSArray *excludedApps;
 }
 
 @property BOOL mouseEnabled;
@@ -46,5 +48,7 @@
 -(BOOL) parseCommandLineArguments;
 -(BOOL) readSettingsPlist;
 -(AccelerationCurve) getAccelerationCurveFromDict:(NSDictionary *)dictionary withKey:(NSString *)key;
+-(BOOL) activeAppIsExcluded;
+-(BOOL) appIsExcluded:(NSString *)app;
 
 @end

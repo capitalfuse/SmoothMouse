@@ -14,6 +14,7 @@
 #define SETTINGS_MOUSE_VELOCITY @"Mouse velocity"
 #define SETTINGS_TRACKPAD_VELOCITY @"Trackpad velocity"
 #define SETTINGS_DRIVER @"Driver"
+#define SETTINGS_EXCLUDED_APPS @"Excluded apps"
 
 #define SETTINGS_MOUSE_ENABLED_DEFAULT NO
 #define SETTINGS_TRACKPAD_ENABLED_DEFAULT NO
