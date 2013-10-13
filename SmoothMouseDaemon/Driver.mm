@@ -372,6 +372,11 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
                     (e2-e1));
             }
 
+            if (event->type != kCGEventMouseMoved &&
+                [[[Config instance] activeAppBundleId] isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"]) {
+                mouse_refresh(REFRESH_REASON_FORCE_DRAG_REFRESH);
+            }
+
             break;
         }
         default:
