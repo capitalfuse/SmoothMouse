@@ -3,8 +3,6 @@
 
 #import <ServiceManagement/ServiceManagement.h>
 
-#import <FeedbackReporter/FRFeedbackReporter.h>
-
 // umask
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -140,7 +138,11 @@
 }
 
 -(IBAction)pressReportBug:(id) sender {
-    [[FRFeedbackReporter sharedReporter] reportFeedback];
+    NSArray *arguments;
+    arguments = [NSArray arrayWithObjects:
+                 @"/Library/PreferencePanes/SmoothMouse.prefPane/Contents/SmoothMouseFeedback.app",
+                 nil];
+    [self launchExecutable:@"/usr/bin/open" withArguments:arguments];
 }
 
 -(IBAction)pressDiagnose:(id) sender {

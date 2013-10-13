@@ -30,10 +30,12 @@ set -o nounset # indicate an error when trying to use an undefined variable
 echo "Merging the daemon and updater with the prefpane"
 rm -rf "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app"
 rm -rf "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseDaemon.app"
+rm -rf "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseFeedback.app"
 mv "${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app" "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/"
 mv "${BUILT_PRODUCTS_DIR}/SmoothMouseDaemon.app" "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/"
+mv "${BUILT_PRODUCTS_DIR}/SmoothMouseFeedback.app" "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/"
 chmod ug+x "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh"
-chmod a+x  "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/FRFeedbackReporter.sh"
+chmod a+x  "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseFeedback.app/Contents/Resources/FRFeedbackReporter.sh"
 
 # Add commit ID to the plist
 SMCOMMITID=`git log --pretty=format:'%h' -n 1`

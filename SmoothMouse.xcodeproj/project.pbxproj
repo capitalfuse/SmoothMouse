@@ -17,6 +17,7 @@
 				03FCEC5216BFE4DB00F35E4A /* PBXTargetDependency */,
 				03DB21001621799400CF4299 /* PBXTargetDependency */,
 				03DB21041621799700CF4299 /* PBXTargetDependency */,
+				03F6A078180AFCD700C2EB03 /* PBXTargetDependency */,
 			);
 			name = SmoothMouseBuild;
 			productName = SmoothMouseBuild;
@@ -58,8 +59,6 @@
 		03DB20C91620CB5900CF4299 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20C81620CB5900CF4299 /* main.m */; };
 		03DB20CD1620CB5900CF4299 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03DB20CB1620CB5900CF4299 /* Credits.rtf */; };
 		03DB20D01620CB5900CF4299 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20CF1620CB5900CF4299 /* AppDelegate.m */; };
-		03DB5DBC180ACE4400C9F54B /* FeedbackReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03DB5DBB180ACE4400C9F54B /* FeedbackReporter.framework */; };
-		03DB5DBE180ACECB00C9F54B /* FeedbackReporter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03DB5DBB180ACE4400C9F54B /* FeedbackReporter.framework */; };
 		03DB5DC0180AD27700C9F54B /* FRFeedbackReporter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03DB5DBF180AD27700C9F54B /* FRFeedbackReporter.sh */; };
 		03E6F25316999C9300FBDBD6 /* VersionLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 03E6F25116999C9300FBDBD6 /* VersionLabel.h */; };
 		03E6F25416999C9300FBDBD6 /* VersionLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E6F25216999C9300FBDBD6 /* VersionLabel.m */; };
@@ -99,6 +98,13 @@
 			remoteGlobalIDString = 03DB20BE1620CB5900CF4299;
 			remoteInfo = SmoothMouseUpdater;
 		};
+		03F6A077180AFCD700C2EB03 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED0E11F214D5493A008704EC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 03F6A057180AF8A500C2EB03;
+			remoteInfo = SmoothMouseFeedback;
+		};
 		03FCEC5116BFE4DB00F35E4A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = ED0E11F214D5493A008704EC /* Project object */;
@@ -116,16 +122,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				03F3CBB516220E0D00D9A857 /* Sparkle.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		03DB5DBD180ACEC600C9F54B /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				03DB5DBE180ACECB00C9F54B /* FeedbackReporter.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,7 +273,6 @@
 				ED03CFA615D7D9B500763D81 /* ServiceManagement.framework in Frameworks */,
 				ED0E121A14D5495F008704EC /* Cocoa.framework in Frameworks */,
 				ED0E121C14D5495F008704EC /* PreferencePanes.framework in Frameworks */,
-				03DB5DBC180ACE4400C9F54B /* FeedbackReporter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -561,7 +556,6 @@
 				ED0E121414D5495F008704EC /* Headers */,
 				ED0E121514D5495F008704EC /* Resources */,
 				ED0E121614D5495F008704EC /* Rez */,
-				03DB5DBD180ACEC600C9F54B /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -752,6 +746,11 @@
 			isa = PBXTargetDependency;
 			target = 03DB20BE1620CB5900CF4299 /* SmoothMouseUpdater */;
 			targetProxy = 03DB21031621799700CF4299 /* PBXContainerItemProxy */;
+		};
+		03F6A078180AFCD700C2EB03 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 03F6A057180AF8A500C2EB03 /* SmoothMouseFeedback */;
+			targetProxy = 03F6A077180AFCD700C2EB03 /* PBXContainerItemProxy */;
 		};
 		03FCEC5216BFE4DB00F35E4A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

@@ -28,5 +28,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>FRFeedbackReporter.targetURL</key>
+	<string>http://smoothmouse.net/feedback/submit.php?project=%@</string>
 </dict>
 </plist>
