@@ -30,5 +30,7 @@
 	<string>NSApplication</string>
 	<key>FRFeedbackReporter.targetURL</key>
 	<string>http://smoothmouse.net/feedback/submit.php?project=%@</string>
+	<key>LSUIElement</key>
+	<false/>
 </dict>
 </plist>
