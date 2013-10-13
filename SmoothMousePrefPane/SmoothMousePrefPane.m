@@ -138,9 +138,11 @@
 }
 
 -(IBAction)pressReportBug:(id) sender {
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *url = [[bundle infoDictionary] objectForKey:@"SMReportBugURL"];
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
+    NSArray *arguments;
+    arguments = [NSArray arrayWithObjects:
+                 @"/Library/PreferencePanes/SmoothMouse.prefPane/Contents/SmoothMouseFeedback.app",
+                 nil];
+    [self launchExecutable:@"/usr/bin/open" withArguments:arguments];
 }
 
 -(IBAction)pressDiagnose:(id) sender {
