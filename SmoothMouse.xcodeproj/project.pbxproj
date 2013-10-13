@@ -58,6 +58,9 @@
 		03DB20C91620CB5900CF4299 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20C81620CB5900CF4299 /* main.m */; };
 		03DB20CD1620CB5900CF4299 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 03DB20CB1620CB5900CF4299 /* Credits.rtf */; };
 		03DB20D01620CB5900CF4299 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20CF1620CB5900CF4299 /* AppDelegate.m */; };
+		03DB5DBC180ACE4400C9F54B /* FeedbackReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03DB5DBB180ACE4400C9F54B /* FeedbackReporter.framework */; };
+		03DB5DBE180ACECB00C9F54B /* FeedbackReporter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03DB5DBB180ACE4400C9F54B /* FeedbackReporter.framework */; };
+		03DB5DC0180AD27700C9F54B /* FRFeedbackReporter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03DB5DBF180AD27700C9F54B /* FRFeedbackReporter.sh */; };
 		03E6F25316999C9300FBDBD6 /* VersionLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 03E6F25116999C9300FBDBD6 /* VersionLabel.h */; };
 		03E6F25416999C9300FBDBD6 /* VersionLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E6F25216999C9300FBDBD6 /* VersionLabel.m */; };
 		03F3CBB416220E0700D9A857 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03F3CBB316220E0400D9A857 /* Sparkle.framework */; };
@@ -104,6 +107,16 @@
 			dstSubfolderSpec = 10;
 			files = (
 				03F3CBB516220E0D00D9A857 /* Sparkle.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		03DB5DBD180ACEC600C9F54B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				03DB5DBE180ACECB00C9F54B /* FeedbackReporter.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -169,6 +182,8 @@
 		03DB20CE1620CB5900CF4299 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		03DB20CF1620CB5900CF4299 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		03DB20DA1620CB5A00CF4299 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		03DB5DBB180ACE4400C9F54B /* FeedbackReporter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FeedbackReporter.framework; path = Dependencies/FeedbackReporter.framework; sourceTree = "<group>"; };
+		03DB5DBF180AD27700C9F54B /* FRFeedbackReporter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = FRFeedbackReporter.sh; sourceTree = "<group>"; };
 		03E6F25116999C9300FBDBD6 /* VersionLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionLabel.h; sourceTree = "<group>"; };
 		03E6F25216999C9300FBDBD6 /* VersionLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionLabel.m; sourceTree = "<group>"; };
 		03F3CBB316220E0400D9A857 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = Dependencies/Sparkle.framework; sourceTree = "<group>"; };
@@ -224,6 +239,7 @@
 				ED03CFA615D7D9B500763D81 /* ServiceManagement.framework in Frameworks */,
 				ED0E121A14D5495F008704EC /* Cocoa.framework in Frameworks */,
 				ED0E121C14D5495F008704EC /* PreferencePanes.framework in Frameworks */,
+				03DB5DBC180ACE4400C9F54B /* FeedbackReporter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -344,6 +360,7 @@
 		ED0E120114D54950008704EC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				03DB5DBB180ACE4400C9F54B /* FeedbackReporter.framework */,
 				03F3CBB316220E0400D9A857 /* Sparkle.framework */,
 				ED03CFA515D7D9B500763D81 /* ServiceManagement.framework */,
 				ED03CFA215D7D97400763D81 /* IOKit.framework */,
@@ -387,6 +404,7 @@
 		ED0E122114D5495F008704EC /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				03DB5DBF180AD27700C9F54B /* FRFeedbackReporter.sh */,
 				03D020BC1631D0DA00CD04C1 /* Credits.rtf */,
 				03BA20FF161F757D0014A74E /* dsa_pub.pem */,
 				ED0E120714D54950008704EC /* InfoPlist.strings */,
@@ -460,6 +478,7 @@
 				ED0E121414D5495F008704EC /* Headers */,
 				ED0E121514D5495F008704EC /* Resources */,
 				ED0E121614D5495F008704EC /* Rez */,
+				03DB5DBD180ACEC600C9F54B /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -527,6 +546,7 @@
 				ED13219C14D6721800D07CC3 /* SmoothMousePrefPane.icns in Resources */,
 				03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */,
 				03D020BD1631D0DA00CD04C1 /* Credits.rtf in Resources */,
+				03DB5DC0180AD27700C9F54B /* FRFeedbackReporter.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -853,7 +873,10 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Dependencies\"",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -890,7 +913,10 @@
 				CLANG_ENABLE_OBJC_ARC = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Dependencies\"",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_ENABLE_OBJC_GC = supported;

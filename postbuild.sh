@@ -33,6 +33,7 @@ rm -rf "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseDaemon.ap
 mv "${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app" "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/"
 mv "${BUILT_PRODUCTS_DIR}/SmoothMouseDaemon.app" "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/"
 chmod ug+x "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh"
+chmod a+x  "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/FRFeedbackReporter.sh"
 
 # Add commit ID to the plist
 SMCOMMITID=`git log --pretty=format:'%h' -n 1`

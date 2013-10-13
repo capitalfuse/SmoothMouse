@@ -34,13 +34,13 @@
 	<string>SmoothMousePrefPane</string>
 	<key>SMHomepageURL</key>
 	<string>http://smoothmouse.com</string>
-	<key>SMReportBugURL</key>
-	<string>http://smoothmouse.com/support/</string>
 	<key>SUEnableAutomaticChecks</key>
 	<string>YES</string>
 	<key>SUFeedURL</key>
 	<string>http://update.smoothmouse.com/appcast.xml</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
+	<key>FRFeedbackReporter.targetURL</key>
+	<string>http://smoothmouse.net/feedback/submit.php?project=%@</string>
 </dict>
 </plist>

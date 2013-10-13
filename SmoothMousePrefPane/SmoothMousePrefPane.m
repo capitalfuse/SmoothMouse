@@ -3,6 +3,8 @@
 
 #import <ServiceManagement/ServiceManagement.h>
 
+#import <FeedbackReporter/FRFeedbackReporter.h>
+
 // umask
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -138,9 +140,7 @@
 }
 
 -(IBAction)pressReportBug:(id) sender {
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSString *url = [[bundle infoDictionary] objectForKey:@"SMReportBugURL"];
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:url]];
+    [[FRFeedbackReporter sharedReporter] reportFeedback];
 }
 
 -(IBAction)pressDiagnose:(id) sender {
