@@ -29,8 +29,8 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>FRFeedbackReporter.targetURL</key>
-	<string>http://smoothmouse.net/feedback/submit.php?project=%@</string>
+	<string>http://feedback.smoothmouse.com/fr/</string>
 	<key>LSUIElement</key>
-	<false/>
+	<true/>
 </dict>
 </plist>
