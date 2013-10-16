@@ -1,14 +1,14 @@
-//
-//  main.m
-//  SmoothMouseFeedback
-//
-//  Created by Daniel Åkerud on 10/13/13.
-//
-//
-
 #import <Cocoa/Cocoa.h>
+#import "AppDelegate.h"
 
 int main(int argc, char *argv[])
 {
-    return NSApplicationMain(argc, (const char **)argv);
+    @autoreleasepool {
+        AppDelegate *delegate = [[AppDelegate alloc] init];
+        NSApplication *application = [NSApplication sharedApplication];
+        [application setDelegate:delegate];
+        [NSApp run];
+        [delegate release];
+    }
 }
+

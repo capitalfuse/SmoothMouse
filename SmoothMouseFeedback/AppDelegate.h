@@ -1,10 +1,3 @@
-//
-//  AppDelegate.h
-//  SmoothMouseFeedback
-//
-//  Created by Daniel Åkerud on 10/13/13.
-//
-//
 
 #import <Cocoa/Cocoa.h>
 
