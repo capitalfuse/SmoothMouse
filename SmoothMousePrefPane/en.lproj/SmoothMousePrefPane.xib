@@ -686,7 +686,7 @@
 															<object class="NSTextView" id="38140941">
 																<reference key="NSNextResponder" ref="315563988"/>
 																<int key="NSvFlags">2322</int>
-																<string key="NSFrameSize">{589, 171}</string>
+																<string key="NSFrameSize">{574, 171}</string>
 																<reference key="NSSuperview" ref="315563988"/>
 																<reference key="NSNextKeyView" ref="18393249"/>
 																<string key="NSReuseIdentifierKey">_NS:13</string>
@@ -705,7 +705,7 @@
 																		<nil key="NSDelegate"/>
 																	</object>
 																	<reference key="NSTextView" ref="38140941"/>
-																	<double key="NSWidth">589</double>
+																	<double key="NSWidth">574</double>
 																	<int key="NSTCFlags">1</int>
 																</object>
 																<object class="NSTextViewSharedData" key="NSSharedData">
@@ -748,11 +748,11 @@
 																</object>
 																<int key="NSTVFlags">6</int>
 																<string key="NSMaxSize">{622, 10000000}</string>
-																<string key="NSMinize">{586, 171}</string>
+																<string key="NSMinize">{571, 171}</string>
 																<nil key="NSDelegate"/>
 															</object>
 														</array>
-														<string key="NSFrame">{{1, 1}, {586, 171}}</string>
+														<string key="NSFrame">{{1, 1}, {571, 171}}</string>
 														<reference key="NSSuperview" ref="58076419"/>
 														<reference key="NSNextKeyView" ref="38140941"/>
 														<string key="NSReuseIdentifierKey">_NS:11</string>
@@ -916,7 +916,7 @@ wGw</bytes>
 													<object class="NSScroller" id="833763264">
 														<reference key="NSNextResponder" ref="58076419"/>
 														<int key="NSvFlags">256</int>
-														<string key="NSFrame">{{571, 1}, {16, 171}}</string>
+														<string key="NSFrame">{{572, 1}, {15, 171}}</string>
 														<reference key="NSSuperview" ref="58076419"/>
 														<reference key="NSNextKeyView" ref="250338565"/>
 														<string key="NSReuseIdentifierKey">_NS:83</string>
