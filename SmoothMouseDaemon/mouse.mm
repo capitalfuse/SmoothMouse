@@ -40,6 +40,7 @@ static const char *get_refresh_reason_string(RefreshReason reason) {
         case REFRESH_REASON_SEQUENCE_NUMBER_INVALID: return "REFRESH_REASON_SEQUENCE_NUMBER_INVALID";
         case REFRESH_REASON_POSITION_TAMPERING: return "REFRESH_REASON_POSITION_TAMPERING";
         case REFRESH_REASON_BUTTON_CLICK: return "REFRESH_REASON_BUTTON_CLICK";
+        case REFRESH_REASON_FORCE_DRAG_REFRESH: return "REFRESH_REASON_FORCE_DRAG_REFRESH";
         case REFRESH_REASON_UNKNOWN: return "REFRESH_REASON_UNKNOWN";
         default: return "?";
     }
@@ -272,6 +273,18 @@ static void mouse_handle_move(mouse_event_t *event, double velocity, Acceleratio
     if ([[Config instance] overlayEnabled]) {
         [[Daemon instance] redrawOverlay];
     }
+
+    if (eventType != kCGEventMouseMoved) {
+        // some games require the mouse position to be refreshed continuously during drags
+        if ([[Config instance] forceDragRefresh]) {
+            mouse_refresh(REFRESH_REASON_FORCE_DRAG_REFRESH);
+        } else {
+            NSString *activeAppBundleId = [[Config instance] activeAppBundleId];
+            if ([activeAppBundleId isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"]) {
+                mouse_refresh(REFRESH_REASON_FORCE_DRAG_REFRESH);
+            }
+        }
+    }
 }
 
 static void mouse_handle_buttons(mouse_event_t *event) {
@@ -417,6 +430,8 @@ void mouse_process_kext_event(mouse_event_t *event) {
 
     if (event->buttons != lastButtons) {
         mouse_handle_buttons(event);
+        // on all clicks, refresh mouse position
+        mouse_refresh(REFRESH_REASON_BUTTON_CLICK);
     }
 
     check_needs_refresh(event);

@@ -12,6 +12,7 @@
 @synthesize mouseCurve;
 @synthesize trackpadCurve;
 @synthesize driver;
+@synthesize forceDragRefresh;
 @synthesize debugEnabled;
 @synthesize memoryLoggingEnabled;
 @synthesize timingsEnabled;
@@ -118,7 +119,10 @@
     if (excludedApps) {
         excludedApps = [excludedApps copy];
     }
-    NSLog(@"excludedApps = %@", excludedApps);
+
+    if ([[Config instance] debugEnabled]) {
+        NSLog(@"excludedApps = %@", excludedApps);
+    }
 
     NSNumber *value;
 
@@ -155,6 +159,13 @@
         [self setDriver:(Driver)[value intValue]];
     } else {
         [self setDriver:(Driver) SETTINGS_DRIVER_DEFAULT];
+    }
+
+    value = [dict valueForKey:SETTINGS_FORCE_DRAG_REFRESH];
+    if (value) {
+        [self setForceDragRefresh:[value boolValue]];
+    } else {
+        [self setForceDragRefresh:SETTINGS_FORCE_DRAG_REFRESH_DEFAULT];
     }
 
     [self setMouseCurve: [self getAccelerationCurveFromDict:dict withKey:SETTINGS_MOUSE_ACCELERATION_CURVE]];

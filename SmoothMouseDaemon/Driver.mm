@@ -372,11 +372,6 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
                     (e2-e1));
             }
 
-            if (event->type != kCGEventMouseMoved &&
-                [[[Config instance] activeAppBundleId] isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"]) {
-                mouse_refresh(REFRESH_REASON_FORCE_DRAG_REFRESH);
-            }
-
             break;
         }
         default:
@@ -499,9 +494,6 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
                     NSLog(@"INTERNAL ERROR: unknown eventType: %d", event->type);
                     exit(0);
             }
-
-            // on clicks, refresh own mouse position
-            mouse_refresh(REFRESH_REASON_BUTTON_CLICK);
 
             IOGPoint newPoint = { (SInt16) event->pos.x, (SInt16) event->pos.y };
 

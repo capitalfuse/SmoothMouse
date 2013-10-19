@@ -13,6 +13,7 @@
     AccelerationCurve mouseCurve;
     AccelerationCurve trackpadCurve;
     Driver driver;
+    BOOL forceDragRefresh;
 
     // from command line
     BOOL debugEnabled;
@@ -34,6 +35,7 @@
 @property AccelerationCurve mouseCurve;
 @property AccelerationCurve trackpadCurve;
 @property Driver driver;
+@property BOOL forceDragRefresh;
 @property BOOL debugEnabled;
 @property BOOL memoryLoggingEnabled;
 @property BOOL timingsEnabled;
