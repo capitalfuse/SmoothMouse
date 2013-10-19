@@ -89,7 +89,7 @@
 
         [controller setHeading:[NSString stringWithFormat:
             FRLocalizedString(@"Got a problem with %@?", nil),
-            [FRApplication applicationName]]];
+            @"SmoothMouse"]]; // Modified by SmoothMouse team
         
         [controller setSubheading:FRLocalizedString(@"Send feedback", nil)];
 
