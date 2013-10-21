@@ -387,8 +387,6 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
 }
 
 BOOL driver_handle_button_event(driver_button_event_t *event) {
-    NSString *activeAppBundleId = [[Config instance] activeAppBundleId];
-
     int driver_to_use = [[Config instance] driver];
 
     // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
@@ -518,7 +516,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             if (is_down_event) eventNumber++;
 
             UInt8 subType = NX_SUBTYPE_DEFAULT;
-            if ([activeAppBundleId isEqualToString:@"net.maxon.cinema4d"]) {
+            if ([[Config instance ] activeAppRequiresTabletPointSubtype]) {
                 if ([[Config instance] debugEnabled]) {
                     LOG(@"Setting subType to TABLET_POINT");
                 }

@@ -276,13 +276,9 @@ static void mouse_handle_move(mouse_event_t *event, double velocity, Acceleratio
 
     if (eventType != kCGEventMouseMoved) {
         // some games require the mouse position to be refreshed continuously during drags
-        if ([[Config instance] forceDragRefresh]) {
+        if ([[Config instance] forceDragRefreshEnabled] ||
+            [[Config instance] activeAppRequiresRefreshOnDrag]) {
             mouse_refresh(REFRESH_REASON_FORCE_DRAG_REFRESH);
-        } else {
-            NSString *activeAppBundleId = [[Config instance] activeAppBundleId];
-            if ([activeAppBundleId isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"]) {
-                mouse_refresh(REFRESH_REASON_FORCE_DRAG_REFRESH);
-            }
         }
     }
 }

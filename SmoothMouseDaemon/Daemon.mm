@@ -251,17 +251,25 @@ error:
 
 - (void) frontAppSwitched {
     NSDictionary *activeApplicationDict = [[NSWorkspace sharedWorkspace] activeApplication];
-    NSString *appBundleId = [activeApplicationDict valueForKey:@"NSApplicationBundleIdentifier"];
-    if ([[Config instance] debugEnabled]) {
-        LOG(@"Active App Bundle Id: %@", appBundleId);
+
+    NSString *appId = [activeApplicationDict valueForKey:@"NSApplicationBundleIdentifier"];
+
+    if (appId == nil) {
+        NSRunningApplication *runningApp = [activeApplicationDict objectForKey:@"NSWorkspaceApplicationKey"];
+        appId = [[runningApp executableURL] path];
     }
-    [[Config instance] setActiveAppBundleId: appBundleId];
+
+    if ([[Config instance] debugEnabled]) {
+        LOG(@"Active App Id: %@", appId);
+    }
+
+    [[Config instance] setActiveAppId: appId];
+
     [self handleAppChanged];
 }
 
 -(void) handleAppChanged {
-    NSString *activeAppBundleId = [[Config instance] activeAppBundleId];
-    if ([activeAppBundleId isEqualToString:@"com.ableton.live"]) {
+    if ([[Config instance] activeAppRequiresMouseEventListener]) {
         [sMouseSupervisor clearMoveEvents];
         [mouseEventListener start:runLoop];
     } else {

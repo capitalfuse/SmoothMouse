@@ -2,6 +2,7 @@
 #import "Config.h"
 
 #include "constants.h"
+#include "debug.h"
 
 @implementation Config
 
@@ -12,12 +13,11 @@
 @synthesize mouseCurve;
 @synthesize trackpadCurve;
 @synthesize driver;
-@synthesize forceDragRefresh;
+@synthesize forceDragRefreshEnabled;
 @synthesize debugEnabled;
 @synthesize memoryLoggingEnabled;
 @synthesize timingsEnabled;
 @synthesize sendAuxEventsEnabled;
-@synthesize activeAppBundleId;
 @synthesize overlayEnabled;
 @synthesize sayEnabled;
 @synthesize latencyEnabled;
@@ -163,9 +163,9 @@
 
     value = [dict valueForKey:SETTINGS_FORCE_DRAG_REFRESH];
     if (value) {
-        [self setForceDragRefresh:[value boolValue]];
+        [self setForceDragRefreshEnabled:[value boolValue]];
     } else {
-        [self setForceDragRefresh:SETTINGS_FORCE_DRAG_REFRESH_DEFAULT];
+        [self setForceDragRefreshEnabled:SETTINGS_FORCE_DRAG_REFRESH_DEFAULT];
     }
 
     [self setMouseCurve: [self getAccelerationCurveFromDict:dict withKey:SETTINGS_MOUSE_ACCELERATION_CURVE]];
@@ -174,28 +174,66 @@
     return YES;
 }
 
--(BOOL) activeAppIsExcluded {
-    if (activeAppBundleId) {
-        if ([[Config instance] appIsExcluded:activeAppBundleId]) {
-            //NSLog(@"smoothmouse should not be enabled in current app");
-            return YES;
-        }
-    }
-    return NO;
-}
+- (void)setActiveAppId:(NSString *)activeAppId {
 
--(BOOL) appIsExcluded:(NSString *)app {
-    // TODO: cache this value for (modesy) performace gain
+    activeAppIsExcluded = NO;
+    activeAppRequiresRefreshOnDrag = NO;
+    activeAppRequiresMouseEventListener = NO;
+    activeAppRequiresTabletPointSubtype = NO;
+
+    // excluded
     if (excludedApps) {
         for (NSString *excludedApp in excludedApps) {
-            if ([excludedApp isEqualToString:app]) {
-                //NSLog(@"%@ is excluded", app);
-                return YES;
+            if ([excludedApp isEqualToString:activeAppId]) {
+                activeAppIsExcluded = YES;
             }
         }
     }
-    //NSLog(@"%@ is NOT excluded", app);
-    return NO;
+
+    // refresh on drag
+    if ([activeAppId isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"]) {
+        activeAppRequiresRefreshOnDrag = YES;
+    }
+
+    NSRange range;
+    range = [activeAppId rangeOfString:@"Steam/steamapps/common/Half-Life 2/hl2_osx" options:NSCaseInsensitiveSearch];
+    if (range.location != NSNotFound) {
+        activeAppRequiresRefreshOnDrag = YES;
+    }
+
+    // app fiddles with mouse
+    if ([activeAppId isEqualToString:@"com.ableton.live"]) {
+        activeAppRequiresMouseEventListener = YES;
+    }
+
+    // some apps requires another subtype for button clicks (iohid driver only)
+    if ([activeAppId isEqualToString:@"net.maxon.cinema4d"]) {
+        activeAppRequiresTabletPointSubtype = YES;
+    }
+
+    if ([[Config instance] debugEnabled]) {
+        LOG(@"activeAppIsExcluded: %d, activeAppRequiresRefreshOnDrag: %d, activeAppRequiresMouseEventListener: %d, activeAppRequiresTabletPointSubtype: %d",
+            activeAppIsExcluded,
+            activeAppRequiresRefreshOnDrag,
+            activeAppRequiresMouseEventListener,
+            activeAppRequiresTabletPointSubtype);
+    }
+}
+
+-(BOOL) activeAppRequiresRefreshOnDrag {
+    return activeAppRequiresRefreshOnDrag;
+}
+
+-(BOOL) activeAppIsExcluded {
+    return activeAppIsExcluded;
+}
+
+-(BOOL) activeAppRequiresMouseEventListener {
+    return activeAppRequiresMouseEventListener;
+}
+
+-(BOOL) activeAppRequiresTabletPointSubtype {
+    return activeAppRequiresTabletPointSubtype;
 }
 
 @end
