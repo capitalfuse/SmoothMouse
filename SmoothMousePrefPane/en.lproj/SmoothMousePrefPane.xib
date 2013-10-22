@@ -587,7 +587,7 @@
 												<object class="NSButtonCell" key="NSCell" id="83386364">
 													<int key="NSCellFlags">67108864</int>
 													<int key="NSCellFlags2">134217728</int>
-													<string key="NSContents">Report feedback</string>
+													<string key="NSContents">Report feedback…</string>
 													<reference key="NSSupport" ref="415778044"/>
 													<string key="NSCellIdentifier">_NS:9</string>
 													<reference key="NSControlView" ref="1067274119"/>
@@ -964,7 +964,7 @@ wGw</bytes>
 												<object class="NSButtonCell" key="NSCell" id="463614590">
 													<int key="NSCellFlags">67108864</int>
 													<int key="NSCellFlags2">134217728</int>
-													<string key="NSContents">Uninstall</string>
+													<string key="NSContents">Uninstall…</string>
 													<reference key="NSSupport" ref="415778044"/>
 													<string key="NSCellIdentifier">_NS:9</string>
 													<reference key="NSControlView" ref="334221701"/>
