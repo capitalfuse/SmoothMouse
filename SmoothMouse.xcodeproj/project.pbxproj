@@ -69,6 +69,7 @@
 		03F6A072180AFA1200C2EB03 /* FeedbackReporter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03DB5DBB180ACE4400C9F54B /* FeedbackReporter.framework */; };
 		03F6A073180AFA1500C2EB03 /* FeedbackReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03DB5DBB180ACE4400C9F54B /* FeedbackReporter.framework */; };
 		03F6A075180AFA4200C2EB03 /* FRFeedbackReporter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03F6A074180AFA4200C2EB03 /* FRFeedbackReporter.sh */; };
+		1352BC76181BC3F90066B43F /* SmoothMouseFeedback.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1352BC75181BC3F90066B43F /* SmoothMouseFeedback.icns */; };
 		ED03CFA615D7D9B500763D81 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA515D7D9B500763D81 /* ServiceManagement.framework */; };
 		ED0E121A14D5495F008704EC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121914D5495F008704EC /* Cocoa.framework */; };
 		ED0E121C14D5495F008704EC /* PreferencePanes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED0E121B14D5495F008704EC /* PreferencePanes.framework */; };
@@ -205,6 +206,7 @@
 		03F6A066180AF8A500C2EB03 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		03F6A067180AF8A500C2EB03 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		03F6A074180AFA4200C2EB03 /* FRFeedbackReporter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = FRFeedbackReporter.sh; sourceTree = "<group>"; };
+		1352BC75181BC3F90066B43F /* SmoothMouseFeedback.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = SmoothMouseFeedback.icns; sourceTree = "<group>"; };
 		ED03CF9E15D7D95200763D81 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		ED03CFA015D7D96000763D81 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		ED03CFA215D7D97400763D81 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
@@ -359,6 +361,7 @@
 		03F6A05A180AF8A500C2EB03 /* SmoothMouseFeedback */ = {
 			isa = PBXGroup;
 			children = (
+				1352BC75181BC3F90066B43F /* SmoothMouseFeedback.icns */,
 				03F6A066180AF8A500C2EB03 /* AppDelegate.h */,
 				03F6A067180AF8A500C2EB03 /* AppDelegate.m */,
 				03F6A05B180AF8A500C2EB03 /* Supporting Files */,
@@ -609,6 +612,7 @@
 			files = (
 				03F6A05F180AF8A500C2EB03 /* InfoPlist.strings in Resources */,
 				03F6A075180AFA4200C2EB03 /* FRFeedbackReporter.sh in Resources */,
+				1352BC76181BC3F90066B43F /* SmoothMouseFeedback.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
