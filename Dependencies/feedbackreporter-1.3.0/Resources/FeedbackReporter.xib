@@ -58,7 +58,7 @@
 				<int key="NSWindowBacking">2</int>
 				<string key="NSWindowRect">{{480, 88}, {480, 640}}</string>
 				<int key="NSWTFlags">1886912512</int>
-				<string key="NSWindowTitle">Feedback</string>
+				<string key="NSWindowTitle">SmoothMouse Feedback</string>
 				<object class="NSMutableString" key="NSWindowClass">
 					<characters key="NS.bytes">NSWindow</characters>
 				</object>
