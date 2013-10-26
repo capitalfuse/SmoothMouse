@@ -2,6 +2,7 @@
 DerivedData/
 build/
 xcuserdata
+*.xccheckout
 /kext/
 *.kext
 *.pkg
