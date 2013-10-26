@@ -191,7 +191,8 @@
     }
 
     // refresh on drag
-    if ([activeAppId isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"]) {
+    if ([activeAppId isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"] ||
+        [activeAppId isEqualToString:@"com.aspyr.callofduty4"]) {
         activeAppRequiresRefreshOnDrag = YES;
     }
 
