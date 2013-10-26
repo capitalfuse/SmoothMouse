@@ -58,7 +58,6 @@
 		03DB20C71620CB5900CF4299 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 03DB20C51620CB5900CF4299 /* InfoPlist.strings */; };
 		03DB20C91620CB5900CF4299 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20C81620CB5900CF4299 /* main.m */; };
 		03DB20D01620CB5900CF4299 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 03DB20CF1620CB5900CF4299 /* AppDelegate.m */; };
-		03DB5DC0180AD27700C9F54B /* FRFeedbackReporter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 03DB5DBF180AD27700C9F54B /* FRFeedbackReporter.sh */; };
 		03E6F25316999C9300FBDBD6 /* VersionLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 03E6F25116999C9300FBDBD6 /* VersionLabel.h */; };
 		03E6F25416999C9300FBDBD6 /* VersionLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E6F25216999C9300FBDBD6 /* VersionLabel.m */; };
 		03F3CBB416220E0700D9A857 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03F3CBB316220E0400D9A857 /* Sparkle.framework */; };
@@ -623,7 +622,6 @@
 				ED13219C14D6721800D07CC3 /* SmoothMousePrefPane.icns in Resources */,
 				03BA2100161F757D0014A74E /* dsa_pub.pem in Resources */,
 				03D020BD1631D0DA00CD04C1 /* Credits.rtf in Resources */,
-				03DB5DC0180AD27700C9F54B /* FRFeedbackReporter.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
