@@ -6,6 +6,8 @@
 #  -k : keep preferences
 
 KEXT="/System/Library/Extensions/SmoothMouse.kext"
+KEXT2="/Library/Extensions/SmoothMouse.kext"
+KEXT_IDENTIFIER="com.cyberic.SmoothMouse"
 PREFPANE="/Library/PreferencePanes/SmoothMouse.prefPane"
 DAEMON="SmoothMouseDaemon"
 DAEMON_OLD="smoothmoused"
@@ -21,8 +23,9 @@ done
 
 #env > /tmp/sm
 
-/sbin/kextunload $KEXT
+/sbin/kextunload -b "$KEXT_IDENTIFIER"
 rm -rf $KEXT
+rm -rf $KEXT2
 
 rm -rf $PREFPANE
 
@@ -37,6 +40,7 @@ rm -f ~/Library/LaunchAgents/com.cyberic.smoothmouseupdater.plist
 rm /usr/bin/smoothmouse
 
 pkgutil --forget "com.cyberic.pkg.SmoothMouseKext"
+pkgutil --forget "com.cyberic.pkg.SmoothMouseKext2"
 pkgutil --forget "com.cyberic.pkg.SmoothMousePrefPane"
 
 /usr/bin/killall $DAEMON
