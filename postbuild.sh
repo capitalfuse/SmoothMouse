@@ -3,9 +3,6 @@ INSTALLER_ROOT="${PROJECT_DIR}/Installer/Root"
 PREFPANE="SmoothMouse.prefPane"
 PREFPANE_PLIST="${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/Info.plist"
 
-KEXT="SmoothMouse.kext"
-KEXT_PLIST="${INSTALLER_ROOT}/${KEXT}/Contents/Info.plist"
-
 # Auxiliary stuff
 # -----------------------------------------------------------------------
 finalize_plist () {
@@ -85,20 +82,12 @@ cp -R "$BUILT_PREFPANE" "$INSTALLER_ROOT"
 # Build the kext if the project exists
 if [ $CONFIGURATION == "Release" ] && [ -d "Kext/SmoothMouseKext.xcodeproj" ]; then
 	echo "Building the kext"
+	export SMKEXTCFBUNDLEVERSION="$CFBUNDLEVERSION"
+	export SMKEXTCFBUNDLESHORTVERSIONSTRING="$CFBUNDLESHORTVERSIONSTRING"
 	xcodebuild -project "Kext/SmoothMouseKext.xcodeproj" | head -1 # remove this for debugging
-fi
-
-if [ -f "$KEXT_PLIST" ]; then
-	# Write version strings to the kext
-	echo "Writing CFBundleVersion ${CFBUNDLEVERSION} to the kext"
-	defaults write "$KEXT_PLIST" CFBundleVersion "$CFBUNDLEVERSION"
-	echo "Writing CFBundleShortVersionString ${CFBUNDLESHORTVERSIONSTRING} to the kext"
-	defaults write "$KEXT_PLIST" CFBundleShortVersionString "$CFBUNDLESHORTVERSIONSTRING"
-	finalize_plist "$KEXT_PLIST"
-
+	unset SMKEXTCFBUNDLEVERSION
+	unset SMKEXTCFBUNDLESHORTVERSIONSTRING
+	
 	# Build an installer
-	if [ $CONFIGURATION == "Release" ]; then
-		echo "Invoking the installer build script"
-		"${INSTALLER_ROOT}/../package.py" --reveal
-	fi
+	"${INSTALLER_ROOT}/../package.py" --reveal
 fi

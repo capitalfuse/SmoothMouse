@@ -1,0 +1,35 @@
+#!/bin/sh
+# Match SmoothMouse and new SmoothMouseDaemon, but don't match the installer itself
+DAEMON_PROCESS="Contents/MacOS/SmoothMouse"
+DAEMON_LAUNCHAGENT="$HOME/Library/LaunchAgents/com.cyberic.smoothmouse.plist"
+
+KEXT_IDENTIFIER="com.cyberic.SmoothMouse"
+KEXT_LOCATION="/Library/Extensions/SmoothMouse.kext"
+
+sync
+
+DAEMON=$(/bin/ps -A | /usr/bin/grep -i "$DAEMON_PROCESS" | /usr/bin/grep -v grep | /usr/bin/awk '{print $1}')
+if [ -n "$DAEMON" ]; then
+	echo "Trying to unload the daemon using launchctl"
+	sudo -u $USER launchctl unload "$DAEMON_LAUNCHAGENT"
+	
+	DAEMON=$(ps -A | grep -i "$DAEMON_PROCESS" | grep -v grep | awk '{print $1}')
+	if [ -n "$DAEMON" ]; then
+		echo "Trying to unload the daemon using kill -9 (attempt #2)"
+		sudo kill -9 "$DAEMON"
+	fi
+else
+	echo "Daemon not loaded, no need to unload"
+fi
+
+if kextstat -lb "$KEXT_IDENTIFIER" 2>&1 | grep -q "$KEXT_IDENTIFIER"; then
+	echo "Trying to unload the kext"
+	sudo kextunload -b "$KEXT_IDENTIFIER"
+	
+	if kextstat -lb "$KEXT_IDENTIFIER" 2>&1 | grep -q "$KEXT_IDENTIFIER"; then
+		echo "Trying to unload the kext (attempt #2)"
+		sudo kextunload -b "$KEXT_IDENTIFIER"
+	fi
+fi
+
+exit 0

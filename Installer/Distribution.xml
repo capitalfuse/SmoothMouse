@@ -11,16 +11,22 @@
 		<pkg-ref id="com.cyberic.pkg.SmoothMouseKext"/>
 	</choice>
 	
-	<choice id="choice1" title="Preference Pane" enabled="false">
+	<choice id="choice1" title="Kernel Extension (10.8+)" enabled="false">
+		<pkg-ref id="com.cyberic.pkg.SmoothMouseKext2"/>
+	</choice>
+	
+	<choice id="choice2" title="Preference Pane" enabled="false">
 		<pkg-ref id="com.cyberic.pkg.SmoothMousePrefPane"/>
 	</choice>
 	
 	<choices-outline>
 		<line choice="choice0" />
 		<line choice="choice1" />
+		<line choice="choice2" />
 	</choices-outline>
 	
 	<pkg-ref id="com.cyberic.pkg.SmoothMouseKext">#Kext.pkg</pkg-ref>
+	<pkg-ref id="com.cyberic.pkg.SmoothMouseKext2">#Kext2.pkg</pkg-ref>
 	<pkg-ref id="com.cyberic.pkg.SmoothMousePrefPane">#PrefPane.pkg</pkg-ref>
 	
     <installation-check script="installationCheck()" />
