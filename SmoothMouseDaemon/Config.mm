@@ -177,6 +177,7 @@
 - (void)setActiveAppId:(NSString *)activeAppId {
 
     activeAppIsExcluded = NO;
+    activeAppRequiresConstantRefresh = NO;
     activeAppRequiresRefreshOnDrag = NO;
     activeAppRequiresMouseEventListener = NO;
     activeAppRequiresTabletPointSubtype = NO;
@@ -190,9 +191,14 @@
         }
     }
 
+    // constant refresh
+    if ([activeAppId isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"]) {
+        activeAppRequiresConstantRefresh = YES;
+        activeAppRequiresMouseEventListener= YES;
+    }
+
     // refresh on drag
-    if ([activeAppId isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"] ||
-        [activeAppId isEqualToString:@"com.aspyr.callofduty4"] ||
+    if ([activeAppId isEqualToString:@"com.aspyr.callofduty4"] ||
         [activeAppId isEqualToString:@"com.native-instruments.Traktor"]) {
         activeAppRequiresRefreshOnDrag = YES;
     }
@@ -214,12 +220,17 @@
     }
 
     if ([[Config instance] debugEnabled]) {
-        LOG(@"activeAppIsExcluded: %d, activeAppRequiresRefreshOnDrag: %d, activeAppRequiresMouseEventListener: %d, activeAppRequiresTabletPointSubtype: %d",
+        LOG(@"activeAppIsExcluded: %d, activeAppRequiresConstantRefresh: %d, activeAppRequiresRefreshOnDrag: %d, activeAppRequiresMouseEventListener: %d, activeAppRequiresTabletPointSubtype: %d",
             activeAppIsExcluded,
+            activeAppRequiresConstantRefresh,
             activeAppRequiresRefreshOnDrag,
             activeAppRequiresMouseEventListener,
             activeAppRequiresTabletPointSubtype);
     }
+}
+
+-(BOOL) activeAppRequiresConstantRefresh {
+    return activeAppRequiresConstantRefresh;
 }
 
 -(BOOL) activeAppRequiresRefreshOnDrag {

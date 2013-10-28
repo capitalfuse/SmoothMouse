@@ -40,6 +40,7 @@ static const char *get_refresh_reason_string(RefreshReason reason) {
         case REFRESH_REASON_SEQUENCE_NUMBER_INVALID: return "REFRESH_REASON_SEQUENCE_NUMBER_INVALID";
         case REFRESH_REASON_POSITION_TAMPERING: return "REFRESH_REASON_POSITION_TAMPERING";
         case REFRESH_REASON_BUTTON_CLICK: return "REFRESH_REASON_BUTTON_CLICK";
+        case REFRESH_REASON_FORCE_CONSTANT_REFRESH: return "REFRESH_REASON_FORCE_CONSTANT_REFRESH";
         case REFRESH_REASON_FORCE_DRAG_REFRESH: return "REFRESH_REASON_FORCE_DRAG_REFRESH";
         case REFRESH_REASON_UNKNOWN: return "REFRESH_REASON_UNKNOWN";
         default: return "?";
@@ -454,6 +455,10 @@ void mouse_process_kext_event(mouse_event_t *event) {
 
     if ([[Config instance] debugEnabled]) {
         debug_register_event(event);
+    }
+
+    if (needs_refresh == 0 && [[Config instance] activeAppRequiresConstantRefresh]) {
+        mouse_refresh(REFRESH_REASON_FORCE_CONSTANT_REFRESH);
     }
 
     lastSequenceNumber = event->seqnum;

@@ -24,6 +24,7 @@
     BOOL sayEnabled;
     BOOL latencyEnabled;
 
+    BOOL activeAppRequiresConstantRefresh;
     BOOL activeAppRequiresRefreshOnDrag;
     BOOL activeAppIsExcluded;
     BOOL activeAppRequiresMouseEventListener;
@@ -54,6 +55,7 @@
 -(BOOL) readSettingsPlist;
 -(AccelerationCurve) getAccelerationCurveFromDict:(NSDictionary *)dictionary withKey:(NSString *)key;
 - (void)setActiveAppId:(NSString *)activeAppId;
+-(BOOL) activeAppRequiresConstantRefresh;
 -(BOOL) activeAppRequiresRefreshOnDrag;
 -(BOOL) activeAppIsExcluded;
 -(BOOL) activeAppRequiresMouseEventListener;
