@@ -128,6 +128,8 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
     NSLog(@"Driver: %s (%d)", driver_get_driver_string([config driver]), [config driver]);
 
+    NSLog(@"Force refresh on drag enabled: %d", [config forceDragRefreshEnabled]);
+
     [self hookAppFrontChanged];
 
     if ([config overlayEnabled]) {

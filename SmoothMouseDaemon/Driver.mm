@@ -346,6 +346,8 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
             IOOptionBits options;
             if (iohidEventType == NX_MOUSEMOVED) {
                 options = kIOHIDSetRelativeCursorPosition;
+                // NOTE: newPoint has no effect in relative mode, you can set it to {0, 0}
+                //       without any issues.
             } else {
                 options = kIOHIDSetCursorPosition;
             }
