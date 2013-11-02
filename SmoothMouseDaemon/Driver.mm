@@ -363,7 +363,7 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
             e2 = GET_TIME();
 
             if ([[Config instance] debugEnabled]) {
-                LOG(@"%s:MOVE: eventType: %s(%d), newPoint.x: %d, newPoint.y: %d, dx: %d, dy: %d, time: %f",
+                LOG(@"%s:MOVE: eventType: %s(%d), newPoint: %dx%d, dx: %d, dy: %d, time: %f",
                     driverString,
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,

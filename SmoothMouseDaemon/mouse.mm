@@ -120,13 +120,17 @@ static void refresh_mouse_location() {
     CGPoint oldPos = currentPos;
     currentPos = get_current_mouse_pos();
 
-    float movedX = oldPos.x - currentPos.x;
-    float movedY = oldPos.y - currentPos.y;
+    float movedX = currentPos.x - oldPos.x;
+    float movedY = currentPos.y - oldPos.y;
 
     deltaPosFloat.x += movedX;
     deltaPosFloat.y += movedY;
     deltaPosInt.x += movedX;
     deltaPosInt.y += movedY;
+
+    if ([[Config instance] debugEnabled]) {
+        LOG(@"Mouse location refreshed (%s), new: %dx%d, old: %dx%d", get_refresh_reason_string(refresh_reason),(int)currentPos.x, (int)currentPos.y, (int)oldPos.x, (int)oldPos.y);
+    }
 }
 
 void mouse_update_clicktime() {
@@ -234,7 +238,7 @@ static void mouse_handle_move(mouse_event_t *event, double velocity, Acceleratio
     }
 
     if ([[Config instance] debugEnabled]) {
-        LOG(@"processed move event: move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03df, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
+        LOG(@"processed move event: move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03d, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
             event->dx,
             event->dy,
             (int)newPos.x,
@@ -407,13 +411,7 @@ void check_sequence_number(mouse_event_t *event) {
 
 void check_needs_refresh(mouse_event_t *event) {
     if (needs_refresh) {
-        if ([[Config instance] debugEnabled]) {
-            LOG(@"Need to refresh mouse location (%s)",
-                get_refresh_reason_string(refresh_reason));
-        }
-
         refresh_mouse_location();
-
         needs_refresh = 0;
     }
 }
@@ -422,17 +420,15 @@ void mouse_process_kext_event(mouse_event_t *event) {
 
     check_sequence_number(event);
 
-    check_needs_refresh(event);
-
     if (event->buttons != lastButtons) {
+        check_needs_refresh(event);
         mouse_handle_buttons(event);
         // on all clicks, refresh mouse position
         mouse_refresh(REFRESH_REASON_BUTTON_CLICK);
     }
 
-    check_needs_refresh(event);
-
     if (event->dx != 0 || event->dy != 0) {
+        check_needs_refresh(event);
         double velocity;
         AccelerationCurve curve;
         switch (event->device_type) {
@@ -462,8 +458,10 @@ void mouse_process_kext_event(mouse_event_t *event) {
 }
 
 void mouse_refresh(RefreshReason reason) {
-    needs_refresh = 1;
-    refresh_reason = reason;
+    if (needs_refresh != 1) {
+        needs_refresh = 1;
+        refresh_reason = reason;
+    }
 }
 
 BOOL mouse_init() {
