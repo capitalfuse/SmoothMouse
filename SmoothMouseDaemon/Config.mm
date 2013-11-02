@@ -178,8 +178,8 @@
 
     activeAppIsExcluded = NO;
     activeAppRequiresRefreshOnDrag = NO;
-    activeAppRequiresMouseEventListener = NO;
-    activeAppRequiresTabletPointSubtype = NO;
+    activeAppRequiresMouseEventListener = NO; // currently no app uses this quirk
+    activeAppRequiresTabletPointSubtype = NO; // currently no app uses this quirk, either
 
     // excluded
     if (excludedApps) {
@@ -192,12 +192,13 @@
 
     if ([activeAppId isEqualToString:@"com.riotgames.LeagueofLegends.GameClient"]) {
         activeAppRequiresRefreshOnDrag = YES;
-        activeAppRequiresMouseEventListener = YES;
     }
 
     // refresh on drag
     if ([activeAppId isEqualToString:@"com.aspyr.callofduty4"] ||
-        [activeAppId isEqualToString:@"com.native-instruments.Traktor"]) {
+        [activeAppId isEqualToString:@"com.native-instruments.Traktor"] ||
+        [activeAppId isEqualToString:@"com.ableton.live"] ||
+        [activeAppId isEqualToString:@"net.maxon.cinema4d"]) {
         activeAppRequiresRefreshOnDrag = YES;
     }
 
@@ -205,16 +206,6 @@
     range = [activeAppId rangeOfString:@"Steam/steamapps/common/Half-Life 2/hl2_osx" options:NSCaseInsensitiveSearch];
     if (range.location != NSNotFound) {
         activeAppRequiresRefreshOnDrag = YES;
-    }
-
-    // app fiddles with mouse
-    if ([activeAppId isEqualToString:@"com.ableton.live"]) {
-        activeAppRequiresMouseEventListener = YES;
-    }
-
-    // some apps requires another subtype for button clicks (iohid driver only)
-    if ([activeAppId isEqualToString:@"net.maxon.cinema4d"]) {
-        activeAppRequiresTabletPointSubtype = YES;
     }
 
     if ([[Config instance] debugEnabled]) {
