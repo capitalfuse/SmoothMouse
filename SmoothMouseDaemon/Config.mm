@@ -198,7 +198,8 @@
     if ([activeAppId isEqualToString:@"com.aspyr.callofduty4"] ||
         [activeAppId isEqualToString:@"com.native-instruments.Traktor"] ||
         [activeAppId isEqualToString:@"com.ableton.live"] ||
-        [activeAppId isEqualToString:@"net.maxon.cinema4d"]) {
+        [activeAppId isEqualToString:@"net.maxon.cinema4d"] ||
+        [activeAppId isEqualToString:@"com.macsoft.halo"]) {
         activeAppRequiresRefreshOnDrag = YES;
     }
 
