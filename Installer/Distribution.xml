@@ -7,12 +7,12 @@
 	<options hostArchitectures="i386" />
 	<options customize="never" rootVolumeOnly="true" />
 	
-	<choice id="choice0" title="Kernel Extension" enabled="false">
-		<pkg-ref id="com.cyberic.pkg.SmoothMouseKext"/>
+	<choice id="choice0" title="Kernel Extension (10.8+)" enabled="false">
+		<pkg-ref id="com.cyberic.pkg.SmoothMouseKext2"/>
 	</choice>
 	
-	<choice id="choice1" title="Kernel Extension (10.8+)" enabled="false">
-		<pkg-ref id="com.cyberic.pkg.SmoothMouseKext2"/>
+	<choice id="choice1" title="Kernel Extension" enabled="false">
+		<pkg-ref id="com.cyberic.pkg.SmoothMouseKext"/>
 	</choice>
 	
 	<choice id="choice2" title="Preference Pane" enabled="false">
@@ -25,8 +25,8 @@
 		<line choice="choice2" />
 	</choices-outline>
 	
-	<pkg-ref id="com.cyberic.pkg.SmoothMouseKext">#Kext.pkg</pkg-ref>
 	<pkg-ref id="com.cyberic.pkg.SmoothMouseKext2">#Kext2.pkg</pkg-ref>
+	<pkg-ref id="com.cyberic.pkg.SmoothMouseKext">#Kext.pkg</pkg-ref>
 	<pkg-ref id="com.cyberic.pkg.SmoothMousePrefPane">#PrefPane.pkg</pkg-ref>
 	
     <installation-check script="installationCheck()" />
