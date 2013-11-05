@@ -2,6 +2,9 @@
 KEXT_LOCATION="/Library/Extensions/SmoothMouse.kext"
 OSX_MINOR_VERSION=`sw_vers -productVersion | cut -d . -f 2`
 
-if [[ $OSX_MINOR_VERSION -ge 8 ]]; then
+if [[ $OSX_MINOR_VERSION -ge 9 ]]; then
+	# Uninstall the old kext if necessary
+	sudo rm -rf "/System/Library/Extensions/SmoothMouse.kext" || true
+	pkgutil --forget "com.cyberic.pkg.SmoothMouseKext" || true
 	sudo kextload "$KEXT_LOCATION"
 fi

@@ -15,8 +15,8 @@ PACKAGE_VERSION = read_version(os.path.join(ROOT_DIR, 'SmoothMouse.prefPane'), '
 
 # Elements: filename under ROOT_DIR, internal name without spaces, install location
 COMPONENTS = (
-	('Signed/SmoothMouse.kext', 'Kext2', '/Library/Extensions/'),
 	('SmoothMouse.kext', 'Kext', '/System/Library/Extensions/'),
+	('Signed/SmoothMouse.kext', 'Kext2', '/Library/Extensions/'),
 	('SmoothMouse.prefPane', 'PrefPane', '/Library/PreferencePanes/'),
 )
 
