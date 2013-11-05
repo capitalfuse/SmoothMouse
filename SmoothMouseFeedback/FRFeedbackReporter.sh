@@ -8,8 +8,8 @@
 echo "Preference Pane CFBundleVersion: $(defaults read /Library/PreferencePanes/SmoothMouse.prefPane/Contents/Info.plist CFBundleVersion)"
 echo "Preference Pane SMCommitID: $(defaults read /Library/PreferencePanes/SmoothMouse.prefPane/Contents/Info.plist SMCommitID)"
 echo ""
-echo "Kext CFBundleVersion: $(defaults read /System/Library/Extensions/SmoothMouse.kext/Contents/Info.plist CFBundleVersion)"
-echo "Kext SMCommitID: $(defaults read /System/Library/Extensions/SmoothMouse.kext/Contents/Info.plist SMCommitID)"
+echo "Kext CFBundleVersion: $(defaults read /Library/Extensions/SmoothMouse.kext/Contents/Info.plist CFBundleVersion)"
+echo "Kext SMCommitID: $(defaults read /Library/Extensions/SmoothMouse.kext/Contents/Info.plist SMCommitID)"
 
 echo
 
