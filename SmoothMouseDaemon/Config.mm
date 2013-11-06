@@ -194,7 +194,6 @@
         activeAppRequiresRefreshOnDrag = YES;
     }
 
-    // refresh on drag
     if ([activeAppId isEqualToString:@"com.aspyr.callofduty4"] ||
         [activeAppId isEqualToString:@"com.native-instruments.Traktor"] ||
         [activeAppId isEqualToString:@"com.ableton.live"] ||
@@ -203,9 +202,8 @@
         activeAppRequiresRefreshOnDrag = YES;
     }
 
-    NSRange range;
-    range = [activeAppId rangeOfString:@"Steam/steamapps/common/Half-Life 2/hl2_osx" options:NSCaseInsensitiveSearch];
-    if (range.location != NSNotFound) {
+    if ([self appId:activeAppId contains:@"Steam/steamapps/common/Half-Life 2/hl2_osx"] ||
+        [self appId:activeAppId contains:@"Teeworlds.app/Contents/MacOS/teeworlds"]) {
         activeAppRequiresRefreshOnDrag = YES;
     }
 
@@ -216,6 +214,15 @@
             activeAppRequiresMouseEventListener,
             activeAppRequiresTabletPointSubtype);
     }
+}
+
+-(BOOL) appId:(NSString *)activeAppId contains:(NSString *)string {
+    NSRange range;
+    range = [activeAppId rangeOfString:string options:NSCaseInsensitiveSearch];
+    if (range.location != NSNotFound) {
+        return YES;
+    }
+    return NO;
 }
 
 -(BOOL) activeAppRequiresRefreshOnDrag {
