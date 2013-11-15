@@ -198,7 +198,8 @@
         [activeAppId isEqualToString:@"com.native-instruments.Traktor"] ||
         [activeAppId isEqualToString:@"com.ableton.live"] ||
         [activeAppId isEqualToString:@"net.maxon.cinema4d"] ||
-        [activeAppId isEqualToString:@"com.macsoft.halo"]) {
+        [activeAppId isEqualToString:@"com.macsoft.halo"] ||
+        [activeAppId isEqualToString:@"com.transgaming.guildwars2"]) {
         activeAppRequiresRefreshOnDrag = YES;
     }
 
