@@ -34,15 +34,16 @@
 	<script><![CDATA[
 var minOSVersion = '10.6.8';
 
+// {Library/Extensions} will be substituted for /System/Library/Extensions/ and /Library/Extensions/
 var incompatibleSoftware = [
-	['/System/Library/Extensions/SteerMouse.kext', 'SteerMouse'],
-	['/System/Library/Extensions/USBOverdrive.kext', 'USB Overdrive'],
-	['/System/Library/Extensions/ControllerMate.kext', 'ControllerMate'],
-	['/System/Library/Extensions/LogitechUSBHIDevices.kext', 'Logitech Control Center'],
-	['/System/Library/Extensions/LogitechUnifying.kext', 'Logitech Control Center'],
-	['/System/Library/Extensions/LogitechUSBHIDevices.kext', 'Logitech Control Center'],
-	['/System/Library/Extensions/MicrosoftMouse.kext', 'Microsoft IntelliPoint'],
-	['/System/Library/Extensions/KensingtonMouseDriver.kext', 'Kensington MouseWorks'],
+	['{Library/Extensions}/SteerMouse.kext', 'SteerMouse'],
+	['{Library/Extensions}/USBOverdrive.kext', 'USB Overdrive'],
+	['{Library/Extensions}/ControllerMate.kext', 'ControllerMate'],
+	['{Library/Extensions}/LogitechUSBHIDevices.kext', 'Logitech Control Center'],
+	['{Library/Extensions}/LogitechUnifying.kext', 'Logitech Control Center'],
+	['{Library/Extensions}/LogitechUSBHIDevices.kext', 'Logitech Control Center'],
+	['{Library/Extensions}/MicrosoftMouse.kext', 'Microsoft IntelliPoint'],
+	['{Library/Extensions}/KensingtonMouseDriver.kext', 'Kensington MouseWorks'],
 ]
 
 // From http://stackoverflow.com/a/4673436/412240
@@ -55,6 +56,24 @@ if (!String.prototype.format) {
 				: match
 			;
 		});
+	};
+}
+
+// Based on http://stackoverflow.com/a/9229784/412240
+if (!Array.prototype.dedupe) {
+	Array.prototype.dedupe = function() {
+		var object = {};
+		var result = [];
+		
+		for (var i = 0; i < this.length; i++) {
+			object[this[i]] = this[i];
+		}
+		
+		for (var key in object) {
+			result.push(key);
+		}
+		
+		return result;
 	};
 }
 
@@ -72,15 +91,26 @@ function detectIncompatibleKR4MB() {
 }
 
 function detectIncompatibleSoftware() {
-	var message = 'The following application{0} installed on your computer may prevent proper operation of SmoothMouse:\n\n{1}\n\nIt is highly recommended that you uninstall {2} application{0} before proceeding with the installation. In case you must keep {2} application{0}, please disable {3} mouse and trackpad acceleration functionality.\n\nIf you think this message is a mistake, please contact support at smoothmouse.com/support';
+	var message = 'PLEASE READ! THIS IS NOT THE USUAL BLAH-BLAH!\n\nThe following application{0} installed on your computer may prevent proper operation of SmoothMouse:\n\n{1}\n\nIt is HIGHLY recommended that you uninstall {2} application{0} before proceeding with the installation.\n\nIssues caused by incompatibility of other mouse software with SmoothMouse have gotten much worse in OS X 10.9 ‟Mavericks”.\n\nIf you think this is a mistake, or you need assistance with uninstallation, please contact support at smoothmouse.com/support/';
 	
 	var detected = new Array();
 
-	for (var i = 0, arrayLength = incompatibleSoftware.length; i < arrayLength; i++) {
-		if (system.files.fileExistsAtPath(incompatibleSoftware[i][0])) {
-			detected.push(incompatibleSoftware[i][1]);
+	for (var i = 0; i < incompatibleSoftware.length; i++) {
+		var path = incompatibleSoftware[i][0];
+		var name = incompatibleSoftware[i][1];
+		
+		if (path.indexOf('{Library/Extensions}') != -1) {
+			path = path.replace('{Library/Extensions}', '/System/Library/Extensions');
+			
+			incompatibleSoftware.push([path.replace('{Library/Extensions}', '/Library/Extensions'), name]);
+		}
+		
+		if (system.files.fileExistsAtPath(path)) {
+			detected.push(name);
 		}
 	}
+	
+	detected = detected.dedupe();
 	
 	if (detected.length == 1) {
 		return {message: message.format('', detected.join(', '), 'this', 'its')};
