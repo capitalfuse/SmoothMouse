@@ -30,3 +30,8 @@ echo
 
 # Check if the daemon is running
 ps aux | grep -i "SmoothMouse" | grep -v grep
+
+echo
+
+# All running processes
+ps aux
