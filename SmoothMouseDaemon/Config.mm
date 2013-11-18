@@ -199,6 +199,7 @@
         [activeAppId isEqualToString:@"com.ableton.live"] ||
         [activeAppId isEqualToString:@"net.maxon.cinema4d"] ||
         [activeAppId isEqualToString:@"com.macsoft.halo"] ||
+        [activeAppId isEqualToString:@"org.mixxx.mixxx"] ||
         [activeAppId isEqualToString:@"com.transgaming.guildwars2"]) {
         activeAppRequiresRefreshOnDrag = YES;
     }
