@@ -395,7 +395,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
     //       through quartz
     if (driver_to_use == DRIVER_IOHID &&
         (event->type == kCGEventOtherMouseDown || event->type == kCGEventOtherMouseUp)) {
-        driver_to_use = DRIVER_QUARTZ;
+        //sdriver_to_use = DRIVER_QUARTZ;
     }
 
     const char *driverString = driver_get_driver_string(driver_to_use);
