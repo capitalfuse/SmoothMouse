@@ -258,12 +258,6 @@ BOOL driver_cleanup() {
 BOOL driver_handle_move_event(driver_move_event_t *event) {
     int driver_to_use = [[Config instance] driver];
 
-    // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
-    //       through quartz
-    if (driver_to_use == DRIVER_IOHID && event->type == kCGEventOtherMouseDragged) {
-        driver_to_use = DRIVER_QUARTZ;
-    }
-
     const char *driverString = driver_get_driver_string(driver_to_use);
 
     if ([[Daemon instance] isMouseEventListenerActive]) {
@@ -391,13 +385,6 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
 BOOL driver_handle_button_event(driver_button_event_t *event) {
     int driver_to_use = [[Config instance] driver];
 
-    // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
-    //       through quartz
-    if (driver_to_use == DRIVER_IOHID &&
-        (event->type == kCGEventOtherMouseDown || event->type == kCGEventOtherMouseUp)) {
-        driver_to_use = DRIVER_QUARTZ;
-    }
-
     const char *driverString = driver_get_driver_string(driver_to_use);
 
     int clickStateValue;
@@ -467,27 +454,34 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
         {
             int iohidEventType;
             int is_down_event = 1;
+            int hw_button = 0;
 
             switch(event->type) {
                 case kCGEventLeftMouseDown:
                     iohidEventType = NX_LMOUSEDOWN;
+                    hw_button = LEFT_BUTTON;
                     break;
                 case kCGEventLeftMouseUp:
                     iohidEventType = NX_LMOUSEUP;
+                    hw_button = LEFT_BUTTON;
                     is_down_event = 0;
                     break;
                 case kCGEventRightMouseDown:
                     iohidEventType = NX_RMOUSEDOWN;
+                    hw_button = RIGHT_BUTTON;
                     break;
                 case kCGEventRightMouseUp:
                     iohidEventType = NX_RMOUSEUP;
+                    hw_button = RIGHT_BUTTON;
                     is_down_event = 0;
                     break;
                 case kCGEventOtherMouseDown:
                     iohidEventType = NX_OMOUSEDOWN;
+                    hw_button = (1 << event->otherButton);
                     break;
                 case kCGEventOtherMouseUp:
                     iohidEventType = NX_OMOUSEUP;
+                    hw_button = (1 << event->otherButton);
                     is_down_event = 0;
                     break;
                 default:
@@ -503,15 +497,37 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             if ([[Config instance] debugEnabled]) {
                 LOG(@"%s:BUTTON: Sending AUX mouse button event", driverString);
             }
+
+            /* DOCUMENTATION FROM IOLLEvent.h
+
+               http://opensource.apple.com/source/IOHIDFamily/IOHIDFamily-308/IOHIDSystem/IOKit/hidsystem/IOLLEvent.h
+
+               NX_SUBTYPE_AUX_CONTROL_BUTTONS usage
+
+               The incoming NXEvent for other mouse button down/up has event.type
+               NX_SYSDEFINED and event.data.compound.subtype NX_SUBTYPE_AUX_MOUSE_BUTTONS.
+               Within the event.data.compound.misc.L[0] contains bits for all the buttons
+               that have changed state, and event.data.compound.misc.L[1] contains the
+               current button state as a bitmask, with 1 representing down, and 0
+               representing up.  Bit 0 is the left button, bit one is the right button,
+               bit 2 is the center button and so forth.
+
+               Also, thanks to:
+               https://code.google.com/p/mydellmini/source/browse/trunk/Kext+Sources/ApplePS2Controller/IOHIDFamily/IOHIDSystem/IOHIDSystem.cpp#3702
+            */
             bzero(&eventData, sizeof(NXEventData));
-            eventData.compound.misc.L[0] = 1;
-            eventData.compound.misc.L[1] = is_down_event;
+            eventData.compound.misc.L[0] = (hw_button);
+            eventData.compound.misc.L[1] = (event->buttons);
             eventData.compound.subType = NX_SUBTYPE_AUX_MOUSE_BUTTONS;
 
             result = IOHIDPostEvent(iohid_connect, NX_SYSDEFINED, newPoint, &eventData, kNXEventDataVersion, 0, 0);
 
             if (result != KERN_SUCCESS) {
                 NSLog(@"failed to post aux button event");
+            }
+
+            if (hw_button != LEFT_BUTTON && hw_button != RIGHT_BUTTON) {
+                break;
             }
 
             static int eventNumber = 0;
