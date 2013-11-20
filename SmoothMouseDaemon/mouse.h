@@ -5,12 +5,12 @@
 
 #include "KextProtocol.h"
 
-#define LEFT_BUTTON     4
-#define RIGHT_BUTTON    1
-#define MIDDLE_BUTTON   2
-#define BUTTON4         8
-#define BUTTON5         16
-#define BUTTON6         32
+#define LEFT_BUTTON     (1 << 0)
+#define RIGHT_BUTTON    (1 << 1)
+#define MIDDLE_BUTTON   (1 << 2)
+#define BUTTON4         (1 << 3)
+#define BUTTON5         (1 << 4)
+#define BUTTON6         (1 << 5)
 #define NUM_BUTTONS     6
 
 #define BUTTON_DOWN(curbuttons, button)                         (((button) & curbuttons) == (button))

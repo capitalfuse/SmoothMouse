@@ -35,6 +35,27 @@ static RefreshReason refresh_reason = REFRESH_REASON_UNKNOWN;
 static int doubleClickSpeedUpdated = 0;
 static double newDoubleClickSpeed;
 
+static int remap_buttons(int buttons) {
+
+    int bl = !!(buttons & 4);
+    int bm = !!(buttons & 2);
+    int br = !!(buttons & 1);
+    int b4 = !!(buttons & 8);
+    int b5 = !!(buttons & 16);
+    int b6 = !!(buttons & 32);
+
+    int remapped = 0;
+
+    remapped |= (bl << 0);
+    remapped |= (br << 1);
+    remapped |= (bm << 2);
+    remapped |= (b4 << 3);
+    remapped |= (b5 << 4);
+    remapped |= (b6 << 5);
+
+    return remapped;
+}
+
 static const char *get_refresh_reason_string(RefreshReason reason) {
     switch (reason) {
         case REFRESH_REASON_SEQUENCE_NUMBER_INVALID: return "REFRESH_REASON_SEQUENCE_NUMBER_INVALID";
@@ -238,7 +259,7 @@ static void mouse_handle_move(mouse_event_t *event, double velocity, Acceleratio
     }
 
     if ([[Config instance] debugEnabled]) {
-        LOG(@"processed move event: move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03d, buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
+        LOG(@"processed move event: move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03d, buttons(LRM456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
             event->dx,
             event->dy,
             (int)newPos.x,
@@ -248,8 +269,8 @@ static void mouse_handle_move(mouse_event_t *event, double velocity, Acceleratio
             (int)deltaPosInt.x,
             (int)deltaPosInt.y,
             BUTTON_DOWN(event->buttons, LEFT_BUTTON),
-            BUTTON_DOWN(event->buttons, MIDDLE_BUTTON),
             BUTTON_DOWN(event->buttons, RIGHT_BUTTON),
+            BUTTON_DOWN(event->buttons, MIDDLE_BUTTON),
             BUTTON_DOWN(event->buttons, BUTTON4),
             BUTTON_DOWN(event->buttons, BUTTON5),
             BUTTON_DOWN(event->buttons, BUTTON6),
@@ -349,10 +370,10 @@ static void mouse_handle_buttons(mouse_event_t *event) {
             }
 
             if ([[Config instance] debugEnabled]) {
-                LOG(@"processed button event: buttons(LMR456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d, buttonIndex(654LMR): %d, nclicks: %d",
+                LOG(@"processed button event: buttons(LRM456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d, buttonIndex(654MRL): %d, nclicks: %d",
                     BUTTON_DOWN(buttons, LEFT_BUTTON),
-                    BUTTON_DOWN(buttons, MIDDLE_BUTTON),
                     BUTTON_DOWN(buttons, RIGHT_BUTTON),
+                    BUTTON_DOWN(buttons, MIDDLE_BUTTON),
                     BUTTON_DOWN(buttons, BUTTON4),
                     BUTTON_DOWN(buttons, BUTTON5),
                     BUTTON_DOWN(buttons, BUTTON6),
@@ -418,11 +439,14 @@ void check_needs_refresh(mouse_event_t *event) {
 
 void mouse_process_kext_event(mouse_event_t *event) {
 
+    event->buttons = remap_buttons(event->buttons);
+
     check_sequence_number(event);
 
     if (event->buttons != lastButtons) {
         check_needs_refresh(event);
         mouse_handle_buttons(event);
+
         // on all clicks, refresh mouse position
         mouse_refresh(REFRESH_REASON_BUTTON_CLICK);
     }
