@@ -539,6 +539,10 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
                 NSLog(@"failed to post aux button event");
             }
 
+            if (hw_button != LEFT_BUTTON && hw_button != RIGHT_BUTTON) {
+                break;
+            }
+
             static int eventNumber = 0;
             if (is_down_event) eventNumber++;
 
