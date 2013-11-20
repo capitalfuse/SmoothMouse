@@ -258,12 +258,6 @@ BOOL driver_cleanup() {
 BOOL driver_handle_move_event(driver_move_event_t *event) {
     int driver_to_use = [[Config instance] driver];
 
-    // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
-    //       through quartz
-    if (driver_to_use == DRIVER_IOHID && event->type == kCGEventOtherMouseDragged) {
-        //driver_to_use = DRIVER_QUARTZ;
-    }
-
     const char *driverString = driver_get_driver_string(driver_to_use);
 
     if ([[Daemon instance] isMouseEventListenerActive]) {
@@ -390,13 +384,6 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
 
 BOOL driver_handle_button_event(driver_button_event_t *event) {
     int driver_to_use = [[Config instance] driver];
-
-    // NOTE: can't get middle mouse to work in iohid, so let's channel all "other" events
-    //       through quartz
-    if (driver_to_use == DRIVER_IOHID &&
-        (event->type == kCGEventOtherMouseDown || event->type == kCGEventOtherMouseUp)) {
-        //driver_to_use = DRIVER_QUARTZ;
-    }
 
     const char *driverString = driver_get_driver_string(driver_to_use);
 
