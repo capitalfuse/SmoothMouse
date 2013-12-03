@@ -32,6 +32,8 @@
         exit(-1);
     }
 
+    [daemon trapSignals];
+
     [NSThread detachNewThreadSelector:@selector(mainLoop) toTarget:daemon withObject:0];
 }
 

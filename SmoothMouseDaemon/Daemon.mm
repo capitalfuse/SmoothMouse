@@ -97,19 +97,6 @@ const char *get_acceleration_string(AccelerationCurve curve) {
         }
     }
 
-    
-
-#if 0
-    for (int i = 0; i != 31; ++i) {
-        signal(i, trap_signals);
-    }
-#endif
-
-    signal(SIGINT, trap_signals);
-    signal(SIGKILL, trap_signals);
-    signal(SIGTERM, trap_signals);
-    signal(SIGUSR1, trap_sigusr);
-
     accel = [[SystemMouseAcceleration alloc] init];
     sMouseSupervisor = [[MouseSupervisor alloc] init];
     sDriverEventLog = [[DriverEventLog alloc] init];
@@ -143,6 +130,20 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     mouseEventListener = [[MouseEventListener alloc] init];
 
     return self;
+}
+
+-(void) trapSignals
+{
+#if 0
+    for (int i = 0; i != 31; ++i) {
+        signal(i, trap_signals);
+    }
+#endif
+
+    signal(SIGINT, trap_signals);
+    signal(SIGKILL, trap_signals);
+    signal(SIGTERM, trap_signals);
+    signal(SIGUSR1, trap_sigusr);
 }
 
 -(BOOL) loadDriver

@@ -36,6 +36,7 @@
 
 -(id) init;
 +(id) instance;
+-(void) trapSignals;
 -(void) destroy;
 -(BOOL) loadDriver;
 -(BOOL) connectToDriver;
