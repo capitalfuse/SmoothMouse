@@ -35,3 +35,15 @@ echo
 
 # All running processes
 ps aux
+
+echo
+
+# Display I/O Kit registry for the SM KEXT
+ioreg | grep -i smooth
+
+echo
+
+# Show SmoothMouse activity in system.log
+cat /var/log/system.log | grep -i smoothmouse
+
+echo
