@@ -209,8 +209,9 @@
         activeAppRequiresRefreshOnDrag = YES;
     }
 
-    if ([self appId:activeAppId contains:@"Steam/steamapps/common/Half-Life 2/hl2_osx"] ||
-        [self appId:activeAppId contains:@"Steam/steamapps/common/Counter-Strike Source/hl2_osx"] ||
+    // Steam/steamapps/common/Half-Life 2/hl2_osx
+    // Steam/steamapps/common/Counter-Strike Source/hl2_osx
+    if ([self appId:activeAppId contains:@"hl2_osx"] ||
         [self appId:activeAppId contains:@"Teeworlds.app/Contents/MacOS/teeworlds"]) {
         activeAppRequiresRefreshOnDrag = YES;
     }
