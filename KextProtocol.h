@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 
+#define MAX_LENGTH_MANUFACTURER_STRING (32)
+#define MAX_LENGTH_PRODUCT_STRING (32)
+
 typedef enum {
     EVENT_TYPE_DEVICE_ADDED,
     EVENT_TYPE_DEVICE_REMOVED,
@@ -25,10 +28,14 @@ typedef struct {
 
 typedef struct {
     kext_event_base_t base;
+    char manufacturer_string[MAX_LENGTH_MANUFACTURER_STRING];
+    char product_string[MAX_LENGTH_PRODUCT_STRING];
 } device_added_event_t;
 
 typedef struct {
     kext_event_base_t base;
+    char manufacturer_string[MAX_LENGTH_MANUFACTURER_STRING];
+    char product_string[MAX_LENGTH_PRODUCT_STRING];
 } device_removed_event_t;
 
 typedef struct {
@@ -53,7 +60,6 @@ typedef union {
 } kext_event_t;
 
 typedef enum {
-    KEXT_METHOD_CONFIGURE_CONNECTION,
     KEXT_METHOD_CONFIGURE_DEVICE,
     KEXT_METHOD_NUMBER_OF_METHODS
 } kext_method_t;

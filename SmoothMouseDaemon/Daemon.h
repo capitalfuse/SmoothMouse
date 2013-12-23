@@ -38,9 +38,7 @@
 +(id) instance;
 -(void) trapSignals;
 -(void) destroy;
--(BOOL) loadDriver;
 -(BOOL) connectToDriver;
--(BOOL) configureDriver;
 -(BOOL) disconnectFromKext;
 -(BOOL) isActive;
 -(BOOL) isMouseEventListenerActive;

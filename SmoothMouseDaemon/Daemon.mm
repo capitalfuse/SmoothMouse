@@ -146,19 +146,13 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     signal(SIGUSR1, trap_sigusr);
 }
 
--(BOOL) loadDriver
-{
-	NSString *kextID = @"com.cyberic.smoothmouse";
-	return (kOSReturnSuccess == KextManagerLoadKextWithIdentifier((CFStringRef)kextID, NULL));
-}
-
 -(BOOL) connectToDriver
 {
     @synchronized(self) {
         if (!connected && !terminating_smoothmouse) {
             kern_return_t error;
 
-            service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse"));
+            service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("com_cyberic_SmoothMouse2"));
             if (service == IO_OBJECT_NULL) {
                 NSLog(@"IOServiceGetMatchingService() failed");
                 goto error;
@@ -194,12 +188,12 @@ const char *get_acceleration_string(AccelerationCurve curve) {
             queueMappedMemory = (IODataQueueMemory *) address;
             dataSize = (uint32_t) size;
 
-            BOOL ok = [self configureDriver];
-            if (!ok) {
-                NSLog(@"Failed to configure driver");
-                goto error;
-            }
-
+//            BOOL ok = [self configureDriver];
+//            if (!ok) {
+//                NSLog(@"Failed to configure driver");
+//                goto error;
+//            }
+//
             int threadError = pthread_create(&mouseEventThreadID, NULL, &KernelEventThread, self);
             if (threadError != 0)
             {
@@ -280,37 +274,61 @@ error:
     }
 }
 
--(BOOL) configureDriver
+//-(BOOL) configureDriver
+//{
+//    kern_return_t	kernResult;
+//
+//    uint64_t scalarI_64[1];
+//
+//    uint32_t configuration = 0;
+//
+//    Config *config = [Config instance];
+//
+//    if ([config mouseEnabled]) {
+//        configuration |= KEXT_CONF_MOUSE_ENABLED;
+//    }
+//
+//    if ([config trackpadEnabled]) {
+//        configuration |= KEXT_CONF_TRACKPAD_ENABLED;
+//    }
+//
+//    if ([config driver] == DRIVER_QUARTZ_OLD) {
+//        configuration |= KEXT_CONF_QUARTZ_OLD; // set compatibility mode in kernel
+//    }
+//
+//    scalarI_64[0] = configuration;
+//
+//    kernResult = IOConnectCallScalarMethod(connect,
+//                                           KEXT_METHOD_CONFIGURE_DEVICE,
+//                                           scalarI_64,
+//                                           1,
+//                                           NULL,
+//                                           NULL);
+//
+//    if (kernResult == KERN_SUCCESS) {
+//        return YES;
+//    } else {
+//        return NO;
+//    }
+//}
+
+-(BOOL) enableDeviceWithVendorId: (uint32_t)vendorID withProductID: (uint32_t) productID
 {
     kern_return_t	kernResult;
-
-    uint64_t scalarI_64[1];
-
-    uint32_t configuration = 0;
-
-    Config *config = [Config instance];
-
-    if ([config mouseEnabled]) {
-        configuration |= KEXT_CONF_MOUSE_ENABLED;
-    }
-
-    if ([config trackpadEnabled]) {
-        configuration |= KEXT_CONF_TRACKPAD_ENABLED;
-    }
-
-    if ([config driver] == DRIVER_QUARTZ_OLD) {
-        configuration |= KEXT_CONF_QUARTZ_OLD; // set compatibility mode in kernel
-    }
-
-    scalarI_64[0] = configuration;
-
+    
+    uint64_t scalarI_64[3];
+    
+    scalarI_64[0] = vendorID;
+    scalarI_64[1] = productID;
+    scalarI_64[2] = 1;
+    
     kernResult = IOConnectCallScalarMethod(connect,
-                                           kConfigureMethod,
+                                           KEXT_METHOD_CONFIGURE_DEVICE,
                                            scalarI_64,
-                                           1,
+                                           3,
                                            NULL,
                                            NULL);
-
+    
     if (kernResult == KERN_SUCCESS) {
         return YES;
     } else {
@@ -390,18 +408,42 @@ static void *KernelEventThread(void *instance)
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
             kext_event_t *kext_event = (kext_event_t *) buf;
             //LOG(@"Got event from kernel with timestamp: %llu", mouse_event->timestamp);
-            if (!error) {
-                mhs = GET_TIME();
-                mouse_process_kext_event(&kext_event->pointing);
-                if ([[Config instance] debugEnabled]) {
-                    debug_register_event(kext_event);
-                }
-                self->eventsSinceStart++;
-                mhe = GET_TIME();
-            } else {
+            
+            if (error) {
                 LOG(@"IODataQueueDequeue() failed");
                 exit(0);
             }
+            
+            mhs = GET_TIME();
+
+            switch (kext_event->base.type) {
+                case EVENT_TYPE_DEVICE_ADDED:
+                {
+                    device_added_event_t *device_added = &kext_event->device_added;
+                    LOG(@"DEVICE ADDED, vendor_id: %u, product_id: %u, manufacturer_string: '%s', product_string: '%s'",
+                        device_added->base.vendor_id, device_added->base.product_id, device_added->manufacturer_string, device_added->product_string);
+                    [self enableDeviceWithVendorId:device_added->base.vendor_id withProductID:device_added->base.product_id];
+                    break;
+                }
+                case EVENT_TYPE_DEVICE_REMOVED:
+                {
+                    device_removed_event_t *device_removed = &kext_event->device_removed;
+                    LOG(@"DEVICE REMOVED, vendor_id: %u, product_id: %u, manufacturer_string: '%s', product_string: '%s'",
+                        device_removed->base.vendor_id, device_removed->base.product_id, device_removed->manufacturer_string, device_removed->product_string);
+                    break;
+                }
+                case EVENT_TYPE_POINTING:
+                    mouse_process_kext_event(&kext_event->pointing);
+                    break;
+                case EVENT_TYPE_KEYBOARD:
+                    break;
+            }
+            
+            if ([[Config instance] debugEnabled]) {
+                debug_register_event(kext_event);
+            }
+            self->eventsSinceStart++;
+            mhe = GET_TIME();
             end = GET_TIME();
             if ([[Config instance] timingsEnabled]) {
                 LOG(@"timings: outer: %f, inner: %f, process mouse event: %f, seqnum: %llu, burst: %d, coalesced: %d", outerend-outerstart, end-start, mhe-mhs, kext_event->base.seq, numPackets, numCoalescedEvents);
