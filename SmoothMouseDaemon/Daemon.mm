@@ -188,12 +188,12 @@ const char *get_acceleration_string(AccelerationCurve curve) {
             queueMappedMemory = (IODataQueueMemory *) address;
             dataSize = (uint32_t) size;
 
-//            BOOL ok = [self configureDriver];
-//            if (!ok) {
-//                NSLog(@"Failed to configure driver");
-//                goto error;
-//            }
-//
+            BOOL ok = [self connectToUserClient];
+            if (!ok) {
+                NSLog(@"Failed to connect to user client");
+                goto error;
+            }
+
             int threadError = pthread_create(&mouseEventThreadID, NULL, &KernelEventThread, self);
             if (threadError != 0)
             {
@@ -312,6 +312,24 @@ error:
 //    }
 //}
 
+-(BOOL) connectToUserClient
+{
+    kern_return_t	kernResult;
+    
+    kernResult = IOConnectCallScalarMethod(connect,
+                                           KEXT_METHOD_CONNECT,
+                                           NULL,
+                                           0,
+                                           NULL,
+                                           NULL);
+    
+    if (kernResult == KERN_SUCCESS) {
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
 -(BOOL) enableDeviceWithVendorId: (uint32_t)vendorID withProductID: (uint32_t) productID
 {
     kern_return_t	kernResult;
@@ -328,7 +346,7 @@ error:
                                            3,
                                            NULL,
                                            NULL);
-    
+
     if (kernResult == KERN_SUCCESS) {
         return YES;
     } else {

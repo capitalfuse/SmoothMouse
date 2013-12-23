@@ -60,6 +60,7 @@ typedef union {
 } kext_event_t;
 
 typedef enum {
+    KEXT_METHOD_CONNECT,
     KEXT_METHOD_CONFIGURE_DEVICE,
     KEXT_METHOD_NUMBER_OF_METHODS
 } kext_method_t;
