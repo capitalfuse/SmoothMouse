@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "KextProtocol.h"
+#include "../KextProtocol.h"
 #import "Config.h"
 #include <mach/mach_time.h>
 #include <pthread.h>
@@ -30,6 +30,6 @@ extern pthread_mutex_t log_mutex;
         } \
     }
 
-void debug_register_event(mouse_event_t *event);
+void debug_register_event(kext_event_t *event);
 void debug_end();
 

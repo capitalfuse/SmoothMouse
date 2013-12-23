@@ -36,6 +36,7 @@ typedef struct {
 	uint32_t buttons;
 	int32_t dx;
 	int32_t dy;
+    uint32_t is_trackpad;
 } pointing_event_t;
 
 typedef struct keyboard_event_s {

@@ -388,11 +388,14 @@ static void *KernelEventThread(void *instance)
             numPackets++;
             counter++;
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
-            mouse_event_t *mouse_event = (mouse_event_t *) buf;
+            kext_event_t *kext_event = (kext_event_t *) buf;
             //LOG(@"Got event from kernel with timestamp: %llu", mouse_event->timestamp);
             if (!error) {
                 mhs = GET_TIME();
-                mouse_process_kext_event(mouse_event);
+                mouse_process_kext_event(&kext_event->pointing);
+                if ([[Config instance] debugEnabled]) {
+                    debug_register_event(kext_event);
+                }
                 self->eventsSinceStart++;
                 mhe = GET_TIME();
             } else {
@@ -401,7 +404,7 @@ static void *KernelEventThread(void *instance)
             }
             end = GET_TIME();
             if ([[Config instance] timingsEnabled]) {
-                LOG(@"timings: outer: %f, inner: %f, process mouse event: %f, seqnum: %llu, burst: %d, coalesced: %d", outerend-outerstart, end-start, mhe-mhs, mouse_event->seqnum, numPackets, numCoalescedEvents);
+                LOG(@"timings: outer: %f, inner: %f, process mouse event: %f, seqnum: %llu, burst: %d, coalesced: %d", outerend-outerstart, end-start, mhe-mhs, kext_event->base.seq, numPackets, numCoalescedEvents);
             }
         }
 

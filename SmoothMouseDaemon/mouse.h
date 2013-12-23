@@ -3,7 +3,7 @@
 
 #import "MouseSupervisor.h"
 
-#include "KextProtocol.h"
+#include "../KextProtocol.h"
 
 #define LEFT_BUTTON     (1 << 0)
 #define RIGHT_BUTTON    (1 << 1)
@@ -35,7 +35,7 @@ typedef enum AccelerationCurve_s {
 
 BOOL mouse_init();
 BOOL mouse_cleanup();
-void mouse_process_kext_event(mouse_event_t *event);
+void mouse_process_kext_event(pointing_event_t *event);
 void mouse_refresh(RefreshReason reason);
 void mouse_update_clicktime();
 CGPoint mouse_get_current_pos();

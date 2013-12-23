@@ -16,11 +16,11 @@ static int sumHz = 0;
 std::vector<void *> logs;
 pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void debug_register_event(mouse_event_t *event) {
+void debug_register_event(kext_event_t *event) {
     static long long lastTimestamp = 0;
 
     if (lastTimestamp != 0) {
-        float deltaTimestamp = event->timestamp - lastTimestamp; // timestamp is ns
+        float deltaTimestamp = event->base.timestamp - lastTimestamp; // timestamp is ns
 
         int hz = (int) (1000000000 / deltaTimestamp);
 
@@ -32,7 +32,7 @@ void debug_register_event(mouse_event_t *event) {
         }
     }
 
-    lastTimestamp = event->timestamp;
+    lastTimestamp = event->base.timestamp;
 }
 
 void debug_end() {

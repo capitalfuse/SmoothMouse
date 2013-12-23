@@ -169,7 +169,7 @@ void mouse_update_clicktime() {
     }
 }
 
-static void mouse_handle_move(mouse_event_t *event, double velocity, AccelerationCurve curve) {
+static void mouse_handle_move(pointing_event_t *event, double velocity, AccelerationCurve curve) {
     CGPoint newPos;
 
     float calcdx;
@@ -195,24 +195,18 @@ static void mouse_handle_move(mouse_event_t *event, double velocity, Acceleratio
         calcdy = (float) newdy;
     } else if (curve == ACCELERATION_CURVE_OSX) {
         float speed = velocity;
-        if (event->device_type == kDeviceTypeTrackpad && osx_trackpad == NULL) {
+        if (event->is_trackpad && osx_trackpad == NULL) {
             osx_trackpad = new OSXFunction("touchpad", speed);
-        } else if (event->device_type == kDeviceTypeMouse && osx_mouse == NULL) {
+        } else if (!event->is_trackpad && osx_mouse == NULL) {
             osx_mouse = new OSXFunction("mouse", speed);
         }
         int newdx;
         int newdy;
         OSXFunction *osx = NULL;
-        switch (event->device_type) {
-            case kDeviceTypeTrackpad:
-                osx = osx_trackpad;
-                break;
-            case kDeviceTypeMouse:
-                osx = osx_mouse;
-                break;
-            default:
-                NSLog(@"invalid deviceType: %d", event->device_type);
-                exit(0);
+        if (event->is_trackpad) {
+            osx = osx_trackpad;
+        } else {
+            osx = osx_mouse;
         }
         osx->apply(event->dx, event->dy, &newdx, &newdy);
         calcdx = (float) newdx;
@@ -282,8 +276,8 @@ static void mouse_handle_move(mouse_event_t *event, double velocity, Acceleratio
 //    if (!(deltaX == 0 && deltaY == 0)) {
         driver_event_t driverEvent;
         driverEvent.id = DRIVER_EVENT_ID_MOVE;
-        driverEvent.kextSeqnum = event->seqnum;
-        driverEvent.kextTimestamp = event->timestamp;
+        driverEvent.kextSeqnum = event->base.seq;
+        driverEvent.kextTimestamp = event->base.timestamp;
         driverEvent.move.pos = newPos;
         driverEvent.move.type = eventType;
         driverEvent.move.deltaX = deltaX;
@@ -308,7 +302,7 @@ static void mouse_handle_move(mouse_event_t *event, double velocity, Acceleratio
     }
 }
 
-static void mouse_handle_buttons(mouse_event_t *event) {
+static void mouse_handle_buttons(pointing_event_t *event) {
 
     int buttons;
 
@@ -387,8 +381,8 @@ static void mouse_handle_buttons(mouse_event_t *event) {
             driver_event_t driverEvent;
             driverEvent.id = DRIVER_EVENT_ID_BUTTON;
             if (event != NULL) {
-                driverEvent.kextSeqnum = event->seqnum;
-                driverEvent.kextTimestamp = event->timestamp;
+                driverEvent.kextSeqnum = event->base.seq;
+                driverEvent.kextTimestamp = event->base.timestamp;
             } else {
                 driverEvent.kextSeqnum = 0;
                 driverEvent.kextTimestamp = 0;
@@ -403,17 +397,17 @@ static void mouse_handle_buttons(mouse_event_t *event) {
     }
 }
 
-void check_sequence_number(mouse_event_t *event) {
+void check_sequence_number(pointing_event_t *event) {
     uint64_t seqnumExpected = (lastSequenceNumber + 1);
-    int seqNumOk = (event->seqnum == seqnumExpected);
-    uint64_t lostEvents = (event->seqnum - seqnumExpected);
+    int seqNumOk = (event->base.seq == seqnumExpected);
+    uint64_t lostEvents = (event->base.seq - seqnumExpected);
     if (lastSequenceNumber == 0) {
         lostEvents = 0;
     }
     totalNumberOfLostEvents += lostEvents;
     if (!seqNumOk) {
         LOG(@"seqnum: %llu, expected: %llu (%llu lost events)",
-            event->seqnum,
+            event->base.seq,
             seqnumExpected,
             lostEvents);
         if (lostEvents != 0 && [[Config instance] sayEnabled]) {
@@ -430,14 +424,14 @@ void check_sequence_number(mouse_event_t *event) {
     }
 }
 
-void check_needs_refresh(mouse_event_t *event) {
+void check_needs_refresh(pointing_event_t *event) {
     if (needs_refresh) {
         refresh_mouse_location();
         needs_refresh = 0;
     }
 }
 
-void mouse_process_kext_event(mouse_event_t *event) {
+void mouse_process_kext_event(pointing_event_t *event) {
 
     event->buttons = remap_buttons(event->buttons);
 
@@ -455,28 +449,18 @@ void mouse_process_kext_event(mouse_event_t *event) {
         check_needs_refresh(event);
         double velocity;
         AccelerationCurve curve;
-        switch (event->device_type) {
-            case kDeviceTypeMouse:
-                velocity = [[Config instance] mouseVelocity];
-                curve = [[Config instance] mouseCurve];
-                break;
-            case kDeviceTypeTrackpad:
-                velocity = [[Config instance] trackpadVelocity];
-                curve = [[Config instance] trackpadCurve];
-                break;
-            default:
-                NSLog(@"INTERNAL ERROR: device type not mouse or trackpad");
-                exit(0);
+        if (event->is_trackpad) {
+            velocity = [[Config instance] mouseVelocity];
+            curve = [[Config instance] mouseCurve];
+        } else {
+            velocity = [[Config instance] trackpadVelocity];
+            curve = [[Config instance] trackpadCurve];
         }
 
         mouse_handle_move(event, velocity, curve);
     }
 
-    if ([[Config instance] debugEnabled]) {
-        debug_register_event(event);
-    }
-
-    lastSequenceNumber = event->seqnum;
+    lastSequenceNumber = event->base.seq;
     lastButtons = event->buttons;
     lastPos = currentPos;
 }

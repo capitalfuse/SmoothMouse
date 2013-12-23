@@ -137,7 +137,6 @@
 /* Begin PBXFileReference section */
 		031386A71628B36000A04755 /* UrlLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UrlLabel.h; sourceTree = "<group>"; };
 		031386A81628B36000A04755 /* UrlLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UrlLabel.m; sourceTree = "<group>"; };
-		0316714C1711AA5400360C01 /* KextProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KextProtocol.h; sourceTree = "<group>"; };
 		03193FE316BFAC41008FE899 /* SmoothMouseDaemon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmoothMouseDaemon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		03193FE816BFAC41008FE899 /* SmoothMouseDaemon-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SmoothMouseDaemon-Info.plist"; sourceTree = "<group>"; };
 		03193FEA16BFAC41008FE899 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -181,6 +180,7 @@
 		03758EFF17089405003E066D /* mach_timebase_util.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mach_timebase_util.mm; sourceTree = "<group>"; };
 		03A340191709CE3300B4A1D8 /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		03A3401A1709CF0300B4A1D8 /* Config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Config.mm; sourceTree = "<group>"; };
+		03AA3F07186895C500D22816 /* KextProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KextProtocol.h; sourceTree = "<group>"; };
 		03BA20FF161F757D0014A74E /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		03D020BC1631D0DA00CD04C1 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		03D020D41631F22A00CD04C1 /* uninstall.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = uninstall.sh; sourceTree = "<group>"; };
@@ -291,7 +291,6 @@
 				033933C01724214F0052C43D /* DriverEventLog.mm */,
 				03319D701722E7D300668B93 /* InterruptListener.h */,
 				03319D6E1722E7BB00668B93 /* InterruptListener.mm */,
-				0316714C1711AA5400360C01 /* KextProtocol.h */,
 				0319400A16BFB637008FE899 /* libpointing */,
 				03758EFE170893BD003E066D /* mach_timebase_util.h */,
 				03758EFF17089405003E066D /* mach_timebase_util.mm */,
@@ -384,6 +383,7 @@
 		ED0E11F014D5493A008704EC = {
 			isa = PBXGroup;
 			children = (
+				03AA3F07186895C500D22816 /* KextProtocol.h */,
 				0341D0BF170CA67000D24E08 /* Carbon.framework */,
 				0319400816BFB612008FE899 /* IOKit.framework */,
 				036E3EF01637066600887DCE /* Security.framework */,
