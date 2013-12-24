@@ -363,7 +363,7 @@ error:
     scalarI_64[0] = vendorID;
     scalarI_64[1] = productID;
     
-    LOG(@"Getting device information, vendor_id: %u, product_id: %u", vendorID, productID);
+//    LOG(@"Getting device information, vendor_id: %u, product_id: %u", vendorID, productID);
 
     size_t device_info_size = sizeof(device_information_t);
     kernResult = IOConnectCallMethod(
@@ -379,10 +379,8 @@ error:
                         &device_info_size);	// In/Out
 
     if (kernResult == KERN_SUCCESS) {
-        LOG(@"SUCCESS");
         return YES;
     } else {
-        LOG(@"FAILED");
         return NO;
     }
 }
@@ -458,36 +456,34 @@ static void *KernelEventThread(void *instance)
             counter++;
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
             kext_event_t *kext_event = (kext_event_t *) buf;
-            LOG(@"kext event: size %u, type: %u, timestamp: %llu", self->dataSize, kext_event->base.type, kext_event->base.timestamp);
-            LOG(@"kext event: size %u, type: %u, timestamp: %llu", self->dataSize, kext_event->pointing.base.type, kext_event->pointing.base.timestamp);
-            
+
             if (error) {
                 LOG(@"IODataQueueDequeue() failed");
                 exit(0);
             }
             
+            LOG(@"kext event: size %u, type: %u, timestamp: %llu", self->dataSize, kext_event->base.type, kext_event->base.timestamp);
+
             mhs = GET_TIME();
 
             switch (kext_event->base.type) {
                 case EVENT_TYPE_DEVICE_ADDED:
                 {
                     device_added_event_t *device_added = &kext_event->device_added;
-                    LOG(@"DEVICE ADDED, vendor_id: %u, product_id: %u", device_added->base.vendor_id, device_added->base.product_id);
                     [self kextMethodEnableDeviceWithVendorId:device_added->base.vendor_id andProductID:device_added->base.product_id];
                     device_information_t deviceInfo;
                     [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
-                    LOG(@"DEVICE ADDED, manufacturer string: '%s', product string: '%s'",
-                        deviceInfo.manufacturer_string, deviceInfo.product_string);
+                    LOG(@"DEVICE ADDED, vendor_id: %u, product_id: %u, manufacturer string: '%s', product string: '%s'",
+                        device_added->base.vendor_id, device_added->base.product_id, deviceInfo.manufacturer_string, deviceInfo.product_string);
                     break;
                 }
                 case EVENT_TYPE_DEVICE_REMOVED:
                 {
                     device_removed_event_t *device_removed = &kext_event->device_removed;
-                    LOG(@"DEVICE REMOVED, vendor_id: %u, product_id: %u", device_removed->base.vendor_id, device_removed->base.product_id);
                     device_information_t deviceInfo;
                     [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithVendorId: device_removed->base.vendor_id andProductID: device_removed->base.product_id];
-                    LOG(@"DEVICE ADDED, manufacturer string: '%s', product string: '%s'",
-                        deviceInfo.manufacturer_string, deviceInfo.product_string);
+                    LOG(@"DEVICE REMOVED, vendor_id: %u, product_id: %u, manufacturer string: '%s', product string: '%s'",
+                        device_removed->base.vendor_id, device_removed->base.product_id, deviceInfo.manufacturer_string, deviceInfo.product_string);
                     break;
                 }
                 case EVENT_TYPE_POINTING:
