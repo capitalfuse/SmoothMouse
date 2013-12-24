@@ -365,7 +365,6 @@ error:
     
     LOG(@"Getting device information, vendor_id: %u, product_id: %u", vendorID, productID);
 
-    device_information_t device_info;
     size_t device_info_size = sizeof(device_information_t);
     kernResult = IOConnectCallMethod(
                         connect,		// In
@@ -376,12 +375,14 @@ error:
                         0,	// In
                         NULL,		// Out
                         0,		// In/Out
-                        &device_info,		// Out
+                        deviceInfo,		// Out
                         &device_info_size);	// In/Out
 
     if (kernResult == KERN_SUCCESS) {
+        LOG(@"SUCCESS");
         return YES;
     } else {
+        LOG(@"FAILED");
         return NO;
     }
 }
@@ -457,7 +458,8 @@ static void *KernelEventThread(void *instance)
             counter++;
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
             kext_event_t *kext_event = (kext_event_t *) buf;
-            LOG(@"Got event from kernel with size %d and timestamp: %llu", self->dataSize, kext_event->base.timestamp);
+            LOG(@"kext event: size %u, type: %u, timestamp: %llu", self->dataSize, kext_event->base.type, kext_event->base.timestamp);
+            LOG(@"kext event: size %u, type: %u, timestamp: %llu", self->dataSize, kext_event->pointing.base.type, kext_event->pointing.base.timestamp);
             
             if (error) {
                 LOG(@"IODataQueueDequeue() failed");
