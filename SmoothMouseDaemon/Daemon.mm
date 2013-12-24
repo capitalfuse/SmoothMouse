@@ -188,7 +188,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
             queueMappedMemory = (IODataQueueMemory *) address;
             dataSize = (uint32_t) size;
 
-            BOOL ok = [self connectToUserClient];
+            BOOL ok = [self kextMethodConnectToUserClient];
             if (!ok) {
                 NSLog(@"Failed to connect to user client");
                 goto error;
@@ -312,7 +312,7 @@ error:
 //    }
 //}
 
--(BOOL) connectToUserClient
+-(BOOL) kextMethodConnectToUserClient
 {
     kern_return_t	kernResult;
     
@@ -330,7 +330,7 @@ error:
     }
 }
 
--(BOOL) enableDeviceWithVendorId: (uint32_t)vendorID withProductID: (uint32_t) productID
+-(BOOL) kextMethodEnableDeviceWithVendorId: (uint32_t)vendorID andProductID: (uint32_t) productID
 {
     kern_return_t	kernResult;
     
@@ -346,6 +346,38 @@ error:
                                            3,
                                            NULL,
                                            NULL);
+
+    if (kernResult == KERN_SUCCESS) {
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+-(BOOL) kextMethodGetDeviceInformation: (device_information_t *)deviceInfo forDeviceWithVendorId: (uint32_t) vendorID andProductID: (uint32_t) productID
+{
+    kern_return_t	kernResult;
+    
+    uint64_t scalarI_64[2];
+    
+    scalarI_64[0] = vendorID;
+    scalarI_64[1] = productID;
+    
+    LOG(@"Getting device information, vendor_id: %u, product_id: %u", vendorID, productID);
+
+    device_information_t device_info;
+    size_t device_info_size = sizeof(device_information_t);
+    kernResult = IOConnectCallMethod(
+                        connect,		// In
+                        KEXT_METHOD_GET_DEVICE_INFORMATION,		// In
+                        scalarI_64,			// In
+                        2,		// In
+                        NULL,		// In
+                        0,	// In
+                        NULL,		// Out
+                        0,		// In/Out
+                        &device_info,		// Out
+                        &device_info_size);	// In/Out
 
     if (kernResult == KERN_SUCCESS) {
         return YES;
@@ -438,16 +470,22 @@ static void *KernelEventThread(void *instance)
                 case EVENT_TYPE_DEVICE_ADDED:
                 {
                     device_added_event_t *device_added = &kext_event->device_added;
-                    LOG(@"DEVICE ADDED, vendor_id: %u, product_id: %u, manufacturer_string: '%s', product_string: '%s'",
-                        device_added->base.vendor_id, device_added->base.product_id, device_added->manufacturer_string, device_added->product_string);
-                    [self enableDeviceWithVendorId:device_added->base.vendor_id withProductID:device_added->base.product_id];
+                    LOG(@"DEVICE ADDED, vendor_id: %u, product_id: %u", device_added->base.vendor_id, device_added->base.product_id);
+                    [self kextMethodEnableDeviceWithVendorId:device_added->base.vendor_id andProductID:device_added->base.product_id];
+                    device_information_t deviceInfo;
+                    [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
+                    LOG(@"DEVICE ADDED, manufacturer string: '%s', product string: '%s'",
+                        deviceInfo.manufacturer_string, deviceInfo.product_string);
                     break;
                 }
                 case EVENT_TYPE_DEVICE_REMOVED:
                 {
                     device_removed_event_t *device_removed = &kext_event->device_removed;
-                    LOG(@"DEVICE REMOVED, vendor_id: %u, product_id: %u, manufacturer_string: '%s', product_string: '%s'",
-                        device_removed->base.vendor_id, device_removed->base.product_id, device_removed->manufacturer_string, device_removed->product_string);
+                    LOG(@"DEVICE REMOVED, vendor_id: %u, product_id: %u", device_removed->base.vendor_id, device_removed->base.product_id);
+                    device_information_t deviceInfo;
+                    [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithVendorId: device_removed->base.vendor_id andProductID: device_removed->base.product_id];
+                    LOG(@"DEVICE ADDED, manufacturer string: '%s', product string: '%s'",
+                        deviceInfo.manufacturer_string, deviceInfo.product_string);
                     break;
                 }
                 case EVENT_TYPE_POINTING:
