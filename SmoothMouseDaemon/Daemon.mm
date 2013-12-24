@@ -457,7 +457,7 @@ static void *KernelEventThread(void *instance)
             counter++;
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
             kext_event_t *kext_event = (kext_event_t *) buf;
-            LOG(@"Got event from kernel with timestamp: %llu", kext_event->base.timestamp);
+            LOG(@"Got event from kernel with size %d and timestamp: %llu", self->dataSize, kext_event->base.timestamp);
             
             if (error) {
                 LOG(@"IODataQueueDequeue() failed");
