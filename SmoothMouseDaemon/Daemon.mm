@@ -457,7 +457,7 @@ static void *KernelEventThread(void *instance)
             counter++;
             error = IODataQueueDequeue(self->queueMappedMemory, buf, &(self->dataSize));
             kext_event_t *kext_event = (kext_event_t *) buf;
-            //LOG(@"Got event from kernel with timestamp: %llu", mouse_event->timestamp);
+            LOG(@"Got event from kernel with timestamp: %llu", kext_event->base.timestamp);
             
             if (error) {
                 LOG(@"IODataQueueDequeue() failed");
@@ -489,9 +489,14 @@ static void *KernelEventThread(void *instance)
                     break;
                 }
                 case EVENT_TYPE_POINTING:
+                    LOG(@"EVENT_TYPE_POINTING");
                     mouse_process_kext_event(&kext_event->pointing);
                     break;
                 case EVENT_TYPE_KEYBOARD:
+                    LOG(@"EVENT_TYPE_KEYBOARD");
+                    break;
+                default:
+                    LOG(@"Unknown device type: %d", kext_event->base.type);
                     break;
             }
             
