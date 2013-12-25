@@ -3,6 +3,7 @@
 
 #import "Config.h"
 #import "Mouse.h"
+#import "MouseSupervisor.h"
 
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>

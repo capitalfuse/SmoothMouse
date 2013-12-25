@@ -1,8 +1,6 @@
 
 #pragma once
 
-#import "MouseSupervisor.h"
-
 #include "../KextProtocol.h"
 
 #define LEFT_BUTTON     (1 << 0)

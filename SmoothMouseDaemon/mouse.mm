@@ -176,7 +176,7 @@ static void mouse_handle_move(pointing_event_t *event, double velocity, Accelera
     float calcdy;
 
     if (curve == ACCELERATION_CURVE_WINDOWS) {
-        // map slider to [-5 <=> +5]
+        // map prefpane velocity slider to [-5 <=> +5]
         int slider = (int)((velocity * 4) - 6);
         if (slider > 5) {
             slider = 5;
@@ -253,15 +253,17 @@ static void mouse_handle_move(pointing_event_t *event, double velocity, Accelera
     }
 
     if ([[Config instance] debugEnabled]) {
-        LOG(@"processed move event: move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPos: %03dx%03d, buttons(LRM456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
+        LOG(@"processed move event: move dx: %02d, dy: %02d, new pos: %03dx%03d, delta: %02d,%02d, deltaPosInt: %.02fx%.02f, deltaPosFloat: %.02fx%.02f, buttons(LRM456): %d%d%d%d%d%d, eventType: %s(%d), otherButton: %d",
             event->dx,
             event->dy,
             (int)newPos.x,
             (int)newPos.y,
             deltaX,
             deltaY,
-            (int)deltaPosInt.x,
-            (int)deltaPosInt.y,
+            deltaPosInt.x,
+            deltaPosInt.y,
+            deltaPosFloat.x,
+            deltaPosFloat.y,
             BUTTON_DOWN(event->buttons, LEFT_BUTTON),
             BUTTON_DOWN(event->buttons, RIGHT_BUTTON),
             BUTTON_DOWN(event->buttons, MIDDLE_BUTTON),
@@ -449,7 +451,7 @@ void mouse_process_kext_event(pointing_event_t *event) {
         check_needs_refresh(event);
         double velocity;
         AccelerationCurve curve;
-        if (event->is_trackpad) {
+        if (!event->is_trackpad) {
             velocity = [[Config instance] mouseVelocity];
             curve = [[Config instance] mouseCurve];
         } else {
@@ -458,6 +460,8 @@ void mouse_process_kext_event(pointing_event_t *event) {
         }
 
         mouse_handle_move(event, velocity, curve);
+    } else {
+        LOG(@"WARNING: pointing null delta event");
     }
 
     lastSequenceNumber = event->base.seq;
