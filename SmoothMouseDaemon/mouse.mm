@@ -460,8 +460,6 @@ void mouse_process_kext_event(pointing_event_t *event) {
         }
 
         mouse_handle_move(event, velocity, curve);
-    } else {
-        LOG(@"WARNING: pointing null delta event");
     }
 
     lastSequenceNumber = event->base.seq;

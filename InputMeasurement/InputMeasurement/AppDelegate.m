@@ -10,7 +10,7 @@
 
 #include <mach/mach_time.h>
 
-#define FILTER (0.95)
+#define FILTER (0.90)
 
 uint64_t convert_from_mach_timebase_to_nanos(uint64_t mach_time, mach_timebase_info_data_t *info)
 {
@@ -78,6 +78,8 @@ uint64_t convert_from_mach_timebase_to_nanos(uint64_t mach_time, mach_timebase_i
     }
 
     uint64_t nowMach = mach_absolute_time();
+
+    NSLog(@"NOW: %llu", nowMach / 1000000);
 
     double nowMs = convert_from_mach_timebase_to_nanos(nowMach, &info) / 1000000.0;
 

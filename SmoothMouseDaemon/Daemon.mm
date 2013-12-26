@@ -157,8 +157,9 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     EventTypeSpec spec = { kEventClassApplication,  kEventAppFrontSwitched };
     OSStatus err = InstallApplicationEventHandler(NewEventHandlerUPP(AppFrontSwitchedHandler), 1, &spec, (void*)self, NULL);
 
-    if (err)
+    if (err) {
         NSLog(@"Could not install event handler");
+    }
 }
 
 - (void) frontAppSwitched {
