@@ -19,7 +19,8 @@ typedef enum {
 } device_type_t;
 
 typedef struct {
-    event_type_t type;
+    event_type_t event_type;
+    device_type_t device_type;
     uint32_t vendor_id;
     uint32_t product_id;
     uint64_t seq;
@@ -62,6 +63,25 @@ typedef struct {
 typedef struct {
     bool temp;
 } keyboard_device_information_t;
+
+typedef struct {
+
+} pointing_device_configuration_t;
+
+typedef struct {
+    char enabledKeys[256];
+} keyboard_device_configuration_t;
+
+typedef struct {
+    device_type_t device_type;
+    uint32_t vendor_id;
+    uint32_t product_id;
+    uint32_t enabled;
+    union {
+        pointing_device_configuration_t pointing;
+        keyboard_device_configuration_t keyboard;
+    };
+} device_configuration_t;
 
 typedef struct {
     device_type_t type;

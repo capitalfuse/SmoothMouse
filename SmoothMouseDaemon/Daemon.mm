@@ -96,6 +96,8 @@ const char *get_acceleration_string(AccelerationCurve curve) {
           [config trackpadVelocity],
           get_acceleration_string([config trackpadCurve]));
 
+    NSLog(@"Keyboard enabled: %d", [config keyboardEnabled]);
+
     NSLog(@"Driver: %s (%d)", driver_get_driver_string([config driver]), [config driver]);
 
     NSLog(@"Force refresh on drag enabled: %d", [config forceDragRefreshEnabled]);
@@ -285,6 +287,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     NSLog(@"Connected: %d", [kext isConnected]);
     NSLog(@"Mouse enabled: %d", [[Config instance] mouseEnabled]);
     NSLog(@"Trackpad enabled: %d", [[Config instance] trackpadEnabled]);
+    NSLog(@"Keyboard enabled: %d", [[Config instance] keyboardEnabled]);
     NSLog(@"Kernel events since start: %llu", [kext numEvents]);
     NSLog(@"Number of lost kext events: %d", totalNumberOfLostEvents);
     NSLog(@"Number of lost clicks: %d", [sMouseSupervisor numClickEvents]);

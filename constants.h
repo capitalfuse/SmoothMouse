@@ -15,6 +15,7 @@
 #define SETTINGS_TRACKPAD_VELOCITY @"Trackpad velocity"
 #define SETTINGS_DRIVER @"Driver"
 #define SETTINGS_FORCE_DRAG_REFRESH @"Force drag refresh"
+#define SETTINGS_KEYBOARD_ENABLED @"Keyboard enabled"
 
 #define SETTINGS_EXCLUDED_APPS @"Excluded apps"
 

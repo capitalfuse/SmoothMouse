@@ -1,13 +1,17 @@
 
 #import "Kext.h"
-#import "Prio.h"
-#include "KextProtocol.h"
-#include "debug.h"
 
 #import <IOKit/IODataQueueClient.h>
 #import <IOKit/kext/KextManager.h>
 #import <mach/mach.h>
 #include <pthread.h>
+#include <string.h>
+
+#import "Prio.h"
+#include "KextProtocol.h"
+#include "debug.h"
+#include "mouse.h"
+#include "keyboard.h"
 
 double start, end, e1, e2, mhs, mhe, outerstart, outerend, outersum = 0, outernum = 0;
 
@@ -18,7 +22,7 @@ double start, end, e1, e2, mhs, mhe, outerstart, outerend, outersum = 0, outernu
     eventsSinceStart = 0;
     connected = NO;
 
-	self = [super init];
+    self = [super init];
 
     return self;
 }
@@ -59,23 +63,40 @@ static void *KernelEventThread(void *instance)
                 exit(0);
             }
 
-            //LOG(@"kext event: size %u, type: %u, timestamp: %llu", self->queueSize, kext_event->base.type, kext_event->base.timestamp);
+            LOG(@"kext event: size %u, event type: %u, device_type: %d, timestamp: %llu", self->queueSize, kext_event->base.event_type, kext_event->base.device_type, kext_event->base.timestamp);
 
             mhs = GET_TIME();
 
-            switch (kext_event->base.type) {
+            switch (kext_event->base.event_type) {
                 case EVENT_TYPE_DEVICE_ADDED:
                 {
                     device_added_event_t *device_added = &kext_event->device_added;
                     device_information_t deviceInfo;
-                    [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
-                    //LOG(@"DEVICE ADDED, vendor_id: %u, product_id: %u, manufacturer string: '%s', product string: '%s'",
-                    //    device_added->base.vendor_id, device_added->base.product_id, deviceInfo.manufacturer_string, deviceInfo.product_string);
-                    if (device_added->base.type == DEVICE_TYPE_POINTING) {
+                    [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithDeviceType:device_added->base.device_type andVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
+                    LOG(@"DEVICE ADDED, vendor_id: %u, product_id: %u, manufacturer string: '%s', product string: '%s'",
+                        device_added->base.vendor_id, device_added->base.product_id, deviceInfo.manufacturer_string, deviceInfo.product_string);
+                    if (device_added->base.device_type == DEVICE_TYPE_POINTING) {
                         if (([config trackpadEnabled] && deviceInfo.pointing.is_trackpad) ||
                             ([config mouseEnabled] && !deviceInfo.pointing.is_trackpad)) {
-                            [self kextMethodEnableDeviceWithVendorId:device_added->base.vendor_id andProductID:device_added->base.product_id];
+                            device_configuration_t config;
+                            memset(&config, 0, sizeof(device_configuration_t));
+                            config.device_type = DEVICE_TYPE_POINTING;
+                            config.vendor_id = device_added->base.vendor_id;
+                            config.product_id = device_added->base.product_id;
+                            config.enabled = 1;
+                            [self kextMethodConfigureDevice:&config];
                             LOG(@"ENABLED POINTING DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", deviceInfo.pointing.is_trackpad, deviceInfo.vendor_id, deviceInfo.product_id);
+                        }
+                    } else if (device_added->base.device_type == DEVICE_TYPE_KEYBOARD) {
+                        if ([config keyboardEnabled]) {
+                            device_configuration_t config;
+                            memset(&config, 0, sizeof(device_configuration_t));
+                            config.device_type = DEVICE_TYPE_KEYBOARD;
+                            config.vendor_id = device_added->base.vendor_id;
+                            config.product_id = device_added->base.product_id;
+                            config.enabled = 1;
+                            [self kextMethodConfigureDevice:&config];
+                            LOG(@"ENABLED KEYBOARD DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", deviceInfo.pointing.is_trackpad, deviceInfo.vendor_id, deviceInfo.product_id);
                         }
                     }
                     break;
@@ -84,20 +105,21 @@ static void *KernelEventThread(void *instance)
                 {
                     device_removed_event_t *device_removed = &kext_event->device_removed;
                     device_information_t deviceInfo;
-                    [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithVendorId: device_removed->base.vendor_id andProductID: device_removed->base.product_id];
-                    //LOG(@"DEVICE REMOVED, vendor_id: %u, product_id: %u, manufacturer string: '%s', product string: '%s'",
-                    //    device_removed->base.vendor_id, device_removed->base.product_id, deviceInfo.manufacturer_string, deviceInfo.product_string);
+                    [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithDeviceType: device_removed->base.device_type andVendorId: device_removed->base.vendor_id andProductID: device_removed->base.product_id];
+                    LOG(@"DEVICE REMOVED, vendor_id: %u, product_id: %u, manufacturer string: '%s', product string: '%s'",
+                        device_removed->base.vendor_id, device_removed->base.product_id, deviceInfo.manufacturer_string, deviceInfo.product_string);
                     break;
                 }
                 case EVENT_TYPE_POINTING:
-                    //LOG(@"EVENT_TYPE_POINTING");
+                    LOG(@"EVENT_TYPE_POINTING");
                     mouse_process_kext_event(&kext_event->pointing);
                     break;
                 case EVENT_TYPE_KEYBOARD:
-                    //LOG(@"EVENT_TYPE_KEYBOARD");
+                    LOG(@"EVENT_TYPE_KEYBOARD");
+                    keyboard_process_kext_event(&kext_event->keyboard);
                     break;
                 default:
-                    LOG(@"Unknown device type: %d", kext_event->base.type);
+                    LOG(@"Unknown event type: %d", kext_event->base.event_type);
                     break;
             }
 
@@ -121,11 +143,11 @@ static void *KernelEventThread(void *instance)
     }
 
     (void) mouse_cleanup();
-    
+
     free(buf);
-    
+
     //NSLog(@"KernelEventThread: End");
-    
+
     return NULL;
 }
 
@@ -193,7 +215,6 @@ static void *KernelEventThread(void *instance)
     }
 }
 
-
 -(BOOL) disconnect
 {
     @synchronized(self) {
@@ -250,17 +271,11 @@ static void *KernelEventThread(void *instance)
     }
 }
 
--(BOOL) kextMethodEnableDeviceWithVendorId: (uint32_t)vendorID andProductID: (uint32_t) productID
-{
+-(BOOL) kextMethodConfigureDevice:(device_configuration_t *)deviceConfiguration {
     kern_return_t	kernResult;
 
-    uint64_t scalarI_64[3];
-
-    scalarI_64[0] = vendorID;
-    scalarI_64[1] = productID;
-    scalarI_64[2] = 1;
-
-    kernResult = IOConnectCallScalarMethod(connect, KEXT_METHOD_CONFIGURE_DEVICE, scalarI_64, 3, NULL, NULL);
+    kernResult = IOConnectCallStructMethod(connect, KEXT_METHOD_CONFIGURE_DEVICE,  deviceConfiguration,
+                                           sizeof(device_configuration_t), NULL, NULL);
 
     if (kernResult == KERN_SUCCESS) {
         return YES;
@@ -269,16 +284,17 @@ static void *KernelEventThread(void *instance)
     }
 }
 
--(BOOL) kextMethodGetDeviceInformation: (device_information_t *)deviceInfo forDeviceWithVendorId: (uint32_t) vendorID andProductID: (uint32_t) productID
+-(BOOL) kextMethodGetDeviceInformation: (device_information_t *)deviceInfo forDeviceWithDeviceType: (device_type_t) deviceType andVendorId: (uint32_t) vendorID andProductID: (uint32_t) productID
 {
     kern_return_t	kernResult;
-    uint64_t scalarI_64[2];
+    uint64_t scalarI_64[3];
 
-    scalarI_64[0] = vendorID;
-    scalarI_64[1] = productID;
+    scalarI_64[0] = deviceType;
+    scalarI_64[1] = vendorID;
+    scalarI_64[2] = productID;
 
     size_t device_info_size = sizeof(device_information_t);
-    kernResult = IOConnectCallMethod(connect, KEXT_METHOD_GET_DEVICE_INFORMATION, scalarI_64, 2, NULL,
+    kernResult = IOConnectCallMethod(connect, KEXT_METHOD_GET_DEVICE_INFORMATION, scalarI_64, 3, NULL,
                                      0, NULL, 0, deviceInfo, &device_info_size);
 
     if (kernResult == KERN_SUCCESS) {

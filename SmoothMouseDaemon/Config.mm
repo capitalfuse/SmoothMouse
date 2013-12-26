@@ -14,6 +14,7 @@
 @synthesize trackpadCurve;
 @synthesize driver;
 @synthesize forceDragRefreshEnabled;
+@synthesize keyboardEnabled;
 @synthesize debugEnabled;
 @synthesize memoryLoggingEnabled;
 @synthesize timingsEnabled;
@@ -166,6 +167,13 @@
         [self setForceDragRefreshEnabled:[value boolValue]];
     } else {
         [self setForceDragRefreshEnabled:SETTINGS_FORCE_DRAG_REFRESH_DEFAULT];
+    }
+
+    value = [dict valueForKey:SETTINGS_KEYBOARD_ENABLED];
+    if (value) {
+        [self setKeyboardEnabled:YES];
+    } else {
+        [self setKeyboardEnabled:NO];
     }
 
     [self setMouseCurve: [self getAccelerationCurveFromDict:dict withKey:SETTINGS_MOUSE_ACCELERATION_CURVE]];
