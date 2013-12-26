@@ -14,7 +14,7 @@ typedef enum {
 } event_type_t;
 
 typedef enum {
-	DEVICE_TYPE_POINTING,
+    DEVICE_TYPE_POINTING,
     DEVICE_TYPE_KEYBOARD,
     DEVICE_TYPE_UNKNOWN
 } device_type_t;
@@ -38,15 +38,18 @@ typedef struct {
 
 typedef struct {
     kext_event_base_t base;
-	uint32_t buttons;
-	int32_t dx;
-	int32_t dy;
-    uint32_t is_trackpad;
+    uint32_t buttons;
+    int32_t dx;
+    int32_t dy;
+    bool is_trackpad;
 } pointing_event_t;
 
 typedef struct keyboard_event_s {
     kext_event_base_t base;
-    unsigned int key;
+    uint32_t key;
+    uint32_t type;
+    uint32_t flags;
+    bool repeat;
 } keyboard_event_t;
 
 typedef union {
@@ -62,11 +65,9 @@ typedef struct {
 } pointing_device_information_t;
 
 typedef struct {
-    bool temp;
 } keyboard_device_information_t;
 
 typedef struct {
-
 } pointing_device_configuration_t;
 
 typedef struct {
@@ -77,7 +78,7 @@ typedef struct {
     device_type_t device_type;
     uint32_t vendor_id;
     uint32_t product_id;
-    uint32_t enabled;
+    bool enabled;
     union {
         pointing_device_configuration_t pointing;
         keyboard_device_configuration_t keyboard;

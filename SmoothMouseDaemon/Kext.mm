@@ -86,6 +86,8 @@ static void *KernelEventThread(void *instance)
                             config.enabled = 1;
                             [self kextMethodConfigureDevice:&config];
                             LOG(@"ENABLED POINTING DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", deviceInfo.pointing.is_trackpad, deviceInfo.vendor_id, deviceInfo.product_id);
+                        } else {
+                            LOG(@"NOTE ENABLED POINTING DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", deviceInfo.pointing.is_trackpad, deviceInfo.vendor_id, deviceInfo.product_id);
                         }
                     } else if (device_added->base.device_type == DEVICE_TYPE_KEYBOARD) {
                         if ([config keyboardEnabled]) {
