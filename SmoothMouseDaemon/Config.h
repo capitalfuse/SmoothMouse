@@ -3,6 +3,7 @@
 
 #import "mouse.h"
 #import "driver.h"
+#include "KextProtocol.h" 
 
 @interface Config : NSObject {
     // from plist
@@ -29,6 +30,8 @@
     BOOL activeAppIsExcluded;
     BOOL activeAppRequiresMouseEventListener;
     BOOL activeAppRequiresTabletPointSubtype;
+
+    char keyboardConfiguration[KEYBOARD_CONFIGURATION_SIZE];
 
     NSArray *excludedApps;
 }
@@ -60,5 +63,6 @@
 -(BOOL) activeAppIsExcluded;
 -(BOOL) activeAppRequiresMouseEventListener;
 -(BOOL) activeAppRequiresTabletPointSubtype;
+-(BOOL) getKeyboardConfiguration: (char *)keyboardConfiguration;
 
 @end

@@ -4,6 +4,7 @@
 
 #define MAX_LENGTH_MANUFACTURER_STRING (128)
 #define MAX_LENGTH_PRODUCT_STRING (128)
+#define KEYBOARD_CONFIGURATION_SIZE (256)
 
 typedef enum {
     EVENT_TYPE_DEVICE_ADDED,
@@ -69,7 +70,7 @@ typedef struct {
 } pointing_device_configuration_t;
 
 typedef struct {
-    char enabledKeys[256];
+    char enabledKeys[KEYBOARD_CONFIGURATION_SIZE];
 } keyboard_device_configuration_t;
 
 typedef struct {

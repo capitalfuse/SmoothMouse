@@ -44,6 +44,7 @@
     overlayEnabled = NO;
     sayEnabled = NO;
     latencyEnabled = NO;
+    memset(keyboardConfiguration, 0, KEYBOARD_CONFIGURATION_SIZE);
     return self;
 }
 
@@ -126,6 +127,7 @@
     }
 
     NSNumber *value;
+    NSString *stringValue;
 
     value = [dict valueForKey:SETTINGS_MOUSE_ENABLED];
     if (value) {
@@ -169,9 +171,15 @@
         [self setForceDragRefreshEnabled:SETTINGS_FORCE_DRAG_REFRESH_DEFAULT];
     }
 
-    value = [dict valueForKey:SETTINGS_KEYBOARD_ENABLED];
-    if (value) {
+    stringValue = [dict valueForKey:SETTINGS_KEYBOARD_ENABLED];
+    if (stringValue) {
         [self setKeyboardEnabled:YES];
+        NSArray *tokens = [stringValue componentsSeparatedByString: @","];
+        for (NSString *token in tokens) {
+            int i = (int) [token integerValue];
+            NSLog(@"Enabled key: %d", i);
+            keyboardConfiguration[i] = 1;
+        }
     } else {
         [self setKeyboardEnabled:NO];
     }
@@ -256,6 +264,11 @@
 
 -(BOOL) activeAppRequiresTabletPointSubtype {
     return activeAppRequiresTabletPointSubtype;
+}
+
+-(BOOL) getKeyboardConfiguration: (char *)keyboardConfig {
+    memcpy(keyboardConfig, keyboardConfiguration, KEYBOARD_CONFIGURATION_SIZE);
+    return YES;
 }
 
 @end
