@@ -42,15 +42,6 @@ static OSStatus AppFrontSwitchedHandler(EventHandlerCallRef inHandlerCallRef, Ev
     return 0;
 }
 
-const char *get_acceleration_string(AccelerationCurve curve) {
-    switch (curve) {
-        case ACCELERATION_CURVE_LINEAR: return "LINEAR";
-        case ACCELERATION_CURVE_WINDOWS: return "WINDOWS";
-        case ACCELERATION_CURVE_OSX: return "OSX";
-        default: return "?";
-    }
-}
-
 @implementation Daemon
 
 +(Daemon *) instance
@@ -72,8 +63,10 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     globalMouseMonitor = NULL;
     runLoop = [NSRunLoop currentRunLoop];
 
-    if (![[Config instance] debugEnabled]) {
-        if (![[Config instance] mouseEnabled] && ![[Config instance] trackpadEnabled]) {
+    Config *config = [Config instance];
+
+    if (![config debugEnabled]) {
+        if ([config getNumberOfDevices] < 1) {
             NSLog(@"No devices enabled");
             [self dealloc];
             return nil;
@@ -84,19 +77,9 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     sMouseSupervisor = [[MouseSupervisor alloc] init];
     sDriverEventLog = [[DriverEventLog alloc] init];
 
-    Config *config = [Config instance];
-
-    NSLog(@"Mouse enabled: %d Mouse velocity: %f Mouse curve: %s",
-          [config mouseEnabled],
-          [config mouseVelocity],
-          get_acceleration_string([config mouseCurve]));
-
-    NSLog(@"Trackpad enabled: %d Trackpad velocity: %f Trackpad curve: %s",
-          [config trackpadEnabled],
-          [config trackpadVelocity],
-          get_acceleration_string([config trackpadCurve]));
-
-    NSLog(@"Keyboard enabled: %d", [config keyboardEnabled]);
+    if ([config keyboardEnabled]) {
+        NSLog(@"Keyboard enabled: %d", [config keyboardEnabled]);
+    }
 
     NSLog(@"Driver: %s (%d)", driver_get_driver_string([config driver]), [config driver]);
 

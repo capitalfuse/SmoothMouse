@@ -31,7 +31,7 @@ static void *KernelEventThread(void *instance)
 {
     Kext *self = (Kext *) instance;
 
-    //NSLog(@"KernelEventThread: Start");
+    //NSLog(@"KernelEventThread: Start (self: %p)", self);
 
     kern_return_t error;
 
@@ -63,7 +63,7 @@ static void *KernelEventThread(void *instance)
                 exit(0);
             }
 
-            LOG(@"kext event: size %u, event type: %u, device_type: %d, timestamp: %llu", self->queueSize, kext_event->base.event_type, kext_event->base.device_type, kext_event->base.timestamp);
+            //LOG(@"kext event: size %u, event type: %u, device_type: %d, timestamp: %llu", self->queueSize, kext_event->base.event_type, kext_event->base.device_type, kext_event->base.timestamp);
 
             mhs = GET_TIME();
 
@@ -71,35 +71,38 @@ static void *KernelEventThread(void *instance)
                 case EVENT_TYPE_DEVICE_ADDED:
                 {
                     device_added_event_t *device_added = &kext_event->device_added;
-                    device_information_t deviceInfo;
-                    [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithDeviceType:device_added->base.device_type andVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
-                    LOG(@"DEVICE ADDED, vendor_id: %u, product_id: %u, manufacturer string: '%s', product string: '%s'",
-                        device_added->base.vendor_id, device_added->base.product_id, deviceInfo.manufacturer_string, deviceInfo.product_string);
+                    device_information_t kextDeviceInfo;
+                    [self kextMethodGetDeviceInformation: &kextDeviceInfo forDeviceWithDeviceType:device_added->base.device_type andVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
                     if (device_added->base.device_type == DEVICE_TYPE_POINTING) {
-                        if (([config trackpadEnabled] && deviceInfo.pointing.is_trackpad) ||
-                            ([config mouseEnabled] && !deviceInfo.pointing.is_trackpad)) {
-                            device_configuration_t config;
-                            memset(&config, 0, sizeof(device_configuration_t));
-                            config.device_type = DEVICE_TYPE_POINTING;
-                            config.vendor_id = device_added->base.vendor_id;
-                            config.product_id = device_added->base.product_id;
-                            config.enabled = 1;
-                            [self kextMethodConfigureDevice:&config];
-                            LOG(@"ENABLED POINTING DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", deviceInfo.pointing.is_trackpad, deviceInfo.vendor_id, deviceInfo.product_id);
+                        DeviceInfo *deviceInfo = [config getDeviceWithDeviceType: DEVICE_TYPE_POINTING andVendorID:device_added->base.vendor_id andProductID:device_added->base.product_id];
+                        if (deviceInfo != NULL) {
+                            device_configuration_t device_config;
+                            memset(&device_config, 0, sizeof(device_configuration_t));
+                            device_config.device_type = DEVICE_TYPE_POINTING;
+                            device_config.vendor_id = device_added->base.vendor_id;
+                            device_config.product_id = device_added->base.product_id;
+                            device_config.enabled = 1;
+                            [self kextMethodConfigureDevice:&device_config];
+                            LOG(@"Enabled POINTING device (trackpad: %d): VendorID: %u, ProductID: %u, Manufacturer: '%s', Product: '%s'", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id, kextDeviceInfo.manufacturer_string, kextDeviceInfo.product_string);
+                            if (kextDeviceInfo.pointing.is_trackpad) {
+                                [config setTrackpadEnabled: YES];
+                            } else {
+                                [config setMouseEnabled: YES];
+                            }
                         } else {
-                            LOG(@"NOTE ENABLED POINTING DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", deviceInfo.pointing.is_trackpad, deviceInfo.vendor_id, deviceInfo.product_id);
+                            LOG(@"skipped pointing device (trackpad: %d), vendor id: %u, product id: %u", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id);
                         }
                     } else if (device_added->base.device_type == DEVICE_TYPE_KEYBOARD) {
                         if ([config keyboardEnabled]) {
-                            device_configuration_t config;
-                            memset(&config, 0, sizeof(device_configuration_t));
-                            config.device_type = DEVICE_TYPE_KEYBOARD;
-                            config.vendor_id = device_added->base.vendor_id;
-                            config.product_id = device_added->base.product_id;
-                            [[Config instance] getKeyboardConfiguration: &config.keyboard.enabledKeys[0]];
-                            config.enabled = 1;
-                            [self kextMethodConfigureDevice:&config];
-                            LOG(@"ENABLED KEYBOARD DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", deviceInfo.pointing.is_trackpad, deviceInfo.vendor_id, deviceInfo.product_id);
+                            device_configuration_t device_config;
+                            memset(&device_config, 0, sizeof(device_configuration_t));
+                            device_config.device_type = DEVICE_TYPE_KEYBOARD;
+                            device_config.vendor_id = device_added->base.vendor_id;
+                            device_config.product_id = device_added->base.product_id;
+                            [config getKeyboardConfiguration: &device_config.keyboard.enabledKeys[0]];
+                            device_config.enabled = 1;
+                            [self kextMethodConfigureDevice:&device_config];
+                            LOG(@"ENABLED KEYBOARD DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id);
                         }
                     }
                     break;
@@ -107,26 +110,23 @@ static void *KernelEventThread(void *instance)
                 case EVENT_TYPE_DEVICE_REMOVED:
                 {
                     device_removed_event_t *device_removed = &kext_event->device_removed;
-                    device_information_t deviceInfo;
-                    [self kextMethodGetDeviceInformation: &deviceInfo forDeviceWithDeviceType: device_removed->base.device_type andVendorId: device_removed->base.vendor_id andProductID: device_removed->base.product_id];
-                    LOG(@"DEVICE REMOVED, vendor_id: %u, product_id: %u, manufacturer string: '%s', product string: '%s'",
-                        device_removed->base.vendor_id, device_removed->base.product_id, deviceInfo.manufacturer_string, deviceInfo.product_string);
+                    LOG(@"DEVICE REMOVED, VendorID: %u, ProductID: %u",
+                        device_removed->base.vendor_id, device_removed->base.product_id);
                     break;
                 }
                 case EVENT_TYPE_POINTING:
-                    LOG(@"EVENT_TYPE_POINTING");
+                    //LOG(@"EVENT_TYPE_POINTING");
                     mouse_process_kext_event(&kext_event->pointing);
                     break;
                 case EVENT_TYPE_KEYBOARD:
-                    LOG(@"EVENT_TYPE_KEYBOARD");
+                    //LOG(@"EVENT_TYPE_KEYBOARD");
                     keyboard_process_kext_event(&kext_event->keyboard);
                     break;
                 default:
                     LOG(@"Unknown event type: %d", kext_event->base.event_type);
                     break;
             }
-
-            if ([[Config instance] debugEnabled]) {
+            if ([config debugEnabled]) {
                 debug_register_event(kext_event);
             }
             self->eventsSinceStart++;

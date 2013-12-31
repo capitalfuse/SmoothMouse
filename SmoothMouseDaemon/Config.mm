@@ -5,13 +5,6 @@
 #include "debug.h"
 
 @implementation Config
-
-@synthesize mouseEnabled;
-@synthesize trackpadEnabled;
-@synthesize mouseVelocity;
-@synthesize trackpadVelocity;
-@synthesize mouseCurve;
-@synthesize trackpadCurve;
 @synthesize driver;
 @synthesize forceDragRefreshEnabled;
 @synthesize keyboardEnabled;
@@ -22,6 +15,8 @@
 @synthesize overlayEnabled;
 @synthesize sayEnabled;
 @synthesize latencyEnabled;
+@synthesize mouseEnabled;
+@synthesize trackpadEnabled;
 
 +(Config *) instance
 {
@@ -45,7 +40,18 @@
     sayEnabled = NO;
     latencyEnabled = NO;
     memset(keyboardConfiguration, 0, KEYBOARD_CONFIGURATION_SIZE);
+    mouseEnabled = NO;
+    trackpadEnabled = NO;
     return self;
+}
+
+const char *get_acceleration_string(AccelerationCurve curve) {
+    switch (curve) {
+        case ACCELERATION_CURVE_LINEAR: return "LINEAR";
+        case ACCELERATION_CURVE_WINDOWS: return "WINDOWS";
+        case ACCELERATION_CURVE_OSX: return "OSX";
+        default: return "?";
+    }
 }
 
 -(BOOL) parseCommandLineArguments {
@@ -91,24 +97,12 @@
     return YES;
 }
 
--(AccelerationCurve) getAccelerationCurveFromDict:(NSDictionary *)dictionary withKey:(NSString *)key {
-    NSString *value;
-    value = [dictionary valueForKey:key];
-    if (value) {
-        if ([value compare:@"Windows"] == NSOrderedSame) {
-            return ACCELERATION_CURVE_WINDOWS;
-        }
-        if ([value compare:@"OS X"] == NSOrderedSame) {
-            return ACCELERATION_CURVE_OSX;
-        }
-    }
-    return ACCELERATION_CURVE_LINEAR;
-}
-
 -(BOOL) readSettingsPlist
 {
-    NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
+    //NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
+    NSString *file = @"/Users/da/com.cyberic.SmoothMouse2.plist";
     NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:file];
+    NSArray *devicesFromPlist;
 
     if (!dict) {
         NSLog(@"cannot open file %@", file);
@@ -129,32 +123,41 @@
     NSNumber *value;
     NSString *stringValue;
 
-    value = [dict valueForKey:SETTINGS_MOUSE_ENABLED];
-    if (value) {
-        [self setMouseEnabled: [value boolValue]];
+    devicesFromPlist = [dict valueForKey:@"Devices"];
+    if (devicesFromPlist) {
+        for (NSDictionary *deviceInfo in devicesFromPlist) {
+            DeviceInfo newDevice;
+            if (![self getIntegerInDictionary:deviceInfo forKey:@"VendorID" withResult: &newDevice.vendor_id]) {
+                NSLog(@"Failed to read VendorID");
+                return NO;
+            }
+            if (![self getIntegerInDictionary:deviceInfo forKey:@"ProductID" withResult: &newDevice.product_id]) {
+                NSLog(@"Failed to read ProductID");
+                return NO;
+            }
+            if (![self getStringInDictionary:deviceInfo forKey:@"Manufacturer" withResult: newDevice.manufacturer]) {
+                NSLog(@"Failed to read Manufacturer");
+                return NO;
+            }
+            if (![self getStringInDictionary:deviceInfo forKey:@"Product" withResult: newDevice.product]) {
+                NSLog(@"Failed to read Product");
+                return NO;
+            }
+            if (![self getDoubleInDictionary:deviceInfo forKey:@"Velocity" withResult: &newDevice.velocity]) {
+                NSLog(@"Failed to read Velocity");
+                return NO;
+            }
+            if (![self getAccelerationCurveFromDictionary:deviceInfo withKey:@"Curve" withResult: &newDevice.curve]) {
+                NSLog(@"Failed to read Curve");
+                return NO;
+            }
+            LOG(@"Configured Device: %s (%s)", newDevice.product.c_str(), newDevice.manufacturer.c_str());
+            LOG(@"  VendorID: %u, ProductID: %u, Velocity: %f, Curve: %s", newDevice.vendor_id, newDevice.product_id, newDevice.velocity, get_acceleration_string(newDevice.curve));
+            devices.insert(devices.begin(), newDevice);
+        }
     } else {
+        LOG(@"No devices found in plist");
         return NO;
-    }
-
-    value = [dict valueForKey:SETTINGS_TRACKPAD_ENABLED];
-    if (value) {
-        [self setTrackpadEnabled: [value boolValue]];
-    } else {
-        return NO;
-    }
-
-    value = [dict valueForKey:SETTINGS_MOUSE_VELOCITY];
-    if (value) {
-        [self setMouseVelocity: [value doubleValue]];
-    } else {
-        [self setMouseVelocity: 1.0];
-    }
-
-    value = [dict valueForKey:SETTINGS_TRACKPAD_VELOCITY];
-    if (value) {
-        [self setTrackpadVelocity: [value doubleValue]];
-    } else {
-        [self setTrackpadVelocity: 1.0];
     }
 
     value = [dict valueForKey:SETTINGS_DRIVER];
@@ -184,10 +187,73 @@
         [self setKeyboardEnabled:NO];
     }
 
-    [self setMouseCurve: [self getAccelerationCurveFromDict:dict withKey:SETTINGS_MOUSE_ACCELERATION_CURVE]];
-    [self setTrackpadCurve: [self getAccelerationCurveFromDict:dict withKey:SETTINGS_TRACKPAD_ACCELERATION_CURVE]];
-
     return YES;
+}
+
+- (BOOL) getIntegerInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (uint32_t *)result
+{
+    NSNumber *number = [dictionary objectForKey:key];
+    if (number && [number isKindOfClass:[NSNumber class]]) {
+        *result = (uint32_t)[number integerValue];
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+- (BOOL) getStringInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (std::string &)result
+{
+    NSString *string = [dictionary objectForKey:key];
+    if (string && [string isKindOfClass:[NSString class]]) {
+        std::string s = [string UTF8String];
+        result = s;
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+- (BOOL) getBoolInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (BOOL *)result
+{
+    NSNumber *number = [dictionary objectForKey:key];
+    if (number && [number isKindOfClass:[NSNumber class]]) {
+        *result = [number boolValue];
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+- (BOOL) getDoubleInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (double *)result
+{
+    NSNumber *number = [dictionary objectForKey:key];
+    if (number && [number isKindOfClass:[NSNumber class]]) {
+        *result = [number doubleValue];
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+-(BOOL) getAccelerationCurveFromDictionary:(NSDictionary *)dictionary withKey:(NSString *)key withResult: (AccelerationCurve *)result
+{
+    NSString *value;
+    value = [dictionary valueForKey:key];
+    if (value && [value isKindOfClass:[NSString class]]) {
+        if ([value compare:@"Windows"] == NSOrderedSame) {
+            *result = ACCELERATION_CURVE_WINDOWS;
+            return YES;
+        }
+        if ([value compare:@"OS X"] == NSOrderedSame) {
+            *result = ACCELERATION_CURVE_OSX;
+            return YES;
+        }
+        if ([value compare:@"Linear"] == NSOrderedSame) {
+            *result = ACCELERATION_CURVE_LINEAR;
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (void)setActiveAppId:(NSString *)activeAppId {
@@ -270,5 +336,24 @@
     memcpy(keyboardConfig, keyboardConfiguration, KEYBOARD_CONFIGURATION_SIZE);
     return YES;
 }
+
+-(DeviceInfo *)getDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID {
+    if (deviceType != DEVICE_TYPE_POINTING ) {
+        return NULL;
+    }
+    std::vector<DeviceInfo>::iterator iterator;
+    for (iterator = devices.begin(); iterator != devices.end(); iterator++) {
+        DeviceInfo *deviceInfo = &*iterator;
+        if (deviceInfo->vendor_id == vendorID && deviceInfo->product_id == productID) {
+            return deviceInfo;
+        }
+    }
+    return NULL;
+}
+
+-(size_t) getNumberOfDevices {
+    return devices.size();
+}
+
 
 @end

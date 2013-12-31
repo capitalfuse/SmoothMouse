@@ -62,10 +62,9 @@
             }
 
             NSLog(@"System mouse settings initialized (%f/%f)", oldValueMouse, newValueMouse);
-        }
-        //else if (is_debug) {
-        //    NSLog(@"Skipped settings for '%@'", key);
-        //}
+        } /* else {
+            NSLog(@"Skipped settings for '%@'", key);
+        } */
     }
 
     if ([[Config instance] trackpadEnabled]) {
@@ -97,10 +96,9 @@
             }
 
             NSLog(@"System trackpad settings initialized (%f/%f)", oldValueTrackpad, newValueTrackpad);
-        }
-        //else if (is_debug) {
-        //    NSLog(@"Skipped settings for '%@'", key);
-        //}
+        } /*else {
+            NSLog(@"Skipped settings for '%@'", key);
+        } */
     }
     
     NXCloseEventStatus(handle);
