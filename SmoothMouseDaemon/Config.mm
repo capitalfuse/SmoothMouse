@@ -99,8 +99,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
 -(BOOL) readSettingsPlist
 {
-    //NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
-    NSString *file = @"/Users/da/com.cyberic.SmoothMouse2.plist";
+    NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
     NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:file];
     NSArray *devicesFromPlist;
 
