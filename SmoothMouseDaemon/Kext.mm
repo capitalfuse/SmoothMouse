@@ -90,8 +90,7 @@ static void *KernelEventThread(void *instance)
                                 [config setMouseEnabled: YES];
                             }
                         } else {
-                            LOG(@"skipped pointing device (trackpad: %d), vendor id: %u, product id: %u", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id);
-                        }
+                            LOG(@"Ignored POINTING device (trackpad: %d): VendorID: %u, ProductID: %u, Manufacturer: '%s', Product: '%s'", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id, kextDeviceInfo.manufacturer_string, kextDeviceInfo.product_string);                        }
                     } else if (device_added->base.device_type == DEVICE_TYPE_KEYBOARD) {
                         if ([config keyboardEnabled]) {
                             device_configuration_t device_config;
