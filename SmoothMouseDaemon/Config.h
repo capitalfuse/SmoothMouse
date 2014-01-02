@@ -3,7 +3,7 @@
 
 #import "mouse.h"
 #import "driver.h"
-#include "KextProtocol.h"
+#include "Kext.h"
 
 #include <string>
 #include <vector>
@@ -63,7 +63,6 @@ typedef struct {
 -(id) init;
 -(BOOL) parseCommandLineArguments;
 -(BOOL) readSettingsPlist;
--(AccelerationCurve) getAccelerationCurveFromDict:(NSDictionary *)dictionary withKey:(NSString *)key;
 - (void)setActiveAppId:(NSString *)activeAppId;
 -(BOOL) activeAppRequiresRefreshOnDrag;
 -(BOOL) activeAppIsExcluded;

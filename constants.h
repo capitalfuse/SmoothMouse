@@ -7,25 +7,26 @@
 #define UPDATER_FILENAME_BASE @"/Contents/SmoothMouseUpdater.app/Contents/MacOS/SmoothMouseUpdater"
 #define KEXT_BUNDLE @"/Library/Extensions/SmoothMouse.kext"
 
-#define SETTINGS_MOUSE_ENABLED @"Mouse enabled"
-#define SETTINGS_TRACKPAD_ENABLED @"Trackpad enabled"
-#define SETTINGS_MOUSE_ACCELERATION_CURVE @"Mouse acceleration curve"
-#define SETTINGS_TRACKPAD_ACCELERATION_CURVE @"Trackpad acceleration curve"
-#define SETTINGS_MOUSE_VELOCITY @"Mouse velocity"
-#define SETTINGS_TRACKPAD_VELOCITY @"Trackpad velocity"
+#define SETTINGS_DEVICES @"Devices"
+// device settings
+#define SETTINGS_VENDOR_ID @"VendorID"
+#define SETTINGS_PRODUCT_ID @"ProductID"
+#define SETTINGS_MANUFACTURER @"Manufacturer"
+#define SETTINGS_PRODUCT @"Product"
+#define SETTINGS_ENABLED @"Enabled"
+#define SETTINGS_ACCELERATION_CURVE @"Curve"
+#define SETTINGS_VELOCITY @"Velocity"
+
 #define SETTINGS_DRIVER @"Driver"
 #define SETTINGS_FORCE_DRAG_REFRESH @"Force drag refresh"
 #define SETTINGS_KEYBOARD_ENABLED @"Keyboard enabled"
 
 #define SETTINGS_EXCLUDED_APPS @"Excluded apps"
 
-#define SETTINGS_MOUSE_ENABLED_DEFAULT NO
-#define SETTINGS_TRACKPAD_ENABLED_DEFAULT NO
-#define SETTINGS_MOUSE_ACCELERATION_CURVE_DEFAULT @"Linear"
-#define SETTINGS_TRACKPAD_ACCELERATION_CURVE_DEFAULT @"Linear"
-#define SETTINGS_MOUSE_VELOCITY_DEFAULT 1.0
-#define SETTINGS_TRACKPAD_VELOCITY_DEFAULT 1.0
-#define SETTINGS_DRIVER_DEFAULT 2 // IOHID
-#define SETTINGS_FORCE_DRAG_REFRESH_DEFAULT NO
+#define SETTINGS_ENABLED_DEFAULT (NO)
+#define SETTINGS_ACCELERATION_CURVE_DEFAULT @"Linear"
+#define SETTINGS_VELOCITY_DEFAULT (1.0)
+#define SETTINGS_DRIVER_DEFAULT (2) // IOHID
+#define SETTINGS_FORCE_DRAG_REFRESH_DEFAULT (NO)
 
 #define KEY_SELECTED_TAB @"SelectedTab"

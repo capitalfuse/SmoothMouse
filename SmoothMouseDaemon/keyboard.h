@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "../KextProtocol.h"
+#include "../KextInterface.h"
 
 //BOOL keyboard_init();
 //BOOL keyboard_cleanup();

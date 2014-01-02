@@ -9,7 +9,7 @@
 #import "InterruptListener.h"
 #import "Kext.h"
 
-@interface Daemon : NSObject {
+@interface Daemon : NSObject<Kext> {
 @private
     Kext *kext;
     NSRunLoop *runLoop;

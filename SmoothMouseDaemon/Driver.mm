@@ -118,7 +118,7 @@ static void *DriverEventThread(void *instance)
         while(event_queue.empty()) {
             pthread_cond_wait(&data_available, &mutex);
         }
-        double start = GET_TIME();
+
         event = event_queue.front();
         event_queue.pop_front();
         pthread_mutex_unlock(&mutex);
@@ -143,11 +143,6 @@ static void *DriverEventThread(void *instance)
                 //LOG(@"UNKNOWN DRIVER EVENT (%d)", event.id);
                 break;
         }
-        double end = GET_TIME();
-        if ([[Config instance] timingsEnabled]) {
-            LOG(@"driver timings: total time time in mach time units: %f", (end-start));
-        }
-
     }
 
     //NSLog(@"DriverEventThread: End");
@@ -159,21 +154,6 @@ BOOL driver_init() {
     numCoalescedEvents = 0;
 
     switch ([[Config instance] driver]) {
-        case DRIVER_QUARTZ_OLD:
-        {
-            if (CGSetLocalEventsFilterDuringSuppressionState(kCGEventFilterMaskPermitAllEvents,
-                                                             kCGEventSuppressionStateRemoteMouseDrag)) {
-                NSLog(@"call to CGSetLocalEventsFilterDuringSuppressionState failed");
-                /* whatever, but don't continue with interval */
-                break;
-            }
-
-            if (CGSetLocalEventsSuppressionInterval(0.0)) {
-                NSLog(@"call to CGSetLocalEventsSuppressionInterval failed");
-                /* ignore */
-            }
-            break;
-        }
         case DRIVER_QUARTZ:
         {
             eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
@@ -234,8 +214,6 @@ BOOL driver_cleanup() {
     }
 
     switch ([[Config instance] driver]) {
-        case DRIVER_QUARTZ_OLD:
-            break;
         case DRIVER_QUARTZ:
         {
             CFRelease(eventSource);
@@ -264,26 +242,7 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
         [sMouseSupervisor pushMoveEvent: event->deltaX: event->deltaY];
     }
 
-    e1 = GET_TIME();
     switch (driver_to_use) {
-        case DRIVER_QUARTZ_OLD:
-        {
-            if (kCGErrorSuccess != CGPostMouseEvent(event->pos, true, 1, BUTTON_DOWN(event->buttons, LEFT_BUTTON))) {
-                NSLog(@"Failed to post mouse event");
-                exit(0);
-            }
-
-            e2 = GET_TIME();
-
-            if ([[Config instance] debugEnabled]) {
-                LOG(@"%s:MOVE: pos.x: %d, pos.y: %d, time: %f",
-                    driverString,
-                    (int)event->pos.x,
-                    (int)event->pos.y,
-                    (e2-e1));
-            }
-            break;
-        }
         case DRIVER_QUARTZ:
         {
             CGEventRef evt = CGEventCreateMouseEvent(eventSource, event->type, event->pos, event->otherButton);
@@ -292,18 +251,15 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
             CGEventPost(kCGSessionEventTap, evt);
             CFRelease(evt);
 
-            e2 = GET_TIME();
-
             if ([[Config instance] debugEnabled]) {
-                LOG(@"%s:MOVE: eventType: %s(%d), pos.x: %d, pos.y: %d, dx: %d, dy: %d, time: %f",
+                LOG(@"%s:MOVE: eventType: %s(%d), pos.x: %d, pos.y: %d, dx: %d, dy: %d",
                     driverString,
                     driver_quartz_event_type_to_string(event->type),
                     (int)event->type,
                     (int)event->pos.x,
                     (int)event->pos.y,
                     (int)event->deltaX,
-                    (int)event->deltaY,
-                    (e2-e1));
+                    (int)event->deltaY);
             }
             break;
         }
@@ -354,18 +310,15 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
                                  0,
                                  options);
 
-            e2 = GET_TIME();
-
             if ([[Config instance] debugEnabled]) {
-                LOG(@"%s:MOVE: eventType: %s(%d), newPoint: %dx%d, dx: %d, dy: %d, time: %f",
+                LOG(@"%s:MOVE: eventType: %s(%d), newPoint: %dx%d, dx: %d, dy: %d",
                     driverString,
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,
                     (int)newPoint.x,
                     (int)newPoint.y,
                     (int)eventData.mouseMove.dx,
-                    (int)eventData.mouseMove.dy,
-                    (e2-e1));
+                    (int)eventData.mouseMove.dy);
             }
 
             break;
@@ -376,8 +329,6 @@ BOOL driver_handle_move_event(driver_move_event_t *event) {
             exit(0);
         }
     }
-
-    e2 = GET_TIME();
 
     return YES;
 }
@@ -408,27 +359,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
         [sMouseSupervisor pushClickEvent];
     }
 
-    e1 = GET_TIME();
     switch (driver_to_use) {
-        case DRIVER_QUARTZ_OLD:
-        {
-            if (kCGErrorSuccess != CGPostMouseEvent(event->pos, true, 1, BUTTON_DOWN(event->buttons, LEFT_BUTTON))) {
-                NSLog(@"Failed to post mouse event");
-                exit(0);
-            }
-
-            e2 = GET_TIME();
-
-            if ([[Config instance] debugEnabled]) {
-                LOG(@"%s:BUTTON: pos.x: %d, pos.y: %d, time: %f",
-                    driverString,
-                    (int)event->pos.x,
-                    (int)event->pos.y,
-                    (e2-e1));
-            }
-
-            break;
-        }
         case DRIVER_QUARTZ:
         {
             CGEventRef evt = CGEventCreateMouseEvent(eventSource, event->type, event->pos, event->otherButton);
@@ -436,17 +367,14 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
             CGEventPost(kCGSessionEventTap, evt);
             CFRelease(evt);
 
-            e2 = GET_TIME();
-
             if ([[Config instance] debugEnabled]) {
-                LOG(@"%s:BUTTON: eventType: %s(%d), pos: %dx%d, csv: %d, time: %f",
+                LOG(@"%s:BUTTON: eventType: %s(%d), pos: %dx%d, csv: %d",
                     driverString,
                     driver_quartz_event_type_to_string(event->type),
                     (int)event->type,
                     (int)event->pos.x,
                     (int)event->pos.y,
-                    clickStateValue,
-                    (e2-e1));
+                    clickStateValue);
             }
             break;
         }
@@ -560,10 +488,8 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
                 NSLog(@"failed to post button event");
             }
 
-            e2 = GET_TIME();
-
             if ([[Config instance] debugEnabled]) {
-                LOG(@"%s:BUTTON: eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d, time: %f",
+                LOG(@"%s:BUTTON: eventType: %s(%d), pos: %dx%d, subt: %d, click: %d, pressure: %d, eventNumber: %d, buttonNumber: %d",
                     driverString,
                     driver_iohid_event_type_to_string(iohidEventType),
                     (int)iohidEventType,
@@ -573,8 +499,7 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
                     (int)eventData.mouse.click,
                     (int)eventData.mouse.pressure,
                     (int)eventData.mouse.eventNum,
-                    (int)eventData.mouse.buttonNumber,
-                    (e2-e1));
+                    (int)eventData.mouse.buttonNumber);
             }
 
             break;
@@ -586,14 +511,11 @@ BOOL driver_handle_button_event(driver_button_event_t *event) {
         }
     }
 
-    e2 = GET_TIME();
-
     return YES;
 }
 
 const char *driver_get_driver_string(int driver) {
     switch (driver) {
-        case DRIVER_QUARTZ_OLD: return "QUARTZ_OLD";
         case DRIVER_QUARTZ: return "QUARTZ";
         case DRIVER_IOHID: return "IOHID";
         default: return "?";

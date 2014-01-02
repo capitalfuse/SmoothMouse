@@ -56,10 +56,6 @@ void debug_end() {
         [log release];
     }
 
-    if ([[Config instance] timingsEnabled]) {
-        NSLog(@"outer average: %f", (outersum / outernum));
-    }
-
     if (!logs.empty()) {
         NSLog(@"Dumping complete");
     }

@@ -1,13 +1,12 @@
 
 #pragma once
 
-#include "../KextProtocol.h"
+#include "../KextInterface.h"
 #import "Config.h"
 #include <mach/mach_time.h>
 #include <pthread.h>
 #include <vector>
 
-extern double start, end, e1, e2, outerstart, outerend, outersum, outernum;
 extern std::vector<void *> logs;
 extern BOOL is_dumping;
 extern pthread_mutex_t log_mutex;

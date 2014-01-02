@@ -4,9 +4,8 @@
 extern int numCoalescedEvents;
 
 typedef enum Driver_s {
-    DRIVER_QUARTZ_OLD,
-    DRIVER_QUARTZ,
-    DRIVER_IOHID
+    DRIVER_QUARTZ   = 1,
+    DRIVER_IOHID    = 2
 } Driver;
 
 typedef enum driver_event_id_s {

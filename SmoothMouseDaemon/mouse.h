@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "../KextProtocol.h"
+#include "../KextInterface.h"
 
 #define LEFT_BUTTON     (1 << 0)
 #define RIGHT_BUTTON    (1 << 1)
