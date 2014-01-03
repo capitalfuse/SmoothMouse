@@ -30,3 +30,7 @@
 #define SETTINGS_FORCE_DRAG_REFRESH_DEFAULT (NO)
 
 #define KEY_SELECTED_TAB @"SelectedTab"
+
+#define SETTINGS_CURVE_OFF @"Off"
+#define SETTINGS_CURVE_WINDOWS @"Windows"
+#define SETTINGS_CURVE_OSX @"OS X"

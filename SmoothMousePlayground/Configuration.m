@@ -12,6 +12,7 @@
     self = [super init];
     configuration = nil;
     configurationFilename = nil;
+    connectedDevices = nil;
     return self;
 }
 
@@ -20,6 +21,8 @@
     LOG(@"enter");
 
     configurationFilename = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
+    [configurationFilename retain];
+
     NSMutableDictionary *plistContents = [NSMutableDictionary dictionaryWithContentsOfFile:configurationFilename];
 
     if (!plistContents) {
@@ -30,6 +33,8 @@
     configuration = plistContents;
 
     [configuration retain];
+
+    LOG(@"configuration: %@", configuration);
 
     return YES;
 }
@@ -67,6 +72,20 @@
     }
 }
 
+-(NSMutableDictionary *) getDeviceAtIndex: (int) index
+{
+    if (configuration) {
+        NSMutableArray *devices = [configuration valueForKey:@"Devices"];
+        if (index < [devices count]) {
+            return [devices objectAtIndex:index];
+        } else {
+            return nil;
+        }
+    } else {
+        return nil;
+    }
+}
+
 -(BOOL) deviceExistsWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid
 {
     NSDictionary *device = [self getDeviceWithVendorID: vid andProductID: pid];
@@ -81,11 +100,11 @@
     if (devices) {
         for (NSDictionary *device in devices) {
             uint32_t vid, pid;
-            if (![self getIntegerInDictionary:device forKey:@"VendorID" withResult: &vid]) {
+            if (![Configuration getIntegerInDictionary:device forKey:@"VendorID" withResult: &vid]) {
                 LOG(@"Failed to read VendorID");
                 continue;
             }
-            if (![self getIntegerInDictionary:device forKey:@"ProductID" withResult: &pid]) {
+            if (![Configuration getIntegerInDictionary:device forKey:@"ProductID" withResult: &pid]) {
                 LOG(@"Failed to read ProductID");
                 continue;
             }
@@ -125,9 +144,59 @@
     NSMutableArray *devices = [self getDevices];
 
     [devices addObject:device];
+
+    LOG(@"configuration: %@", configuration);
 }
 
-- (BOOL) getIntegerInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (uint32_t *)result
+-(BOOL) connectDeviceWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid
+{
+    BOOL ok = NO;
+    LOG(@"connecting device %d:%d", vid, pid);
+    NSMutableDictionary *device = [self getDeviceWithVendorID: vid andProductID: pid];
+    if (device) {
+        if (connectedDevices == nil) {
+            connectedDevices = [[NSMutableArray alloc] init];
+        }
+        if (![connectedDevices containsObject:device]) {
+            [connectedDevices addObject:device];
+            ok = YES;
+        } else {
+            LOG(@"already present as a connected device");
+        }
+    }
+    LOG(@"connectDeviceWithVendorID: %d", ok);
+    return ok;
+}
+
+-(BOOL) disconnectDeviceWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid
+{
+    LOG(@"disconnecting device %d:%d", vid, pid);
+    if (!connectedDevices) {
+        LOG(@"No connected devices");
+        return NO;
+    }
+    BOOL ok = NO;
+    NSMutableDictionary *device = [self getDeviceWithVendorID: vid andProductID: pid];
+    if (device) {
+        [connectedDevices removeObject:device];
+        ok = YES;
+    }
+    LOG(@"disconnectDeviceWithVendorID: %d", ok);
+    return ok;
+}
+
+-(BOOL) deviceIsConnectedWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid {
+    BOOL isConnected = NO;
+    NSMutableDictionary *device = [self getDeviceWithVendorID: vid andProductID: pid];
+    if (device) {
+        [connectedDevices containsObject:device];
+        isConnected = YES;
+    }
+    LOG(@"isConnected: %d", isConnected);
+    return isConnected;
+}
+
++ (BOOL) getIntegerInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (uint32_t *)result
 {
     NSNumber *number = [dictionary objectForKey:key];
     if (number && [number isKindOfClass:[NSNumber class]]) {
@@ -138,7 +207,7 @@
     }
 }
 
-- (BOOL) getStringInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (NSString **)result
++ (BOOL) getStringInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (NSString **)result
 {
     NSString *string = [dictionary objectForKey:key];
     if (string && [string isKindOfClass:[NSString class]]) {
@@ -149,7 +218,7 @@
     }
 }
 
-- (BOOL) getBoolInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (BOOL *)result
++ (BOOL) getBoolInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (BOOL *)result
 {
     NSNumber *number = [dictionary objectForKey:key];
     if (number && [number isKindOfClass:[NSNumber class]]) {
@@ -160,7 +229,7 @@
     }
 }
 
-- (BOOL) getDoubleInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (double *)result
++ (BOOL) getDoubleInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (double *)result
 {
     NSNumber *number = [dictionary objectForKey:key];
     if (number && [number isKindOfClass:[NSNumber class]]) {

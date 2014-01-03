@@ -1,6 +1,9 @@
 
 #import "AppDelegate.h"
 
+#import "Debug.h"
+#import "constants.h"
+
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
@@ -21,6 +24,52 @@
     if (!ok) {
         [self alertFailedToLoadKext];
         [NSApp close];
+    }
+
+    [_tableView reloadData];
+    if ([_tableView numberOfRows] > 0) {
+        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:0];
+        [_tableView selectRowIndexes:indexSet byExtendingSelection:NO];
+    }
+    [self refreshDeviceView];
+}
+
+/* === DEVICE VIEW ACTIONS === */
+
+- (IBAction)enableToggled:(id)sender {
+    LOG(@"enter");
+    NSMutableDictionary *device = [self getSelectedDevice];
+    if (device) {
+        BOOL enabled = !![checkboxEnable state];
+        [device setObject:[NSNumber numberWithBool:enabled] forKey:SETTINGS_ENABLED];
+        [configuration save];
+    }
+}
+
+- (IBAction)curveChanged:(id)sender {
+    LOG(@"enter");
+    NSMutableDictionary *device = [self getSelectedDevice];
+    if (device) {
+        NSInteger itemIndex = [curvePopup indexOfSelectedItem];
+        NSString *curve = NULL;
+        switch (itemIndex) {
+            default: /* fall through to Off */
+            case 0: curve = @"Off"; break;
+            case 1: curve = @"Windows"; break;
+            case 2: curve = @"OS X"; break;
+        }
+        [device setObject:curve forKey:SETTINGS_ACCELERATION_CURVE];
+        [configuration save];
+    }
+}
+
+- (IBAction)velocityChanged:(id)sender {
+    LOG(@"enter");
+    NSMutableDictionary *device = [self getSelectedDevice];
+    if (device) {
+        double velocity = [velocitySlider doubleValue];
+        [device setObject:[NSNumber numberWithDouble:velocity] forKey:SETTINGS_VELOCITY];
+        [configuration save];
     }
 }
 
@@ -54,7 +103,10 @@
                 [configuration createDeviceFromKextDeviceInformation:&kextDeviceInfo];
             }
 
-            // mark device plugged in
+            [configuration connectDeviceWithVendorID:kextDeviceInfo.vendor_id andProductID:kextDeviceInfo.product_id];
+
+            [self performSelectorOnMainThread:@selector(reloadData) withObject:_tableView waitUntilDone:NO];
+
             break;
         }
         case EVENT_TYPE_DEVICE_REMOVED:
@@ -62,7 +114,11 @@
             device_removed_event_t *device_removed = &kext_event->device_removed;
             NSLog(@"DEVICE REMOVED, VendorID: %u, ProductID: %u",
                   device_removed->base.vendor_id, device_removed->base.product_id);
-            // mark device removed
+
+            [configuration disconnectDeviceWithVendorID:device_removed->base.vendor_id andProductID:device_removed->base.product_id];
+
+            [self performSelectorOnMainThread:@selector(reloadData) withObject:_tableView waitUntilDone:NO];
+
             break;
         }
         case EVENT_TYPE_POINTING:
@@ -73,6 +129,106 @@
             NSLog(@"Unknown event type: %d", kext_event->base.event_type);
             break;
     }
+}
+
+/* === TABLE VIEW NOTIFICATIONS === */
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
+    NSUInteger count = [[configuration getDevices] count];
+    LOG(@"count: %lu", count);
+    return count;
+}
+
+// This method is optional if you use bindings to provide the data
+- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
+    LOG(@"enter");
+    NSMutableDictionary *device = [configuration getDeviceAtIndex:(int)row];
+    NSString *identifier = [tableColumn identifier];
+    if (device) {
+        if ([identifier isEqualToString:SETTINGS_PRODUCT]) {
+            NSTableCellView *view = [tableView makeViewWithIdentifier:identifier owner:self];
+            view.textField.stringValue = [device objectForKey:SETTINGS_PRODUCT];
+            return view;
+        } else if ([identifier isEqualToString:SETTINGS_MANUFACTURER]) {
+            NSTableCellView *view = [tableView makeViewWithIdentifier:identifier owner:self];
+            view.textField.stringValue = [device objectForKey:SETTINGS_MANUFACTURER];
+            return view;
+        }
+    }
+    return nil;
+}
+
+- (IBAction)deviceSelected:(id)sender
+{
+    [self refreshDeviceView];
+}
+
+- (void) refreshDeviceView {
+    NSMutableDictionary *device = [self getSelectedDevice];
+
+    [deviceView setHidden:(device == nil)];
+
+    if (device) {
+        BOOL ok;
+
+        BOOL enabled;
+        ok = [Configuration getBoolInDictionary:device forKey:SETTINGS_ENABLED withResult:&enabled];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_ENABLED);
+            [NSApp close];
+        }
+
+        NSString *curve;
+        ok = [Configuration getStringInDictionary:device forKey:SETTINGS_ACCELERATION_CURVE withResult:&curve];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_ACCELERATION_CURVE);
+            [NSApp close];
+        }
+
+        double velocity;
+        ok = [Configuration getDoubleInDictionary:device forKey:SETTINGS_VELOCITY withResult:&velocity];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_VELOCITY);
+            [NSApp close];
+        }
+
+        int curveIndex;
+        ok = [self getIndexFromAccelerationCurveString:curve withResult:&curveIndex];
+        if (!ok) {
+            curveIndex = 0;
+        }
+
+        [checkboxEnable setState:enabled];
+        [curvePopup selectItemAtIndex:curveIndex];
+        [velocitySlider setDoubleValue:velocity];
+    }
+}
+
+-(BOOL)getIndexFromAccelerationCurveString: (NSString *) string withResult: (int *)result
+{
+    if ([string compare:SETTINGS_CURVE_WINDOWS] == NSOrderedSame) {
+        *result = 1;
+        return YES;
+    }
+
+    if ([string compare:SETTINGS_CURVE_OSX] == NSOrderedSame) {
+        *result = 2;
+        return YES;
+    }
+
+    if ([string compare:SETTINGS_CURVE_OFF] == NSOrderedSame) {
+        *result = 0;
+        return YES;
+    }
+
+    return NO;
+}
+
+-(NSMutableDictionary *) getSelectedDevice
+{
+    NSInteger index = [_tableView selectedRow];
+    NSMutableDictionary *device = [configuration getDeviceAtIndex:(int)index];
+    return device;
 }
 
 /* ===              === */
