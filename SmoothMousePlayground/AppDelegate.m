@@ -32,6 +32,8 @@
         [_tableView selectRowIndexes:indexSet byExtendingSelection:NO];
     }
     [self refreshDeviceView];
+
+    daemonController = [[DaemonController alloc] init];
 }
 
 /* === DEVICE VIEW ACTIONS === */
@@ -43,6 +45,11 @@
         BOOL enabled = !![checkboxEnable state];
         [device setObject:[NSNumber numberWithBool:enabled] forKey:SETTINGS_ENABLED];
         [configuration save];
+    }
+    if ([configuration anyDeviceIsEnabled]) {
+        [daemonController start];
+    } else {
+        [daemonController stop];
     }
 }
 
@@ -60,6 +67,7 @@
         }
         [device setObject:curve forKey:SETTINGS_ACCELERATION_CURVE];
         [configuration save];
+        [daemonController update];
     }
 }
 
@@ -70,6 +78,8 @@
         double velocity = [velocitySlider doubleValue];
         [device setObject:[NSNumber numberWithDouble:velocity] forKey:SETTINGS_VELOCITY];
         [configuration save];
+        [daemonController update];
+
     }
 }
 
@@ -105,7 +115,7 @@
 
             [configuration connectDeviceWithVendorID:kextDeviceInfo.vendor_id andProductID:kextDeviceInfo.product_id];
 
-            [self performSelectorOnMainThread:@selector(reloadData) withObject:_tableView waitUntilDone:NO];
+            [_tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
 
             break;
         }
@@ -117,7 +127,7 @@
 
             [configuration disconnectDeviceWithVendorID:device_removed->base.vendor_id andProductID:device_removed->base.product_id];
 
-            [self performSelectorOnMainThread:@selector(reloadData) withObject:_tableView waitUntilDone:NO];
+            [_tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
 
             break;
         }

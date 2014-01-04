@@ -1,6 +1,6 @@
 INSTALLER_ROOT="${PROJECT_DIR}/Installer/Root"
 
-PREFPANE="SmoothMouse.prefPane"
+PREFPANE="SmoothMousePrefs.prefPane"
 PREFPANE_PLIST="${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/Info.plist"
 
 # Auxiliary stuff
@@ -25,14 +25,16 @@ set -o nounset # indicate an error when trying to use an undefined variable
 # -----------------------------------------------------------------------
 # Merge the daemon and updater with the prefpane
 echo "Merging the daemon and updater with the prefpane"
-rm -rf "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseUpdater.app"
-rm -rf "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseDaemon.app"
-rm -rf "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseFeedback.app"
-mv "${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app" "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/"
-mv "${BUILT_PRODUCTS_DIR}/SmoothMouseDaemon.app" "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/"
-mv "${BUILT_PRODUCTS_DIR}/SmoothMouseFeedback.app" "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/"
-chmod ug+x "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/Resources/uninstall.sh"
-chmod a+x  "${BUILT_PRODUCTS_DIR}/SmoothMouse.prefPane/Contents/SmoothMouseFeedback.app/Contents/Resources/FRFeedbackReporter.sh"
+rm -rf "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/SmoothMouseUpdater.app"
+rm -rf "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/SmoothMouseDaemon.app"
+rm -rf "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/SmoothMouseFeedback.app"
+rm -rf "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/SmoothMousePlayground.app"
+mv "${BUILT_PRODUCTS_DIR}/SmoothMouseUpdater.app" "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/"
+mv "${BUILT_PRODUCTS_DIR}/SmoothMouseDaemon.app" "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/"
+mv "${BUILT_PRODUCTS_DIR}/SmoothMouseFeedback.app" "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/"
+mv "${BUILT_PRODUCTS_DIR}/SmoothMousePlayground.app" "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/"
+chmod ug+x "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/Resources/uninstall.sh"
+chmod a+x  "${BUILT_PRODUCTS_DIR}/${PREFPANE}/Contents/SmoothMouseFeedback.app/Contents/Resources/FRFeedbackReporter.sh"
 
 # Add commit ID to the plist
 SMCOMMITID=`git log --pretty=format:'%h' -n 1`

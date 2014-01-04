@@ -3,11 +3,13 @@
 
 #import "Configuration.h"
 #import "Kext.h"
+#import "DaemonController.h"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, NSTableViewDelegate, NSTableViewDataSource> {
 @private
     Kext *kext;
     Configuration *configuration;
+    DaemonController *daemonController;
     IBOutlet NSTableView *_tableView;
     IBOutlet NSButton *checkboxEnable;
     IBOutlet NSPopUpButton *curvePopup;

@@ -126,28 +126,32 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     if (devicesFromPlist) {
         for (NSDictionary *deviceInfo in devicesFromPlist) {
             DeviceInfo newDevice;
-            if (![self getIntegerInDictionary:deviceInfo forKey:@"VendorID" withResult: &newDevice.vendor_id]) {
+            if (![self getIntegerInDictionary:deviceInfo forKey:SETTINGS_VENDOR_ID withResult: &newDevice.vendor_id]) {
                 NSLog(@"Failed to read VendorID");
                 return NO;
             }
-            if (![self getIntegerInDictionary:deviceInfo forKey:@"ProductID" withResult: &newDevice.product_id]) {
+            if (![self getIntegerInDictionary:deviceInfo forKey:SETTINGS_PRODUCT_ID withResult: &newDevice.product_id]) {
                 NSLog(@"Failed to read ProductID");
                 return NO;
             }
-            if (![self getStringInDictionary:deviceInfo forKey:@"Manufacturer" withResult: newDevice.manufacturer]) {
+            if (![self getStringInDictionary:deviceInfo forKey:SETTINGS_MANUFACTURER withResult: newDevice.manufacturer]) {
                 NSLog(@"Failed to read Manufacturer");
                 return NO;
             }
-            if (![self getStringInDictionary:deviceInfo forKey:@"Product" withResult: newDevice.product]) {
+            if (![self getStringInDictionary:deviceInfo forKey:SETTINGS_PRODUCT withResult: newDevice.product]) {
                 NSLog(@"Failed to read Product");
                 return NO;
             }
-            if (![self getDoubleInDictionary:deviceInfo forKey:@"Velocity" withResult: &newDevice.velocity]) {
+            if (![self getDoubleInDictionary:deviceInfo forKey:SETTINGS_VELOCITY withResult: &newDevice.velocity]) {
                 NSLog(@"Failed to read Velocity");
                 return NO;
             }
-            if (![self getAccelerationCurveFromDictionary:deviceInfo withKey:@"Curve" withResult: &newDevice.curve]) {
+            if (![self getAccelerationCurveFromDictionary:deviceInfo withKey:SETTINGS_ACCELERATION_CURVE withResult: &newDevice.curve]) {
                 NSLog(@"Failed to read Curve");
+                return NO;
+            }
+            if (![self getBoolInDictionary:deviceInfo forKey:SETTINGS_ENABLED withResult: (BOOL *)&newDevice.enabled]) {
+                NSLog(@"Failed to read Enabled");
                 return NO;
             }
             LOG(@"Configured Device: %s (%s)", newDevice.product.c_str(), newDevice.manufacturer.c_str());
@@ -247,7 +251,7 @@ const char *get_acceleration_string(AccelerationCurve curve) {
             *result = ACCELERATION_CURVE_OSX;
             return YES;
         }
-        if ([value compare:@"Linear"] == NSOrderedSame) {
+        if ([value compare:@"Off"] == NSOrderedSame) {
             *result = ACCELERATION_CURVE_LINEAR;
             return YES;
         }

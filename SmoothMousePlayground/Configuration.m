@@ -49,7 +49,8 @@
 {
     LOG(@"enter");
     NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
-                          [[[NSDictionary alloc] init] autorelease], @"Devices",
+                          [[[NSArray alloc] init] autorelease], SETTINGS_DEVICES,
+                          [NSNumber numberWithInt:2], SETTINGS_DRIVER,
                           nil];
 
     NSString *file = [NSHomeDirectory() stringByAppendingPathComponent: PREFERENCES_FILENAME];
@@ -100,12 +101,13 @@
     if (devices) {
         for (NSDictionary *device in devices) {
             uint32_t vid, pid;
-            if (![Configuration getIntegerInDictionary:device forKey:@"VendorID" withResult: &vid]) {
-                LOG(@"Failed to read VendorID");
+            
+            if (![Configuration getIntegerInDictionary:device forKey:SETTINGS_VENDOR_ID withResult: &vid]) {
+                LOG(@"Key %@ missing in device", SETTINGS_VENDOR_ID);
                 continue;
             }
-            if (![Configuration getIntegerInDictionary:device forKey:@"ProductID" withResult: &pid]) {
-                LOG(@"Failed to read ProductID");
+            if (![Configuration getIntegerInDictionary:device forKey:SETTINGS_PRODUCT_ID withResult: &pid]) {
+                LOG(@"Key %@ missing in device", SETTINGS_PRODUCT_ID);
                 continue;
             }
             if (vid == theVid && pid == thePid) {
@@ -144,6 +146,8 @@
     NSMutableArray *devices = [self getDevices];
 
     [devices addObject:device];
+
+    [self save];
 
     LOG(@"configuration: %@", configuration);
 }
@@ -194,6 +198,24 @@
     }
     LOG(@"isConnected: %d", isConnected);
     return isConnected;
+}
+
+-(BOOL) anyDeviceIsEnabled {
+    NSArray *devices = [self getDevices];
+
+    if (devices) {
+        for (NSDictionary *device in devices) {
+            BOOL enabled;
+            if (![Configuration getBoolInDictionary:device forKey:SETTINGS_ENABLED withResult: &enabled]) {
+                LOG(@"Key %@ missing in device", SETTINGS_ENABLED);
+                continue;
+            }
+            if (enabled) {
+                return YES;
+            }
+        }
+    }
+    return NO;
 }
 
 + (BOOL) getIntegerInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (uint32_t *)result

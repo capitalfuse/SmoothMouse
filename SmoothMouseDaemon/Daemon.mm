@@ -73,7 +73,7 @@ static OSStatus AppFrontSwitchedHandler(EventHandlerCallRef inHandlerCallRef, Ev
             [kext kextMethodGetDeviceInformation: &kextDeviceInfo forDeviceWithDeviceType:device_added->base.device_type andVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
             if (device_added->base.device_type == DEVICE_TYPE_POINTING) {
                 DeviceInfo *deviceInfo = [config getDeviceWithDeviceType: DEVICE_TYPE_POINTING andVendorID:device_added->base.vendor_id andProductID:device_added->base.product_id];
-                if (deviceInfo != NULL) {
+                if (deviceInfo != NULL && deviceInfo->enabled) {
                     device_configuration_t device_config;
                     memset(&device_config, 0, sizeof(device_configuration_t));
                     device_config.device_type = DEVICE_TYPE_POINTING;

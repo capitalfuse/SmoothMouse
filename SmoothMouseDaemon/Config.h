@@ -15,6 +15,7 @@ typedef struct {
     std::string product;
     double velocity;
     AccelerationCurve curve;
+    bool enabled;
 } DeviceInfo;
 
 @interface Config : NSObject {

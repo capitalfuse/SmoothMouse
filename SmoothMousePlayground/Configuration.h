@@ -21,6 +21,7 @@
 -(BOOL) connectDeviceWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid;
 -(BOOL) disconnectDeviceWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid;
 -(BOOL) deviceIsConnectedWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid;
+-(BOOL) anyDeviceIsEnabled;
 
 + (BOOL) getIntegerInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (uint32_t *)result;
 + (BOOL) getStringInDictionary: (NSDictionary *)dictionary forKey: (NSString *)key withResult: (NSString **)result;
