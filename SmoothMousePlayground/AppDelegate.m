@@ -15,6 +15,11 @@
 
     if (!ok) {
         [configuration writeDefaultConfiguration];
+        ok = [configuration load];
+        if (!ok) {
+            LOG(@"Failed to load default configuration");
+            [NSApp close];
+        }
     }
 
     kext = [[Kext alloc] init];

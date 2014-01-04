@@ -39,7 +39,7 @@
     [self enableStartAtLogin:YES];
 
     if ([self isRunning]) {
-        return YES;//[self restart];
+        return [self restart];
     } else {
         NSArray *arguments;
         NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
