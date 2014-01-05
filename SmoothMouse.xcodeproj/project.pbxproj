@@ -62,6 +62,7 @@
 		035222F116C0492E00DBE092 /* MouseSupervisor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.mm */; };
 		03628254170481F000C2E371 /* Prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* Prio.mm */; };
 		03758F0017089405003E066D /* mach_timebase_util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03758EFF17089405003E066D /* mach_timebase_util.mm */; };
+		039AB85818799EFC0045971E /* DeviceCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 039AB85718799EFC0045971E /* DeviceCellView.m */; };
 		039EAE5618775E25002E5B0C /* DaemonController.m in Sources */ = {isa = PBXBuildFile; fileRef = 039EAE5518775E25002E5B0C /* DaemonController.m */; };
 		039EAE571877600E002E5B0C /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA515D7D9B500763D81 /* ServiceManagement.framework */; };
 		039EAE5D18776959002E5B0C /* uninstall.sh in Resources */ = {isa = PBXBuildFile; fileRef = 039EAE5C18776959002E5B0C /* uninstall.sh */; };
@@ -223,6 +224,8 @@
 		03628253170481F000C2E371 /* Prio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Prio.mm; sourceTree = "<group>"; };
 		03758EFE170893BD003E066D /* mach_timebase_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mach_timebase_util.h; sourceTree = "<group>"; };
 		03758EFF17089405003E066D /* mach_timebase_util.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mach_timebase_util.mm; sourceTree = "<group>"; };
+		039AB85618799EFC0045971E /* DeviceCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceCellView.h; sourceTree = "<group>"; };
+		039AB85718799EFC0045971E /* DeviceCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceCellView.m; sourceTree = "<group>"; };
 		039EAE5418775E25002E5B0C /* DaemonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DaemonController.h; sourceTree = "<group>"; };
 		039EAE5518775E25002E5B0C /* DaemonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DaemonController.m; sourceTree = "<group>"; };
 		039EAE5C18776959002E5B0C /* uninstall.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = uninstall.sh; sourceTree = "<group>"; };
@@ -365,6 +368,8 @@
 				0306A79218761A71005F94DE /* Debug.h */,
 				039EAE5418775E25002E5B0C /* DaemonController.h */,
 				039EAE5518775E25002E5B0C /* DaemonController.m */,
+				039AB85618799EFC0045971E /* DeviceCellView.h */,
+				039AB85718799EFC0045971E /* DeviceCellView.m */,
 			);
 			path = SmoothMousePlayground;
 			sourceTree = "<group>";
@@ -890,6 +895,7 @@
 			files = (
 				0306A78D18759F6A005F94DE /* Kext.mm in Sources */,
 				039EAE5618775E25002E5B0C /* DaemonController.m in Sources */,
+				039AB85818799EFC0045971E /* DeviceCellView.m in Sources */,
 				0306A76F18759EE5005F94DE /* AppDelegate.m in Sources */,
 				0306A7911876140F005F94DE /* Configuration.m in Sources */,
 				0306A76818759EE5005F94DE /* main.m in Sources */,

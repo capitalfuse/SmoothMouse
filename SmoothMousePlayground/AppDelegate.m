@@ -1,5 +1,6 @@
 
 #import "AppDelegate.h"
+#import "DeviceCellView.h"
 
 #import "Debug.h"
 #import "constants.h"
@@ -160,15 +161,11 @@
     NSMutableDictionary *device = [configuration getDeviceAtIndex:(int)row];
     NSString *identifier = [tableColumn identifier];
     if (device) {
-        if ([identifier isEqualToString:SETTINGS_PRODUCT]) {
-            NSTableCellView *view = [tableView makeViewWithIdentifier:identifier owner:self];
-            view.textField.stringValue = [device objectForKey:SETTINGS_PRODUCT];
-            return view;
-        } else if ([identifier isEqualToString:SETTINGS_MANUFACTURER]) {
-            NSTableCellView *view = [tableView makeViewWithIdentifier:identifier owner:self];
-            view.textField.stringValue = [device objectForKey:SETTINGS_MANUFACTURER];
-            return view;
-        }
+        DeviceCellView *view = [tableView makeViewWithIdentifier:identifier owner:self];
+        view.productTextField.stringValue = [device objectForKey:SETTINGS_PRODUCT];
+        view.manufacturerTextField.stringValue = [device objectForKey:SETTINGS_MANUFACTURER];
+        [view.deviceImage setImage:[NSImage imageNamed:@"NSAdvanced"]];
+        return view;
     }
     return nil;
 }
