@@ -16,6 +16,8 @@ typedef struct {
     double velocity;
     AccelerationCurve curve;
     bool enabled;
+    bool is_trackpad;
+    bool connected;
 } DeviceInfo;
 
 @interface Config : NSObject {
@@ -70,7 +72,10 @@ typedef struct {
 -(BOOL) activeAppRequiresMouseEventListener;
 -(BOOL) activeAppRequiresTabletPointSubtype;
 -(BOOL) getKeyboardConfiguration: (char *)keyboardConfiguration;
--(DeviceInfo *)getDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID;
+-(BOOL) getDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID withResult:(DeviceInfo *) theResult;
+-(void) connectDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID;
+-(void) disconnectDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID;
 -(size_t) getNumberOfDevices;
+-(BOOL) configureDevices:(Kext*) kext;
 
 @end

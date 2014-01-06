@@ -449,8 +449,13 @@ void mouse_process_kext_event(pointing_event_t *event) {
 
     if (event->dx != 0 || event->dy != 0) {
         check_needs_refresh(event);
-        DeviceInfo *deviceInfo = [[Config instance] getDeviceWithDeviceType:DEVICE_TYPE_POINTING andVendorID:event->base.vendor_id andProductID: event->base.product_id];
-        mouse_handle_move(event, deviceInfo->velocity, deviceInfo->curve);
+        DeviceInfo deviceInfo;
+        BOOL ok = [[Config instance] getDeviceWithDeviceType:DEVICE_TYPE_POINTING andVendorID:event->base.vendor_id andProductID: event->base.product_id withResult:&deviceInfo];
+        if (ok) {
+            mouse_handle_move(event, deviceInfo.velocity, deviceInfo.curve);
+        } else {
+            LOG(@"Device not found for POINTING event");
+        }
     }
 
     lastSequenceNumber = event->base.seq;

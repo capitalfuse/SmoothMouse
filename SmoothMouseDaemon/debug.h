@@ -25,7 +25,7 @@ extern pthread_mutex_t log_mutex;
                 NSLog(@"log string nil! (%s, %d, %@)", __FILE__, __LINE__, format); \
             } \
         } else { \
-            NSLog(format, ##__VA_ARGS__); \
+            NSLog(@"%s(%d)>" format, __FUNCTION__, __LINE__, ##__VA_ARGS__); \
         } \
     }
 

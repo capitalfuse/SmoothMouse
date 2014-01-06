@@ -30,6 +30,8 @@
 -(void) redrawOverlay;
 -(void) say:(NSString *)message;
 -(void) dumpState;
+-(void) reloadConfiguration;
+-(void) configureDevices;
 
 @end
 

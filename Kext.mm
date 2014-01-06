@@ -9,6 +9,7 @@
 
 #import "Prio.h"
 #include "KextInterface.h"
+#include "Debug.h"
 
 @implementation Kext
 
@@ -227,6 +228,7 @@ static void *KernelEventThread(void *instance)
                                      0, NULL, 0, deviceInfo, &device_info_size);
 
     if (kernResult == KERN_SUCCESS) {
+        LOG(@"KEXT DEVICE INFO: %d:%d trackpad: %d", deviceInfo->vendor_id, deviceInfo->product_id, deviceInfo->pointing.is_trackpad);
         return YES;
     } else {
         return NO;

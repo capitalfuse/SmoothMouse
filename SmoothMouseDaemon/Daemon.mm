@@ -35,7 +35,7 @@ void trap_signals(int sig)
 }
 
 void trap_sigusr(int sig) {
-    [[Daemon instance] dumpState];
+    [[Daemon instance] reloadConfiguration];
 }
 
 // more information about getting notified when fron app changes:
@@ -50,6 +50,7 @@ static OSStatus AppFrontSwitchedHandler(EventHandlerCallRef inHandlerCallRef, Ev
 
 /* === KEXTPROTOCOL === */
 - (void)connected {
+    [self configureDevices];
 }
 
 - (void)disconnected {
@@ -63,52 +64,25 @@ static OSStatus AppFrontSwitchedHandler(EventHandlerCallRef inHandlerCallRef, Ev
 
 - (void)didReceiveEvent:(kext_event_t *)kext_event {
     Config *config = [Config instance];
-    //LOG(@"kext event: size %u, event type: %u, device_type: %d, timestamp: %llu", self->queueSize, kext_event->base.event_type, kext_event->base.device_type, kext_event->base.timestamp);
+    LOG(@"kext event: event type: %u, device_type: %d, timestamp: %llu", kext_event->base.event_type, kext_event->base.device_type, kext_event->base.timestamp);
 
     switch (kext_event->base.event_type) {
         case EVENT_TYPE_DEVICE_ADDED:
         {
             device_added_event_t *device_added = &kext_event->device_added;
             device_information_t kextDeviceInfo;
-            [kext kextMethodGetDeviceInformation: &kextDeviceInfo forDeviceWithDeviceType:device_added->base.device_type andVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
-            if (device_added->base.device_type == DEVICE_TYPE_POINTING) {
-                DeviceInfo *deviceInfo = [config getDeviceWithDeviceType: DEVICE_TYPE_POINTING andVendorID:device_added->base.vendor_id andProductID:device_added->base.product_id];
-                if (deviceInfo != NULL && deviceInfo->enabled) {
-                    device_configuration_t device_config;
-                    memset(&device_config, 0, sizeof(device_configuration_t));
-                    device_config.device_type = DEVICE_TYPE_POINTING;
-                    device_config.vendor_id = device_added->base.vendor_id;
-                    device_config.product_id = device_added->base.product_id;
-                    device_config.enabled = 1;
-                    [kext kextMethodConfigureDevice:&device_config];
-                    LOG(@"Enabled POINTING device (trackpad: %d): VendorID: %u, ProductID: %u, Manufacturer: '%s', Product: '%s'", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id, kextDeviceInfo.manufacturer_string, kextDeviceInfo.product_string);
-                    if (kextDeviceInfo.pointing.is_trackpad) {
-                        [config setTrackpadEnabled: YES];
-                    } else {
-                        [config setMouseEnabled: YES];
-                    }
-                } else {
-                    LOG(@"Ignored POINTING device (trackpad: %d): VendorID: %u, ProductID: %u, Manufacturer: '%s', Product: '%s'", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id, kextDeviceInfo.manufacturer_string, kextDeviceInfo.product_string);                        }
-            } else if (device_added->base.device_type == DEVICE_TYPE_KEYBOARD) {
-                if ([config keyboardEnabled]) {
-                    device_configuration_t device_config;
-                    memset(&device_config, 0, sizeof(device_configuration_t));
-                    device_config.device_type = DEVICE_TYPE_KEYBOARD;
-                    device_config.vendor_id = device_added->base.vendor_id;
-                    device_config.product_id = device_added->base.product_id;
-                    [config getKeyboardConfiguration: &device_config.keyboard.enabledKeys[0]];
-                    device_config.enabled = 1;
-                    [kext kextMethodConfigureDevice:&device_config];
-                    LOG(@"ENABLED KEYBOARD DEVICE (trackpad: %d), vendor_id: %u, product_id: %u", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id);
-                }
+            BOOL ok = [kext kextMethodGetDeviceInformation: &kextDeviceInfo forDeviceWithDeviceType:device_added->base.device_type andVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
+            if (ok && device_added->base.device_type == DEVICE_TYPE_POINTING) {
+                [config connectDeviceWithDeviceType:device_added->base.device_type andVendorID:device_added->base.vendor_id andProductID:device_added->base.product_id];
             }
             break;
         }
         case EVENT_TYPE_DEVICE_REMOVED:
         {
             device_removed_event_t *device_removed = &kext_event->device_removed;
-            LOG(@"DEVICE REMOVED, VendorID: %u, ProductID: %u",
-                device_removed->base.vendor_id, device_removed->base.product_id);
+            if (device_removed->base.device_type == DEVICE_TYPE_POINTING) {
+                [config disconnectDeviceWithDeviceType:device_removed->base.device_type andVendorID:device_removed->base.vendor_id andProductID:device_removed->base.product_id];
+            }
             break;
         }
         case EVENT_TYPE_POINTING:
@@ -364,6 +338,18 @@ static OSStatus AppFrontSwitchedHandler(EventHandlerCallRef inHandlerCallRef, Ev
     NSLog(@"Number of lost kext events: %d", totalNumberOfLostEvents);
     NSLog(@"Number of lost clicks: %d", [sMouseSupervisor numClickEvents]);
     NSLog(@"===");
+}
+
+-(void) reloadConfiguration {
+    LOG(@"Reloading configuration");
+
+    [accel restore];
+    [[Config instance] readSettingsPlist];
+    [self configureDevices];
+}
+
+-(void) configureDevices {
+    [[Config instance] configureDevices: kext];
 }
 
 @end

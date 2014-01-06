@@ -4,6 +4,8 @@
 #include "constants.h"
 #include "debug.h"
 
+#include <string.h>
+
 @implementation Config
 @synthesize driver;
 @synthesize forceDragRefreshEnabled;
@@ -17,6 +19,8 @@
 @synthesize latencyEnabled;
 @synthesize mouseEnabled;
 @synthesize trackpadEnabled;
+
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 +(Config *) instance
 {
@@ -124,40 +128,60 @@ const char *get_acceleration_string(AccelerationCurve curve) {
 
     devicesFromPlist = [dict valueForKey:@"Devices"];
     if (devicesFromPlist) {
+        pthread_mutex_lock(&mutex);
+        BOOL ok = YES;
+        devices.clear();
         for (NSDictionary *deviceInfo in devicesFromPlist) {
             DeviceInfo newDevice;
+
             if (![self getIntegerInDictionary:deviceInfo forKey:SETTINGS_VENDOR_ID withResult: &newDevice.vendor_id]) {
                 NSLog(@"Failed to read VendorID");
-                return NO;
+                ok = NO;
+                break;
             }
             if (![self getIntegerInDictionary:deviceInfo forKey:SETTINGS_PRODUCT_ID withResult: &newDevice.product_id]) {
                 NSLog(@"Failed to read ProductID");
-                return NO;
+                ok = NO;
+                break;
             }
             if (![self getStringInDictionary:deviceInfo forKey:SETTINGS_MANUFACTURER withResult: newDevice.manufacturer]) {
                 NSLog(@"Failed to read Manufacturer");
-                return NO;
+                ok = NO;
+                break;
             }
             if (![self getStringInDictionary:deviceInfo forKey:SETTINGS_PRODUCT withResult: newDevice.product]) {
                 NSLog(@"Failed to read Product");
-                return NO;
+                ok = NO;
+                break;
             }
             if (![self getDoubleInDictionary:deviceInfo forKey:SETTINGS_VELOCITY withResult: &newDevice.velocity]) {
                 NSLog(@"Failed to read Velocity");
-                return NO;
+                ok = NO;
+                break;
             }
             if (![self getAccelerationCurveFromDictionary:deviceInfo withKey:SETTINGS_ACCELERATION_CURVE withResult: &newDevice.curve]) {
                 NSLog(@"Failed to read Curve");
-                return NO;
+                ok = NO;
+                break;
             }
             if (![self getBoolInDictionary:deviceInfo forKey:SETTINGS_ENABLED withResult: (BOOL *)&newDevice.enabled]) {
                 NSLog(@"Failed to read Enabled");
-                return NO;
+                ok = NO;
+                break;
             }
+
+            newDevice.connected = false;
+            newDevice.is_trackpad = false;
+
             LOG(@"Configured Device: %s (%s)", newDevice.product.c_str(), newDevice.manufacturer.c_str());
             LOG(@"  VendorID: %u, ProductID: %u, Velocity: %f, Curve: %s", newDevice.vendor_id, newDevice.product_id, newDevice.velocity, get_acceleration_string(newDevice.curve));
             devices.insert(devices.begin(), newDevice);
         }
+        pthread_mutex_unlock(&mutex);
+        if (!ok) {
+            return NO;
+        }
+        [self listAllDevices];
     } else {
         LOG(@"No devices found in plist");
         return NO;
@@ -340,23 +364,155 @@ const char *get_acceleration_string(AccelerationCurve curve) {
     return YES;
 }
 
--(DeviceInfo *)getDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID {
+-(BOOL) getDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID withResult:(DeviceInfo *)theResult
+{
     if (deviceType != DEVICE_TYPE_POINTING ) {
-        return NULL;
+        return NO;
     }
+    BOOL found = NO;
+    pthread_mutex_lock(&mutex);
     std::vector<DeviceInfo>::iterator iterator;
     for (iterator = devices.begin(); iterator != devices.end(); iterator++) {
         DeviceInfo *deviceInfo = &*iterator;
         if (deviceInfo->vendor_id == vendorID && deviceInfo->product_id == productID) {
-            return deviceInfo;
+            *theResult = *deviceInfo;
+            found = YES;
+            break;
         }
     }
-    return NULL;
+    pthread_mutex_unlock(&mutex);
+    return found;
 }
 
 -(size_t) getNumberOfDevices {
-    return devices.size();
+    size_t count;
+    pthread_mutex_lock(&mutex);
+    count = devices.size();
+    pthread_mutex_unlock(&mutex);
+    return count;
 }
 
+-(void) connectDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID {
+    pthread_mutex_lock(&mutex);
+
+    std::vector<DeviceInfo>::iterator iterator;
+    for (iterator = devices.begin(); iterator != devices.end(); iterator++) {
+        DeviceInfo *deviceInfo = &*iterator;
+        if (deviceInfo->vendor_id == vendorID && deviceInfo->product_id == productID) {
+            deviceInfo->connected = true;
+            LOG(@"Connected device %d:%d", vendorID, productID);
+            if ([self anyConnectedAndEnabledMice]) {
+                LOG(@"Enabled mouse");
+                [self setMouseEnabled:YES];
+            }
+            if ([self anyConnectedAndEnabledTrackpads]) {
+                LOG(@"Enabled trackpad");
+                [self setTrackpadEnabled:YES];
+            }
+        }
+    }
+
+    pthread_mutex_unlock(&mutex);
+}
+
+-(void) disconnectDeviceWithDeviceType:(device_type_t)deviceType andVendorID:(uint32_t)vendorID andProductID:(uint32_t)productID
+{
+    pthread_mutex_lock(&mutex);
+
+    LOG(@"DISCONNECT");
+    std::vector<DeviceInfo>::iterator iterator;
+    for (iterator = devices.begin(); iterator != devices.end(); iterator++) {
+        DeviceInfo *deviceInfo = &*iterator;
+        if (deviceInfo->vendor_id == vendorID && deviceInfo->product_id == productID) {
+            deviceInfo->connected = false;
+            LOG(@"Disconnected device %d:%d", vendorID, productID);
+            if (![self anyConnectedAndEnabledMice]) {
+                LOG(@"Disabled mouse");
+                [self setMouseEnabled:NO];
+            }
+            if (![self anyConnectedAndEnabledTrackpads]) {
+                LOG(@"Disabled trackpad");
+                [self setTrackpadEnabled:NO];
+            }
+        }
+    }
+
+    pthread_mutex_unlock(&mutex);
+}
+
+-(BOOL) anyConnectedAndEnabledMice {
+    BOOL found = NO;
+    std::vector<DeviceInfo>::iterator iterator;
+    for (iterator = devices.begin(); iterator != devices.end(); iterator++) {
+        DeviceInfo *deviceInfo = &*iterator;
+        if (!deviceInfo->is_trackpad && deviceInfo->connected && deviceInfo->enabled) {
+            LOG(@"found %d:%d trackpad: %d", deviceInfo->vendor_id, deviceInfo->product_id, deviceInfo->is_trackpad);
+            found = YES;
+            break;
+        }
+    }
+    return found;
+}
+
+-(BOOL) anyConnectedAndEnabledTrackpads {
+    BOOL found = NO;
+    std::vector<DeviceInfo>::iterator iterator;
+    for (iterator = devices.begin(); iterator != devices.end(); iterator++) {
+        DeviceInfo *deviceInfo = &*iterator;
+        if (deviceInfo->is_trackpad && deviceInfo->connected && deviceInfo->enabled) {
+            found = YES;
+            break;
+        }
+    }
+    return found;
+}
+
+-(void) listAllDevices {
+    std::vector<DeviceInfo>::iterator iterator;
+    LOG(@"--- <DEVICES> ---");
+    for (iterator = devices.begin(); iterator != devices.end(); iterator++) {
+        DeviceInfo *deviceInfo = &*iterator;
+        LOG(@"%d:%d enabled: %d, connected: %d, trackpad: %d (0 means mouse or unknown)", deviceInfo->vendor_id, deviceInfo->product_id, deviceInfo->enabled, deviceInfo->connected, deviceInfo->is_trackpad);
+    }
+    LOG(@"--- </DEVICES> ---");
+}
+
+-(BOOL) configureDevices:(Kext *)kext {
+    pthread_mutex_lock(&mutex);
+    [self setMouseEnabled:YES];
+    [self setTrackpadEnabled:YES];
+    std::vector<DeviceInfo>::iterator iterator;
+    for (iterator = devices.begin(); iterator != devices.end(); iterator++) {
+        DeviceInfo *deviceInfo = &*iterator;
+        device_configuration_t device_config;
+        memset(&device_config, 0, sizeof(device_configuration_t));
+        device_config.device_type = DEVICE_TYPE_POINTING;
+        device_config.vendor_id = deviceInfo->vendor_id;
+        device_config.product_id = deviceInfo->product_id;
+        device_config.enabled = deviceInfo->enabled;
+        [kext kextMethodConfigureDevice:&device_config];
+        LOG(@"%s POINTING device: VendorID: %u, ProductID: %u, Manufacturer: '%s', Product: '%s'",
+            (deviceInfo->enabled ? "Enabled" : "Disabled"), deviceInfo->vendor_id, deviceInfo->product_id, deviceInfo->manufacturer.c_str(), deviceInfo->product.c_str());
+
+        device_information_t kextDeviceInfo;
+        BOOL ok = [kext kextMethodGetDeviceInformation: &kextDeviceInfo forDeviceWithDeviceType:DEVICE_TYPE_POINTING andVendorId: deviceInfo->vendor_id andProductID: deviceInfo->product_id];
+        if (ok) {
+            deviceInfo->is_trackpad = kextDeviceInfo.pointing.is_trackpad;
+            LOG(@"setting %d:%d to trackpad: %d", deviceInfo->vendor_id, deviceInfo->product_id, deviceInfo->is_trackpad);
+        } else {
+            LOG(@"could not get device info for %d:%d", deviceInfo->vendor_id, deviceInfo->product_id);
+        }
+    }
+    if ([self anyConnectedAndEnabledMice]) {
+        LOG(@"Enabled mouse");
+        [self setMouseEnabled:YES];
+    }
+    if ([self anyConnectedAndEnabledTrackpads]) {
+        LOG(@"Enabled trackpad");
+        [self setTrackpadEnabled:YES];
+    }
+    pthread_mutex_unlock(&mutex);
+    return YES;
+}
 
 @end

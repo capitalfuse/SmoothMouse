@@ -39,12 +39,11 @@
     [self enableStartAtLogin:YES];
 
     if ([self isRunning]) {
-        return [self restart];
+        return [self update];
     } else {
         NSArray *arguments;
         NSString *plistFile = [NSHomeDirectory() stringByAppendingPathComponent: LAUNCH_AGENT_DAEMON_FILENAME];
         arguments = [NSArray arrayWithObjects: @"load", plistFile, nil];
-
         return [self launchExecutable: @"/bin/launchctl" withArguments:arguments];
     }
 }
@@ -52,19 +51,8 @@
 - (BOOL) update
 {
     LOG(@"enter");
-    BOOL ok;
-    ok = [self restart];
-    return ok;
-}
-
-- (BOOL)restart
-{
-    // TODO: restart daemon smarter
-    LOG(@"enter");
-    if ([self stop] && [self start]) {
-        return YES;
-    }
-    return NO;
+    NSArray *arguments = [NSArray arrayWithObjects: @"-SIGUSR1", @"SmoothMouseDaemon", nil];
+    return [self launchExecutable: @"/usr/bin/killall" withArguments:arguments];
 }
 
 - (BOOL) isRunning;
