@@ -33,6 +33,8 @@ class OSXFunction {
 
 public:
 
+    float speed; // temp :)
+
     OSXFunction(std::string deviceType, float speed) ;
 
     void clearState(void) ;

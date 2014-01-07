@@ -39,7 +39,7 @@ protected:
     
 public:
 
-    int slider ; // temp :)
+    int slider; // temp :)
 
     /**
      The slider argument in the uri defines the mouse sensitivity.

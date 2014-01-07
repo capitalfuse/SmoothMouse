@@ -658,6 +658,7 @@ OSXFunction::OSXFunction(std::string deviceType, float speed) {
     scaleSegments = 0 ;
     scaleSegCount = 0 ;
 
+    this->speed = speed;
     clearState() ;
     loadTable(deviceType) ;
     configure(speed) ;

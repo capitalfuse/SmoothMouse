@@ -195,9 +195,15 @@ static void mouse_handle_move(pointing_event_t *event, double velocity, Accelera
         calcdy = (float) newdy;
     } else if (curve == ACCELERATION_CURVE_OSX) {
         float speed = velocity;
-        if (event->is_trackpad && osx_trackpad == NULL) {
+        if (event->is_trackpad && (osx_trackpad == NULL || osx_trackpad->speed != speed)) {
+            if (osx_trackpad != NULL) {
+                delete osx_trackpad;
+            }
             osx_trackpad = new OSXFunction("touchpad", speed);
-        } else if (!event->is_trackpad && osx_mouse == NULL) {
+        } else if (!event->is_trackpad && (osx_mouse == NULL || osx_mouse->speed != speed)) {
+            if (osx_mouse != NULL) {
+                delete osx_mouse;
+            }
             osx_mouse = new OSXFunction("mouse", speed);
         }
         int newdx;
@@ -208,6 +214,7 @@ static void mouse_handle_move(pointing_event_t *event, double velocity, Accelera
         } else {
             osx = osx_mouse;
         }
+
         osx->apply(event->dx, event->dy, &newdx, &newdy);
         calcdx = (float) newdx;
         calcdy = (float) newdy;
