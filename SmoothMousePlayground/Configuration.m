@@ -87,6 +87,37 @@
     }
 }
 
+-(int) getIndexForDeviceWithVendorID:(uint32_t)theVid andProductID:(uint32_t)thePid
+{
+    NSArray *devices = [self getDevices];
+
+    if (devices) {
+        int index = 0;
+        for (NSDictionary *device in devices) {
+            uint32_t vid, pid;
+
+            if (![Configuration getIntegerInDictionary:device forKey:SETTINGS_VENDOR_ID withResult: &vid]) {
+                LOG(@"Key %@ missing in device", SETTINGS_VENDOR_ID);
+                continue;
+            }
+
+            if (![Configuration getIntegerInDictionary:device forKey:SETTINGS_PRODUCT_ID withResult: &pid]) {
+                LOG(@"Key %@ missing in device", SETTINGS_PRODUCT_ID);
+                continue;
+            }
+
+            if (vid == theVid && pid == thePid) {
+                LOG(@"device: %p", device);
+                return index;
+            }
+
+            index++;
+        }
+    }
+    LOG(@"no such device");
+    return -1;
+}
+
 -(BOOL) deviceExistsWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid
 {
     NSDictionary *device = [self getDeviceWithVendorID: vid andProductID: pid];
@@ -110,6 +141,7 @@
                 LOG(@"Key %@ missing in device", SETTINGS_PRODUCT_ID);
                 continue;
             }
+
             if (vid == theVid && pid == thePid) {
                 LOG(@"device: %p", device);
                 return device;
@@ -193,8 +225,9 @@
     BOOL isConnected = NO;
     NSMutableDictionary *device = [self getDeviceWithVendorID: vid andProductID: pid];
     if (device) {
-        [connectedDevices containsObject:device];
-        isConnected = YES;
+        if ([connectedDevices containsObject:device]) {
+            isConnected = YES;
+        }
     }
     LOG(@"isConnected: %d", isConnected);
     return isConnected;

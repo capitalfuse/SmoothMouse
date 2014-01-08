@@ -15,6 +15,7 @@
 -(BOOL) writeDefaultConfiguration;
 -(NSMutableArray *) getDevices;
 -(NSMutableDictionary *) getDeviceAtIndex: (int) index;
+-(int) getIndexForDeviceWithVendorID:(uint32_t)vid andProductID:(uint32_t)pid;
 -(BOOL) deviceExistsWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid;
 -(NSMutableDictionary *) getDeviceWithVendorID: (uint32_t) vid andProductID: (uint32_t) pid;
 -(void) createDeviceFromKextDeviceInformation: (device_information_t *) information;

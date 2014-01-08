@@ -121,7 +121,7 @@
 
             [configuration connectDeviceWithVendorID:kextDeviceInfo.vendor_id andProductID:kextDeviceInfo.product_id];
 
-            [_tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+            [self performSelectorOnMainThread:@selector(refreshTable) withObject:nil waitUntilDone:NO];
 
             break;
         }
@@ -133,7 +133,7 @@
 
             [configuration disconnectDeviceWithVendorID:device_removed->base.vendor_id andProductID:device_removed->base.product_id];
 
-            [_tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+            [self performSelectorOnMainThread:@selector(refreshTable) withObject:nil waitUntilDone:NO];
 
             break;
         }
@@ -161,10 +161,50 @@
     NSMutableDictionary *device = [configuration getDeviceAtIndex:(int)row];
     NSString *identifier = [tableColumn identifier];
     if (device) {
+        BOOL ok;
+
+        NSString *product;
+        NSString *manufacturer;
+        uint32_t vid, pid;
+
+        ok = [Configuration getStringInDictionary:device forKey:SETTINGS_PRODUCT withResult:&product];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_PRODUCT);
+            [NSApp close];
+        }
+
+        ok = [Configuration getStringInDictionary:device forKey:SETTINGS_MANUFACTURER withResult:&manufacturer];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_MANUFACTURER);
+            [NSApp close];
+        }
+
+        ok = [Configuration getIntegerInDictionary:device forKey:SETTINGS_VENDOR_ID withResult: &vid];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_VENDOR_ID);
+            [NSApp close];
+        }
+
+        ok = [Configuration getIntegerInDictionary:device forKey:SETTINGS_PRODUCT_ID withResult: &pid];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_PRODUCT_ID);
+            [NSApp close];
+        }
+
+        //][device objectForKey:SETTINGS_PRODUCT];
+        BOOL connected = [configuration deviceIsConnectedWithVendorID:vid andProductID:pid];
         DeviceCellView *view = [tableView makeViewWithIdentifier:identifier owner:self];
-        view.productTextField.stringValue = [device objectForKey:SETTINGS_PRODUCT];
-        view.manufacturerTextField.stringValue = [device objectForKey:SETTINGS_MANUFACTURER];
-        [view.deviceImage setImage:[NSImage imageNamed:@"NSAdvanced"]];
+        view.productTextField.stringValue = product;
+        view.manufacturerTextField.stringValue = manufacturer;
+        NSImage *image = [NSImage imageNamed:@"NSAdvanced"];
+        CGFloat alpha = 1.0;
+        if (!connected) {
+            alpha = 0.5;
+        }
+        [view setWantsLayer:YES];
+        [view setAlphaValue:alpha];
+        [view.deviceImage setImage:image];
+
         return view;
     }
     return nil;
@@ -173,6 +213,33 @@
 - (IBAction)deviceSelected:(id)sender
 {
     [self refreshDeviceView];
+}
+
+- (void) refreshTable {
+
+    NSMutableDictionary *device = [self getSelectedDevice];
+
+    uint32_t vid, pid;
+    BOOL ok;
+
+    ok = [Configuration getIntegerInDictionary:device forKey:SETTINGS_VENDOR_ID withResult: &vid];
+    if (!ok) {
+        LOG(@"Key %@ missing in device", SETTINGS_VENDOR_ID);
+        [NSApp close];
+    }
+
+    ok = [Configuration getIntegerInDictionary:device forKey:SETTINGS_PRODUCT_ID withResult: &pid];
+    if (!ok) {
+        LOG(@"Key %@ missing in device", SETTINGS_PRODUCT_ID);
+        [NSApp close];
+    }
+
+    [_tableView reloadData];
+
+    int index = [configuration getIndexForDeviceWithVendorID:vid andProductID:pid];
+
+    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:index];
+    [_tableView selectRowIndexes:indexSet byExtendingSelection:NO];
 }
 
 - (void) refreshDeviceView {
