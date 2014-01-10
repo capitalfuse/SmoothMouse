@@ -4,12 +4,14 @@
 #import "Configuration.h"
 #import "Kext.h"
 #import "DaemonController.h"
+#import "Metadata.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, NSTableViewDelegate, NSTableViewDataSource> {
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSTableViewDelegate, NSTableViewDataSource, Metadata> {
 @private
     Kext *kext;
     Configuration *configuration;
     DaemonController *daemonController;
+    Metadata *metadata;
     IBOutlet NSTableView *_tableView;
     IBOutlet NSButton *checkboxEnable;
     IBOutlet NSPopUpButton *curvePopup;

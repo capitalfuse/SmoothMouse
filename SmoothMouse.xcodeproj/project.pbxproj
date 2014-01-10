@@ -53,6 +53,7 @@
 		0319401016BFB637008FE899 /* WindowsFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0319400D16BFB637008FE899 /* WindowsFunction.cpp */; };
 		031F7843171AA0CF00752C43 /* OverlayWindow.mm in Sources */ = {isa = PBXBuildFile; fileRef = 031F7842171AA0CF00752C43 /* OverlayWindow.mm */; };
 		031F7846171AD33700752C43 /* OverlayView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 031F7845171AD33700752C43 /* OverlayView.mm */; };
+		033182C61880A73900E4AC66 /* MetadataParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 033182C51880A73900E4AC66 /* MetadataParser.m */; };
 		03319D6F1722E7BC00668B93 /* InterruptListener.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03319D6E1722E7BB00668B93 /* InterruptListener.mm */; };
 		03319D73172307FE00668B93 /* MouseEventListener.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03319D72172307FE00668B93 /* MouseEventListener.mm */; };
 		033933C11724214F0052C43D /* DriverEventLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = 033933C01724214F0052C43D /* DriverEventLog.mm */; };
@@ -62,6 +63,7 @@
 		035222F116C0492E00DBE092 /* MouseSupervisor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 035222F016C0492E00DBE092 /* MouseSupervisor.mm */; };
 		03628254170481F000C2E371 /* Prio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03628253170481F000C2E371 /* Prio.mm */; };
 		03758F0017089405003E066D /* mach_timebase_util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 03758EFF17089405003E066D /* mach_timebase_util.mm */; };
+		03994729187EBAED005462AC /* Metadata.m in Sources */ = {isa = PBXBuildFile; fileRef = 03994728187EBAED005462AC /* Metadata.m */; };
 		039AB85818799EFC0045971E /* DeviceCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 039AB85718799EFC0045971E /* DeviceCellView.m */; };
 		039EAE5618775E25002E5B0C /* DaemonController.m in Sources */ = {isa = PBXBuildFile; fileRef = 039EAE5518775E25002E5B0C /* DaemonController.m */; };
 		039EAE571877600E002E5B0C /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED03CFA515D7D9B500763D81 /* ServiceManagement.framework */; };
@@ -209,6 +211,8 @@
 		031F7842171AA0CF00752C43 /* OverlayWindow.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OverlayWindow.mm; sourceTree = "<group>"; };
 		031F7844171AD33700752C43 /* OverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayView.h; sourceTree = "<group>"; };
 		031F7845171AD33700752C43 /* OverlayView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OverlayView.mm; sourceTree = "<group>"; };
+		033182C41880A73900E4AC66 /* MetadataParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataParser.h; sourceTree = "<group>"; };
+		033182C51880A73900E4AC66 /* MetadataParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MetadataParser.m; sourceTree = "<group>"; };
 		03319D6E1722E7BB00668B93 /* InterruptListener.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = InterruptListener.mm; sourceTree = "<group>"; };
 		03319D701722E7D300668B93 /* InterruptListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InterruptListener.h; sourceTree = "<group>"; };
 		03319D71172307FE00668B93 /* MouseEventListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MouseEventListener.h; sourceTree = "<group>"; };
@@ -224,6 +228,8 @@
 		03628253170481F000C2E371 /* Prio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Prio.mm; sourceTree = "<group>"; };
 		03758EFE170893BD003E066D /* mach_timebase_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mach_timebase_util.h; sourceTree = "<group>"; };
 		03758EFF17089405003E066D /* mach_timebase_util.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mach_timebase_util.mm; sourceTree = "<group>"; };
+		03994727187EBAED005462AC /* Metadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Metadata.h; sourceTree = "<group>"; };
+		03994728187EBAED005462AC /* Metadata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Metadata.m; sourceTree = "<group>"; };
 		039AB85618799EFC0045971E /* DeviceCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceCellView.h; sourceTree = "<group>"; };
 		039AB85718799EFC0045971E /* DeviceCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceCellView.m; sourceTree = "<group>"; };
 		039EAE5418775E25002E5B0C /* DaemonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DaemonController.h; sourceTree = "<group>"; };
@@ -370,6 +376,10 @@
 				039EAE5518775E25002E5B0C /* DaemonController.m */,
 				039AB85618799EFC0045971E /* DeviceCellView.h */,
 				039AB85718799EFC0045971E /* DeviceCellView.m */,
+				03994727187EBAED005462AC /* Metadata.h */,
+				03994728187EBAED005462AC /* Metadata.m */,
+				033182C41880A73900E4AC66 /* MetadataParser.h */,
+				033182C51880A73900E4AC66 /* MetadataParser.m */,
 			);
 			path = SmoothMousePlayground;
 			sourceTree = "<group>";
@@ -522,7 +532,6 @@
 			children = (
 				0341D0BF170CA67000D24E08 /* Carbon.framework */,
 				ED0E124F14D54A96008704EC /* constants.h */,
-				0306A76118759EE5005F94DE /* SmoothMousePlayground */,
 				ED0E120114D54950008704EC /* Frameworks */,
 				0319400816BFB612008FE899 /* IOKit.framework */,
 				03A151F81875918300EEEC88 /* Kext.h */,
@@ -531,6 +540,7 @@
 				ED0E120014D54950008704EC /* Products */,
 				03193FE616BFAC41008FE899 /* SmoothMouseDaemon */,
 				03F6A05A180AF8A500C2EB03 /* SmoothMouseFeedback */,
+				0306A76118759EE5005F94DE /* SmoothMousePlayground */,
 				ED0E122014D5495F008704EC /* SmoothMousePrefPane */,
 				03A151E41874CF6C00EEEC88 /* SmoothMousePrefs */,
 				03DB20C21620CB5900CF4299 /* SmoothMouseUpdater */,
@@ -894,7 +904,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				0306A78D18759F6A005F94DE /* Kext.mm in Sources */,
+				033182C61880A73900E4AC66 /* MetadataParser.m in Sources */,
 				039EAE5618775E25002E5B0C /* DaemonController.m in Sources */,
+				03994729187EBAED005462AC /* Metadata.m in Sources */,
 				039AB85818799EFC0045971E /* DeviceCellView.m in Sources */,
 				0306A76F18759EE5005F94DE /* AppDelegate.m in Sources */,
 				0306A7911876140F005F94DE /* Configuration.m in Sources */,

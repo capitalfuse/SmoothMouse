@@ -40,6 +40,9 @@
     [self refreshDeviceView];
 
     daemonController = [[DaemonController alloc] init];
+
+    metadata = [[Metadata alloc] init];
+    [metadata setDelegate:self];
 }
 
 /* === DEVICE VIEW ACTIONS === */
@@ -165,6 +168,7 @@
 
         NSString *product;
         NSString *manufacturer;
+        NSImage *icon;
         uint32_t vid, pid;
 
         ok = [Configuration getStringInDictionary:device forKey:SETTINGS_PRODUCT withResult:&product];
@@ -194,20 +198,41 @@
         //][device objectForKey:SETTINGS_PRODUCT];
         BOOL connected = [configuration deviceIsConnectedWithVendorID:vid andProductID:pid];
         DeviceCellView *view = [tableView makeViewWithIdentifier:identifier owner:self];
+
+        ok = [metadata getMetadataForVendorID:vid
+                                 andProductID:pid
+                                 manufacturer:&manufacturer
+                                      product:&product
+                                         icon:&icon
+                                   completion:^{
+                                       LOG(@"metadata returned");
+                                       LOG(@"metadata returned");
+                                       LOG(@"metadata returned");
+                                       LOG(@"metadata returned");
+                                   }];
+
+        if (ok) {
+            LOG(@"metadata was cached");
+        } else {
+            LOG(@"metadata was not cached");
+            icon = [NSImage imageNamed:@"NSAdvanced"]; // TODO: default icon
+        }
+
         view.productTextField.stringValue = product;
         view.manufacturerTextField.stringValue = manufacturer;
-        NSImage *image = [NSImage imageNamed:@"NSAdvanced"];
-        CGFloat alpha = 1.0;
-        if (!connected) {
-            alpha = 0.5;
-        }
         [view setWantsLayer:YES];
-        [view setAlphaValue:alpha];
-        [view.deviceImage setImage:image];
+        [view setAlphaValue:(connected? 1.0 : 0.5)];
+        [view.deviceImage setImage:icon];
 
         return view;
     }
     return nil;
+}
+
+- (void)didReceiveMetadataForVendorID:(uint32_t)vid andProductID:(uint32_t)pid manufacturer:(NSString *) manufacturer product:(NSString *)product icon:(NSImage *)icon
+{
+    LOG(@"vid: %d, pid: %d, manufacturer: %@, product: %@, icon: %@",
+        vid, pid, manufacturer, product, icon);
 }
 
 - (IBAction)deviceSelected:(id)sender
