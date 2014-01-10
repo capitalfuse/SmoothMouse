@@ -184,7 +184,7 @@
     // excluded
     if (excludedApps) {
         for (NSString *excludedApp in excludedApps) {
-            if ([excludedApp isEqualToString:activeAppId]) {
+            if ([self appId:activeAppId contains:excludedApp]) {
                 activeAppIsExcluded = YES;
             }
         }
