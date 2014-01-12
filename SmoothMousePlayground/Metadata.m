@@ -84,7 +84,7 @@
     delegate = delegate_;
 }
 
--(BOOL) getMetadataForVendorID:(uint32_t)vid andProductID:(uint32_t)pid manufacturer:(NSString **) manufacturer product:(NSString **)product icon:(NSImage **)icon completion:(void(^)(void))callback;
+-(BOOL) getMetadataForVendorID:(uint32_t)vid andProductID:(uint32_t)pid manufacturer:(NSString **)manufacturer product:(NSString **)product icon:(NSImage **)icon;
 {
     NSString *dataDirectory = [[NSFileManager defaultManager] getDataDirectory];
     LOG(@"data directory: %@", dataDirectory);
@@ -93,72 +93,133 @@
 
     NSString *iconDirectory = [[NSFileManager defaultManager] getIconDirectory];
     LOG(@"icon directory: %@", iconDirectory);
-    NSString *iconFilename = [NSString stringWithFormat:@"%@/%d_%d.xml", iconDirectory, vid, pid];
+    NSString *iconFilename = [NSString stringWithFormat:@"%@/%d_%d.png", iconDirectory, vid, pid];
     LOG(@"icon filename: %@", iconFilename);
 
     BOOL dataExists = [[NSFileManager defaultManager] fileExistsAtPath:dataFilename];
     BOOL iconExists = [[NSFileManager defaultManager] fileExistsAtPath:iconFilename];
 
-    if (dataExists && iconExists) {
-        LOG(@"exists, load xml and icon");
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://metadata.smoothmouse.com/devices/%d/%d/", vid, pid]];
+    LOG(@"metadata url: %@", url);
+
+    if (dataExists) {
+        LOG(@"exists, load xml and/or icon");
+        NSString *manufacturerFromXml;
+        NSString *productFromXml;
+        BOOL ok = [self parseXml:dataFilename manufacturer:&manufacturerFromXml product:&productFromXml iconUrl:nil];
+        if (!ok) {
+            LOG("failed to parse xml, refreshing in background");
+            [self saveMetadataAndIconFromUrl:url forVendorID:vid andProductID:pid dataFilename:dataFilename iconFilename:iconFilename];
+            return NO;
+        }
+        NSImage *loadedIcon = nil;
+        if (iconExists) {
+            loadedIcon = [[NSImage alloc] initWithContentsOfFile: iconFilename];
+            if (loadedIcon == nil) {
+                LOG("failed to parse xml, refreshing in background");
+                [self saveMetadataAndIconFromUrl:url forVendorID:vid andProductID:pid dataFilename:dataFilename iconFilename:iconFilename];
+                return NO;
+            }
+        }
+        *manufacturer = manufacturerFromXml;
+        *product = productFromXml;
+        if (iconExists) {
+            *icon = loadedIcon;
+        }
         return YES;
     } else {
-        LOG(@"retrieving metadata and icon from server");
-        dispatch_queue_t myprocess_queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-        dispatch_async(myprocess_queue, ^{
-            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://metadata.smoothmouse.com/devices/%d/%d/", vid, pid]];
-            LOG(@"metadata url: %@", url);
-            BOOL ok = [self downloadMetadataAndIconFromUrl:url forVendorID:vid andProductID:pid dataFilename:dataFilename iconFilename:iconFilename];
+        [self saveMetadataAndIconFromUrl:url forVendorID:vid andProductID:pid dataFilename:dataFilename iconFilename:iconFilename];
+        return NO;
+    }
+}
+
+-(void) saveMetadataAndIconFromUrl:(NSURL *)url
+                       forVendorID:(uint32_t)vid
+                      andProductID:(uint32_t)pid
+                      dataFilename:(NSString *)dataFilename
+                      iconFilename:(NSString *)iconFilename
+{
+    dispatch_queue_t myprocess_queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    dispatch_async(myprocess_queue, ^{
+        BOOL ok;
+
+        ok = [self saveMetadata:url filename:dataFilename];
+        if (!ok) {
+            LOG(@"failed to retrieve metadata from url: %@", url);
+            return;
+        }
+
+        NSString *manufacturer = nil;
+        NSString *product = nil;
+        NSURL *iconUrl = nil;
+
+        ok = [self parseXml:dataFilename manufacturer:&manufacturer product:&product iconUrl:&iconUrl];
+        if (!ok) {
+            LOG(@"failed to parse xml");
+            return;
+        }
+
+        LOG(@"metadata from url %@: manufacturer: %@, product: %@, iconUrl: %@", url, manufacturer, product, iconUrl);
+
+        if (iconUrl != nil) {
+            ok = [self saveIcon: iconUrl filename:iconFilename];
             if (!ok) {
-                LOG(@"call to downloadMetadataAndIconFromUrl failed");
+                LOG(@"failed to retrieve icon from url: %@", iconUrl);
+                return;
             }
+        }
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [delegate didReceiveMetadataForVendorID:vid andProductID:pid];
         });
-        return NO;
-    }
+
+        return;
+    });
+    return;
 }
 
--(BOOL) downloadMetadataAndIconFromUrl:(NSURL *)url
-                           forVendorID:(uint32_t)vid
-                          andProductID:(uint32_t)pid
-                          dataFilename:(NSString *)dataFilename
-                          iconFilename:(NSString *)iconFilename
+-(BOOL)saveMetadata:(NSURL *)url
+           filename:(NSString *)filename
 {
-    NSString *manufacturer = nil;
-    NSString *product = nil;
-    NSURL *iconUrl = nil;
-    NSImage *icon = nil;
-
-    BOOL ok = [self getMetadataFromUrl:url filename:dataFilename manufacturer:&manufacturer product:&product iconUrl:&iconUrl];
-    if (!ok) {
-        LOG(@"failed to retrieve metadata from url: %@", url);
-        return NO;
-    }
-
-    LOG(@"metadata from url %@: manufacturer: %@, product: %@, iconUrl: %@", url, manufacturer, product, iconUrl);
-
-    ok = [self getIconFromUrl: iconUrl filename:iconFilename icon:&icon];
-    if (!ok) {
-        LOG(@"failed to retrieve icon from url: %@", iconUrl);
-        return NO;
-    }
-
-    [delegate didReceiveMetadataForVendorID:vid andProductID:pid manufacturer:manufacturer product:product icon:icon];
-
-    return YES;
-}
-
--(BOOL)getMetadataFromUrl:(NSURL *)url
-                 filename:(NSString *)filename
-             manufacturer:(NSString **)manufacturer
-                  product:(NSString **)product
-                  iconUrl:(NSURL **)iconUrl
-{
-    // use NSURLConnection to download the metadata to Application Support/SmoothMouse/Metadata/x_y.metadata
-
     NSURLRequest *request;
     NSHTTPURLResponse *response;
     NSError *error;
     NSData *data;
+
+    LOG(@"url: %@", url);
+
+    request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:MAX_HTTP_REQUEST_TIMEOUT_SECONDS];
+
+    data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+
+    long statusCode = [response statusCode];
+
+    LOG(@"response status code: %ld", statusCode);
+
+    if (statusCode != 200) {
+        LOG(@"response not 200 OK");
+        return NO;
+    }
+
+    // TEMP: how to convert nsdata to nsstring, either null-terminated or not
+    //NSString* xml = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    // or
+    // NSString* xml = [NSString stringWithUTF8String:[data bytes]];
+
+    [data writeToFile:filename atomically:YES];
+
+    return YES;
+}
+
+-(BOOL)saveIcon:(NSURL *)url
+       filename:(NSString *)filename
+{
+    // TODO: duplicate code for downloading, reuse saveMetadata code
+    NSURLRequest *request;
+    NSHTTPURLResponse *response;
+    NSError *error;
+    NSData *data;
+
     LOG(@"url: %@", url);
 
     request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:MAX_HTTP_REQUEST_TIMEOUT_SECONDS];
@@ -175,27 +236,7 @@
     }
 
     [data writeToFile:filename atomically:YES];
-
-    //NSString* xml = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
-    // or
-    // NSString* xml = [NSString stringWithUTF8String:[data bytes]];
-    BOOL ok = [self parseXml:filename manufacturer:manufacturer product:product iconUrl:iconUrl];
-    if (!ok) {
-        LOG(@"Failed to parse xml");
-        return NO;
-    }
-
-    return YES;
-}
-
--(BOOL)getIconFromUrl:(NSURL *)url
-             filename:(NSString *)filename
-                 icon:(NSImage **)icon
-{
-    // use NSURLDownload to download the icon to Application Support/SmoothMouse/Icons/x_y.png
-
-    LOG(@"url: %@", url);
-
+    
     return YES;
 }
 
@@ -214,7 +255,7 @@
     *product = parser.product;
     icon = parser.icon;
 
-    if (icon) {
+    if (icon && iconUrl) {
         *iconUrl = [NSURL URLWithString:icon];
     }
 

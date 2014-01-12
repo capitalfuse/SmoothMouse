@@ -37,6 +37,7 @@
         NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:0];
         [_tableView selectRowIndexes:indexSet byExtendingSelection:NO];
     }
+
     [self refreshDeviceView];
 
     daemonController = [[DaemonController alloc] init];
@@ -168,8 +169,8 @@
 
         NSString *product;
         NSString *manufacturer;
-        NSImage *icon;
         uint32_t vid, pid;
+        NSImage *icon = nil;
 
         ok = [Configuration getStringInDictionary:device forKey:SETTINGS_PRODUCT withResult:&product];
         if (!ok) {
@@ -203,18 +204,16 @@
                                  andProductID:pid
                                  manufacturer:&manufacturer
                                       product:&product
-                                         icon:&icon
-                                   completion:^{
-                                       LOG(@"metadata returned");
-                                       LOG(@"metadata returned");
-                                       LOG(@"metadata returned");
-                                       LOG(@"metadata returned");
-                                   }];
+                                         icon:&icon];
+
+        LOG(@"metadata was cached: '%s' for %d:%d", (ok ? "yes" : "no"), vid, pid);
 
         if (ok) {
-            LOG(@"metadata was cached");
+            if (icon == nil) {
+                // there was metadata, but there is no icon for this specific pointing device
+                icon = [NSImage imageNamed:@"NSAdvanced"]; // TODO: default icon
+            }
         } else {
-            LOG(@"metadata was not cached");
             icon = [NSImage imageNamed:@"NSAdvanced"]; // TODO: default icon
         }
 
@@ -229,10 +228,16 @@
     return nil;
 }
 
-- (void)didReceiveMetadataForVendorID:(uint32_t)vid andProductID:(uint32_t)pid manufacturer:(NSString *) manufacturer product:(NSString *)product icon:(NSImage *)icon
+- (void)didReceiveMetadataForVendorID:(uint32_t)vid andProductID:(uint32_t)pid
 {
-    LOG(@"vid: %d, pid: %d, manufacturer: %@, product: %@, icon: %@",
-        vid, pid, manufacturer, product, icon);
+
+    int index = [configuration getIndexForDeviceWithVendorID:vid andProductID:pid];
+
+    NSIndexSet *rowIndexSet = [NSIndexSet indexSetWithIndex:index];
+    NSIndexSet *columnIndexSet = [NSIndexSet indexSetWithIndex:0];
+    [_tableView reloadDataForRowIndexes:rowIndexSet columnIndexes:columnIndexSet];
+
+    LOG(@"refresh rowing row for vid: %d, pid: %d, index: %d", vid, pid, index);
 }
 
 - (IBAction)deviceSelected:(id)sender
@@ -242,29 +247,34 @@
 
 - (void) refreshTable {
 
-    NSMutableDictionary *device = [self getSelectedDevice];
-
-    uint32_t vid, pid;
+    uint32_t vid = 0, pid = 0;
     BOOL ok;
 
-    ok = [Configuration getIntegerInDictionary:device forKey:SETTINGS_VENDOR_ID withResult: &vid];
-    if (!ok) {
-        LOG(@"Key %@ missing in device", SETTINGS_VENDOR_ID);
-        [NSApp close];
-    }
+    NSMutableDictionary *device = [self getSelectedDevice];
 
-    ok = [Configuration getIntegerInDictionary:device forKey:SETTINGS_PRODUCT_ID withResult: &pid];
-    if (!ok) {
-        LOG(@"Key %@ missing in device", SETTINGS_PRODUCT_ID);
-        [NSApp close];
+    if (device) {
+        ok = [Configuration getIntegerInDictionary:device forKey:SETTINGS_VENDOR_ID withResult: &vid];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_VENDOR_ID);
+            [NSApp close];
+        }
+
+        ok = [Configuration getIntegerInDictionary:device forKey:SETTINGS_PRODUCT_ID withResult: &pid];
+        if (!ok) {
+            LOG(@"Key %@ missing in device", SETTINGS_PRODUCT_ID);
+            [NSApp close];
+        }
     }
 
     [_tableView reloadData];
 
-    int index = [configuration getIndexForDeviceWithVendorID:vid andProductID:pid];
+    if (vid != 0 && pid != 0) {
+        int index = [configuration getIndexForDeviceWithVendorID:vid andProductID:pid];
 
-    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:index];
-    [_tableView selectRowIndexes:indexSet byExtendingSelection:NO];
+        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:index];
+        [_tableView selectRowIndexes:indexSet byExtendingSelection:NO];
+    }
+
 }
 
 - (void) refreshDeviceView {
