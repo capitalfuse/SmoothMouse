@@ -26,7 +26,7 @@
     NSMutableDictionary *plistContents = [NSMutableDictionary dictionaryWithContentsOfFile:configurationFilename];
 
     if (!plistContents) {
-        NSLog(@"cannot open file %@", configurationFilename);
+        LOG(@"cannot open file %@", configurationFilename);
         return NO;
     }
 

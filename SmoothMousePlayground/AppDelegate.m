@@ -114,7 +114,7 @@
             device_information_t kextDeviceInfo;
             [kext kextMethodGetDeviceInformation: &kextDeviceInfo forDeviceWithDeviceType:device_added->base.device_type andVendorId: device_added->base.vendor_id andProductID: device_added->base.product_id];
             if (device_added->base.device_type == DEVICE_TYPE_POINTING) {
-                NSLog(@"DEVICE ADDED (trackpad: %d), vendor_id: %u, product_id: %u", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id);
+                LOG(@"DEVICE ADDED (trackpad: %d), vendor_id: %u, product_id: %u", kextDeviceInfo.pointing.is_trackpad, kextDeviceInfo.vendor_id, kextDeviceInfo.product_id);
             }
 
             NSDictionary *device = [configuration getDeviceWithVendorID: kextDeviceInfo.vendor_id andProductID:kextDeviceInfo.product_id];
@@ -132,7 +132,7 @@
         case EVENT_TYPE_DEVICE_REMOVED:
         {
             device_removed_event_t *device_removed = &kext_event->device_removed;
-            NSLog(@"DEVICE REMOVED, VendorID: %u, ProductID: %u",
+            LOG(@"DEVICE REMOVED, VendorID: %u, ProductID: %u",
                   device_removed->base.vendor_id, device_removed->base.product_id);
 
             [configuration disconnectDeviceWithVendorID:device_removed->base.vendor_id andProductID:device_removed->base.product_id];
@@ -146,7 +146,7 @@
         case EVENT_TYPE_KEYBOARD:
             break;
         default:
-            NSLog(@"Unknown event type: %d", kext_event->base.event_type);
+            LOG(@"Unknown event type: %d", kext_event->base.event_type);
             break;
     }
 }
